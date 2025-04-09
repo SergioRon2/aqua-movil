@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
-
+    "module": "nodenext",              
+    "moduleResolution": "nodenext",
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"]
