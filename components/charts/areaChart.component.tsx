@@ -9,7 +9,7 @@ const data = {
     datasets: [
         {
             data: [50, 70, 40, 95, 85, 60],
-            color: (opacity = 1) => `rgba(0, 128, 255, ${opacity})`, // Color de la línea
+            color: (opacity = 1) => `#db2777`, // Color de la línea
             strokeWidth: 2,
         },
     ],
@@ -20,13 +20,13 @@ const chartConfig = {
     backgroundGradientTo: "#ffffff",
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Color del texto y ejes
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    fillShadowGradient: "#007bff", // Color del relleno debajo de la línea
+    fillShadowGradient: "#db2777", // Color del relleno debajo de la línea
     fillShadowGradientOpacity: 0.3, // Opacidad del relleno
-    strokeWidth: 2,
+    strokeWidth: 4,
     propsForDots: {
         r: "4",
         strokeWidth: "2",
-        stroke: "#007bff",
+        stroke: "#db2777",
     },
 };
 

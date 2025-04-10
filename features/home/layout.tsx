@@ -1,26 +1,21 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DashboardScreen from './dashboard/dashboard.screen';
 import SettingsScreen from './settings/settings.screen';
+import Sectoriales from './sectoriales/sectoriales.screen';
+import Municipios from './municipios/municipios.screen';
+import IAButton from 'components/buttons/IAButton.component';
+import {Navbar} from 'components/navigators/navbar.component';
 
 const Tab = createBottomTabNavigator();
-
-const Municipios = () => (
-    <View className='mt-7 flex-1 bg-yellow-300 justify-center items-center'>
-        <Text className='animate-fade-in'>Municipios Screen</Text>
-    </View>
-);
-
-const Sectoriales = () => (
-    <View className='mt-7 flex-1 bg-red-300 justify-center items-center'>
-        <Text className='animate-fade-in'>Sectoriales Screen</Text>
-    </View>
-);
 
 // Tab Navigator
 const HomeTabNavigator = () => {
     return (
+        <View style={{ flex: 1 }} className="mt-8">
+            <Navbar />
+            <IAButton />
             <Tab.Navigator
                 initialRouteName="Home"
                 screenOptions={{
@@ -86,8 +81,8 @@ const HomeTabNavigator = () => {
                     }}
                 />
             </Tab.Navigator>
+        </View>
     );
 };
-
 
 export default HomeTabNavigator;

@@ -16,7 +16,7 @@ const data = {
 const chartConfig = {
     backgroundGradientFrom: "#ffffff",
     backgroundGradientTo: "#ffffff",
-    fillShadowGradient: "#34a853", // color de las barras
+    fillShadowGradient: "#db2777", // color de las barras
     fillShadowGradientOpacity: 1,
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // color del texto
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
