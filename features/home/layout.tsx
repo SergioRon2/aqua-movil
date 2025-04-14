@@ -1,10 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DashboardScreen from './dashboard/dashboard.screen';
 import SettingsScreen from './settings/settings.screen';
-import Sectoriales from './sectoriales/main-screen/sectoriales.screen';
-import Municipios from './municipios/main-screen/municipios.screen';
 import IAButton from 'components/buttons/IAButton.component';
 import {Navbar} from 'components/navigators/navbar.component';
 import MunicipiosLayout from './municipios/layout';

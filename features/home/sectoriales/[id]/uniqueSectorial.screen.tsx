@@ -22,7 +22,7 @@ const UniqueSectorialScreen = () => {
     return (
         <View className="animate-fade-in px-12 w-full">
             <Text className="text-3xl font-bold text-center py-6">
-                {sectorial.municipio}
+                {sectorial.sectorial}
             </Text>
 
             <View>
