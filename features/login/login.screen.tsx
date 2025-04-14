@@ -79,11 +79,11 @@ const LoginScreen = () => {
                     source={require('../../assets/img/backgroundLogin.png')}
                     resizeMode='cover'
                 >
-                    <View className='flex-row justify-between items-start w-full h-1/4 z-40 opacity-65'>
-                        <Image source={require('../../assets/img/logo gobcesar HORIZONTAL.png')} style={{ width: '35%', height: '50%', marginTop: 10 }} resizeMode='contain' />
-                        <Image source={require('../../assets/img/logo.png')} style={{ width: '20%', height: '50%', marginTop: 10 }} resizeMode='contain' />
-                    </View>
-                    <View className="absolute inset-0 bg-pink-600/40 justify-center">
+                    <View className="h-full w-full inset-0 bg-pink-600/40 justify-start">
+                        <View className='flex-row justify-between items-start w-full h-1/4 z-40 opacity-65'>
+                            <Image source={require('../../assets/img/logo gobcesar HORIZONTAL.png')} style={{ width: '35%', height: '50%', marginTop: 10 }} resizeMode='contain' />
+                            <Image source={require('../../assets/img/logo.png')} style={{ width: '20%', height: '50%', marginTop: 10 }} resizeMode='contain' />
+                        </View>
                         <Text className="text-8xl font-bold text-white text-center mt-10 font-serif animate-fade-in">AQUA</Text>
                         <Text className="text-4xl font-bold text-white text-center mt-2 animate-fade-in">Bienvenido</Text>
                         <Text className="text-lg font-bold text-white text-center mt-2 animate-fade-in">Inicia sesión para continuar</Text>
