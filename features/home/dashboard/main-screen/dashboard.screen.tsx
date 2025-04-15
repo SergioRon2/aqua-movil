@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import AreaChartComponent from 'components/charts/areaChart.component';
 import BarChartComponent from 'components/charts/barChart.component';
 import PieChartComponent from 'components/charts/pieChart.component';
@@ -6,6 +7,11 @@ import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 
 const DashboardScreen = () => {
     const [selected, setSelected] = useState<number>(1);
+    const navigation = useNavigation();
+
+    const handleNavigation = () => {
+        navigation.navigate('Proyectos');
+    };
 
     return (
         <ScrollView
@@ -67,6 +73,14 @@ const DashboardScreen = () => {
                     <Text className="text-lg font-bold">Card 3</Text>
                     <Text className="text-gray-600">This is some content for card 3.</Text>
                 </View>
+            </View>
+
+            {/* view projects */}
+            <View>
+                <Text className="animate-fade-in text-xl font-bold mb-4">Ver proyectos</Text>
+                <Pressable onPress={handleNavigation} className="bg-pink-600 p-4 rounded-lg mb-4">
+                    <Text className="text-white text-center text-lg font-bold">Ver todos los proyectos</Text>
+                </Pressable>
             </View>
         </ScrollView>
     );

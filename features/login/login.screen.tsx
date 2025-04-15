@@ -3,21 +3,21 @@ import { View, Text, TextInput, Button, Alert, Pressable, ImageBackground, Modal
 import useAuthStore from 'store/auth/auth.store';
 
 const LoginScreen = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [section, setSection] = useState<number>(1);
     const { login } = useAuthStore()
     const [error, setError] = useState<boolean>(false)
 
     const handleLogin = () => {
-        if (!username || !password) {
+        if (!email || !password) {
             Alert.alert('Error', 'Please fill in all fields');
             return;
         }
         // Add your login logic here
-        if (username === 'admin' && password === 'admin') {
-            login({ id: '1', name: 'admin' })
-        } else {
+        try {
+            login(email, password)
+        } catch {
             setError(true)
             setTimeout(() => {
                 setError(false)
@@ -26,14 +26,7 @@ const LoginScreen = () => {
     };
 
     const handleNextSection = () => {
-        if (username === 'admin') {
-            setSection(section + 1);
-        } else {
-            setError(true)
-            setTimeout(() => {
-                setError(false)
-            }, 4000)
-        }
+        setSection(section + 1);
     }
 
     const handleBackSection = () => {
@@ -105,9 +98,9 @@ const LoginScreen = () => {
                     {section === 1 && (
                         <TextInput
                             className="h-14 border border-gray-300 mb-4 px-6 rounded-full animate-fade-in"
-                            placeholder="Username"
-                            value={username}
-                            onChangeText={setUsername}
+                            placeholder="Correo electronico"
+                            value={email}
+                            onChangeText={setEmail}
                             keyboardType="email-address"
                             autoCapitalize="none"
                         />

@@ -12,6 +12,7 @@ export interface IMunicipio {
 }
 
 export interface IProyectos {
+    id: string;
     nombre: string;
     fechaInicio: string;
     fechaFin: string;

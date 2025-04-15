@@ -1,12 +1,12 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import DashboardScreen from './dashboard/dashboard.screen';
 import SettingsScreen from './settings/settings.screen';
 import IAButton from 'components/buttons/IAButton.component';
 import {Navbar} from 'components/navigators/navbar.component';
 import MunicipiosLayout from './municipios/layout';
 import SectorialesLayout from './sectoriales/layout';
+import DashboardLayout from './dashboard/layout';
 
 const Tab = createBottomTabNavigator();
 
@@ -40,7 +40,7 @@ const HomeTabNavigator = () => {
                 />
                 <Tab.Screen
                     name="Home"
-                    component={DashboardScreen}
+                    component={DashboardLayout}
                     options={{
                         tabBarLabel: 'Dashboard',
                         tabBarIcon: ({ focused, color, size }: any) => (
