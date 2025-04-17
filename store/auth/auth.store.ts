@@ -1,11 +1,14 @@
-import { AuthService } from 'services/auth/auth.service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IUser } from 'interfaces/user.interface';
 import { create } from 'zustand';
 
 interface AuthState {
     isAuthenticated: boolean;
-    user: { id: string; name: string } | null;
+    user: IUser | null;
     token: string | null;
-    login: (email: string, password: string) => Promise<void>;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    setUser: (user: IUser) => void;
+    setToken: (token: string | null) => void;
     logout: () => void;
 }
 
@@ -13,27 +16,22 @@ const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     user: null,
     token: null,
-
-
-    login: async (email, password) => {
-        try {
-            const data  = await AuthService.login(email, password);
-            console.log(data)
-            const { authorisation, user, status } = data;
-
-            set({
-                token: authorisation?.token,
-                user: user,
-                isAuthenticated: status === 'success',
-            });
-        } catch (error) {
-            console.error("Login failed store:", error);
-            throw error;
-        }
+    setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
+    setUser: (user: IUser | null) => set({ user }),
+    setToken: (token: string | null) => set({ token }),
+    logout: async () => {
+        set({
+            isAuthenticated: false, 
+            user: null, 
+            token: null 
+        }) 
+        
+        await AsyncStorage.multiRemove([
+            '@token',
+            '@user',
+            '@isAuthenticated',
+        ]);
     },
-
-
-    logout: () => set({ isAuthenticated: false, user: null, token: null }),
 }));
 
 export default useAuthStore;

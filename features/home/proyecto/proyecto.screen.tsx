@@ -11,7 +11,7 @@ const ProyectoScreen = () => {
 
     return (
         <ScrollView className="h-full mt-5 px-4">
-            <Text className="text-3xl font-bold text-center">{proyecto.nombre}</Text>
+            <Text className="text-3xl font-bold text-center">{proyecto.name}</Text>
 
             <View>
                 <InfoProyecto proyecto={proyecto} />

@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 const Stack = createStackNavigator();
 
 const MainStackNavigator = () => {
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, token } = useAuthStore();
 
     return (
         <Stack.Navigator
@@ -17,12 +17,8 @@ const MainStackNavigator = () => {
                     backgroundColor: '#fff',
                 },
             }}>
-            {!isAuthenticated ? (
                 <Stack.Screen name="Login" component={LoginScreen} />
-            ) :
                 <Stack.Screen name="Home" component={HomeTabNavigator} />
-            }
-
         </Stack.Navigator>
     );
 };
