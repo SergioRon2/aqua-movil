@@ -1,7 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
+import { FiltersComponent } from 'components/buttons/filters.component';
+import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import AreaChartComponent from 'components/charts/areaChart.component';
-import BarChartComponent from 'components/charts/barChart.component';
 import PieChartComponent from 'components/charts/pieChart.component';
+import { ModalMunicipios } from 'components/modals/modalMunicipios.component';
+import { ModalSectoriales } from 'components/modals/modalSectoriales.component';
 import { useState } from 'react';
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native';
 
@@ -34,14 +37,7 @@ const DashboardScreen = () => {
 
 
             {/* filters */}
-            <View className="flex-row w-full mx-auto mb-4 justify-center items-center animate-fade-in">
-                <Pressable onPress={() => console.log('Filter 1')} className="bg-white px-6 py-2 w-1/2 rounded-sm">
-                    <Text className="text-pink-600 text-xl font-bold text-center">Municipios</Text>
-                </Pressable>
-                <Pressable onPress={() => console.log('Filter 2')} className="bg-white px-6 py-2 w-1/2 rounded-sm">
-                    <Text className="text-pink-600 text-xl font-bold text-center">Sectoriales</Text>
-                </Pressable>
-            </View>
+            <FiltersComponent />
 
             {/* values */}
             <View className='flex-row justify-center w-full p-4 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4'>
@@ -56,8 +52,16 @@ const DashboardScreen = () => {
             </View>
 
 
+            {/* view projects */}
+            <View className='p-4 border justify-center items-center border-gray-200 bg-white rounded-lg'>
+                <Text className="animate-fade-in text-xl p-2 font-bold">Ver proyectos</Text>
+                <Text className="animate-fade-in text-base text-gray-500 p-4 font-bold text-center">Aqui puedes ver una lista de todos los proyectos actuales, recuerda que solo es una vista basica y dinamica de todos los datos por proyecto.</Text>
+                <CustomButtonPrimary title='Ver todos los proyectos' onPress={handleNavigation} />
+            </View>
+
+
             {/* charts */}
-            <View className='gap-4 mb-4 p-4'>
+            <View className='gap-4 mb-4 my-3'>
                 <View className='items-center bg-white justify-center'>
                     <AreaChartComponent />
                 </View>
@@ -85,14 +89,6 @@ const DashboardScreen = () => {
                 </View>
             </View>
 
-            {/* view projects */}
-            <View className='p-4 border justify-center border-gray-200 bg-white rounded-lg'>
-                <Text className="animate-fade-in text-xl p-4 font-bold">Ver proyectos</Text>
-                <Text className="animate-fade-in text-base text-gray-500 p-4 font-bold">Aqui puedes ver una lista de todos los proyectos actuales, recuerda que solo es una vista basica y dinamica de todos los datos por proyecto.</Text>
-                <Pressable onPress={handleNavigation} className="bg-pink-600 px-4 py-2 rounded-lg mb-4">
-                    <Text className="text-white text-center text-lg font-bold">Ver todos los proyectos</Text>
-                </Pressable>
-            </View>
         </ScrollView>
     );
 };

@@ -1,11 +1,11 @@
 import ProyectoCard from 'components/cards/proyectoCard.component';
-import { IProyectos } from 'interfaces/municipio.interface';
+import { IProyecto } from 'interfaces/proyecto.interface';
 import { useEffect, useState } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { ProjectsService } from 'services/projects/projects.service';
 
 const ProyectosScreen = () => {
-    const [proyectos, setProyectos] = useState<any[]>([]);
+    const [proyectos, setProyectos] = useState<IProyecto[]>([]);
 
     useEffect(() => {
         const fetchProyectos = async () => {

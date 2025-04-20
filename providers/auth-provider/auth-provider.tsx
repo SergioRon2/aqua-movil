@@ -38,9 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [token, isAuthenticated]);
 
-    if (token == null) {
-        return <Loading />
-    }
+    console.log({token, isAuthenticated})
+
+    // if (token == null) {
+    //     return <Loading />
+    // }
 
     return <>{children}</>
 };

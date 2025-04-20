@@ -1,8 +1,17 @@
+import { CustomButtonPrimary } from "components/buttons/mainButton.component";
+import { IProyecto } from "interfaces/proyecto.interface";
 import { View, Text, Pressable } from "react-native";
+import { ExportsService } from "services/exports/exports.service";
 
 
-export const InfoProyecto = ({ proyecto }: { proyecto: any }) => (
-    <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
+export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
+
+    const downloadFile = async(id: number) => {
+        await ExportsService.downloadFile(id);
+        console.log('archivo descargado con exito')
+    }
+
+    return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
         <View className="flex-row justify-around gap-5 items-start">
             <View className="justify-between items-start w-1/2">
                 <Text className="text-md text-gray-500">Fecha inicio</Text>
@@ -26,12 +35,12 @@ export const InfoProyecto = ({ proyecto }: { proyecto: any }) => (
             </View>
             <View className="justify-between items-start w-1/2">
                 <Text className={`text-md text-gray-500`}>Estado</Text>
-                <Text 
-                    className={`text-xl font-bold`} 
+                <Text
+                    className={`text-xl font-bold`}
                     style={{
-                        color: proyecto.state_color != null 
-                        ? proyecto.state_color 
-                        : '#000' 
+                        color: proyecto.state_color != null
+                            ? proyecto.state_color
+                            : '#000'
                     }}
                 >
                     {proyecto.state_name != null ? proyecto.state_name : 'Nulo'}
@@ -65,10 +74,8 @@ export const InfoProyecto = ({ proyecto }: { proyecto: any }) => (
             </View>
         </View>
 
-        <View className="justify-between items-start w-1/2">
-            <Pressable className="bg-pink-500 rounded-lg p-2 mt-4" onPress={() => console.log('Descargar informe')}>
-                <Text className="text-md font-bold text-white">Imprimir informe</Text>
-            </Pressable>
+        <View className="justify-between items-start w-1/2 mt-6">
+            <CustomButtonPrimary rounded onPress={() => downloadFile(+proyecto.id)} title="Descargar informe" />
         </View>
     </View>
-)
+}

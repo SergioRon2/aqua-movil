@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, Alert, Pressable, ImageBackground, Modal
 import { AuthService } from 'services/auth/auth.service';
 import useAuthStore from 'store/auth/auth.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
@@ -52,15 +53,10 @@ const LoginScreen = () => {
             <View className="flex-1 items-center w-full h-full justify-center bg-black/50">
                 <View className="bg-white m-auto rounded-lg p-6 w-4/5">
                     <Text className="text-center text-xl font-bold text-black-600">Error</Text>
-                    <Text className="text-center text-gray-600 mt-2">
+                    <Text className="text-center text-gray-600 mt-2 mb-5">
                         Verifica correo o contraseña
                     </Text>
-                    <Pressable
-                        onPress={() => setError(false)}
-                        className="bg-pink-600 h-12 w-full rounded-xl justify-center items-center mt-4"
-                    >
-                        <Text className="text-white font-bold">Cerrar</Text>
-                    </Pressable>
+                    <CustomButtonPrimary onPress={() => setError(false)} title='Cerrar' />
                 </View>
             </View>
         </Modal>
@@ -90,9 +86,7 @@ const LoginScreen = () => {
 
                     />
 
-                    <Pressable onPress={handleLogin} className='bg-pink-600 active:bg-pink-900 w-1/3 py-1 rounded-full mx-auto'>
-                        <Text className='font-bold text-xl text-white text-center'>Login</Text>
-                    </Pressable>
+                    <CustomButtonPrimary rounded onPress={handleLogin} title='Login' /> 
                 </View>
                 <View>
                     <Text className="text-center text-sm text-gray-700 animate-fade-in">Terminos y condiciones de la app <Text className="text-pink-600 font-bold">aquí</Text></Text>
