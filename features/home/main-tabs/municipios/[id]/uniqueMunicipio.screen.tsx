@@ -5,6 +5,7 @@ import BarChartComponent from "components/charts/barChart.component";
 import PieChartComponent from "components/charts/pieChart.component";
 import { View, Text, Dimensions } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import Animated, { FadeInDown, FadeOutDown, useSharedValue } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
@@ -13,8 +14,10 @@ const UniqueMunicipioScreen = () => {
     const route = useRoute();
     const { municipio } = route.params;
 
+    const values = [40, 75, 50, 90, 30, 60];
+    const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+
     const items = [
-        { title: 'Gráfico de Barras', component: <BarChartComponent /> },
         { title: 'Gráfico de Pastel', component: <PieChartComponent /> },
         { title: 'Gráfico de Area', component: <AreaChartComponent /> },
     ];
@@ -53,11 +56,13 @@ const UniqueMunicipioScreen = () => {
             </Text>
 
             <View className="rounded-2xl justify-center animate-fade-in">
-                <FlatList 
+                <FlatList
                     data={municipio.proyectos.lista}
                     keyExtractor={(item) => item.nombre}
-                    renderItem={({ item }) => (
-                        <ProyectoCard data={item} />
+                    renderItem={({ item, index }) => (
+                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
+                            <ProyectoCard data={item} />
+                        </Animated.View>
                     )}
                     contentContainerStyle={{ paddingBottom: 20 }}
                 />

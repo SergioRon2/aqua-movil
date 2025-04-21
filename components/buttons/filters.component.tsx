@@ -6,8 +6,11 @@ import { ModalMunicipios } from "components/modals/modalMunicipios.component";
 import { ModalSectoriales } from "components/modals/modalSectoriales.component";
 import { DecisionModal } from "components/modals/modalAcceptOrDecline.component";
 
+interface Props {
+    border?: boolean;
+}
 
-export const FiltersComponent = () => {
+export const FiltersComponent = ({border}: Props) => {
     const [modalCleanMunicipios, setModalCleanMunicipios] = useState<boolean>(false)
     const [modalCleanSectoriales, setModalCleanSectoriales] = useState<boolean>(false)
     const { municipioActivo, setMunicipioActivo, sectorialActivo, setSectorialActivo } = useActiveStore();
@@ -25,11 +28,11 @@ export const FiltersComponent = () => {
     }
 
     return (
-        <View className="bg-white flex-row w-full h-auto mx-auto mb-4 justify-center items-center animate-fade-in" >
+        <View className={`bg-white flex-row w-full h-auto mx-auto mb-4 justify-center items-center animate-fade-in ${border ? 'border-2 border-pink-600': ''}`} >
 
             {/* buttons */}
             <Pressable onPress={() => setMunicipiosModal(true)} className="px-6 py-2 w-1/2 rounded-sm flex-row gap-2 items-center justify-center">
-                <Text className="text-pink-600 text-xl font-bold text-center">
+                <Text className="text-black text-xl font-bold text-center">
                     {municipioActivo ? municipioActivo : 'Municipios'}
                 </Text>
                 {municipioActivo && (
@@ -40,7 +43,7 @@ export const FiltersComponent = () => {
             </Pressable>
 
             <Pressable onPress={() => setSectorialesModal(true)} className="px-6 py-2 w-1/2 gap-2 rounded-sm flex-row items-center justify-center">
-                <Text className="text-pink-600 text-xl font-bold text-center">
+                <Text className="text-black text-xl font-bold text-center">
                     {/* first letter capitalized */}
                     {sectorialActivo ? sectorialActivo.charAt(0).toUpperCase() + sectorialActivo.slice(1).toLowerCase() : 'Sectoriales'}
                 </Text>

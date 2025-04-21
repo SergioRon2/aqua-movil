@@ -32,7 +32,7 @@ const chartConfig = {
 
 const AreaChartComponent = () => {
     return (
-        <View>
+        <View className='border border-gray-300 rounded-lg'>
             <LineChart
                 data={data}
                 width={screenWidth * 0.9}

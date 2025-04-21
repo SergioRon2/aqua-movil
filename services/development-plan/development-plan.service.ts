@@ -1,11 +1,9 @@
 import { aquaApi } from "config/api/aqua-api"
 
-
-export class ExportsService {
-
-    static downloadFile = async(id: number) => {
+export class DevelopmentPlanService {
+    static getDevelopmentPlans = async () => {
         try {
-            const res = await aquaApi.get(`/download_file/${id}`)
+            const res = await aquaApi.get('/development-plan')
             return res;
         } catch (error) {
             console.error({error})

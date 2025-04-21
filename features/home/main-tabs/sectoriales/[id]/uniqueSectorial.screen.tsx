@@ -5,6 +5,7 @@ import BarChartComponent from "components/charts/barChart.component";
 import PieChartComponent from "components/charts/pieChart.component";
 import { View, Text, Dimensions } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
@@ -56,8 +57,10 @@ const UniqueSectorialScreen = () => {
                 <FlatList 
                     data={sectorial.proyectos.lista}
                     keyExtractor={(item) => item.nombre}
-                    renderItem={({ item }) => (
-                        <ProyectoCard data={item} />
+                    renderItem={({ item, index }) => (
+                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
+                            <ProyectoCard data={item} />
+                        </Animated.View>
                     )}
                     contentContainerStyle={{ paddingBottom: 20 }}
                 />

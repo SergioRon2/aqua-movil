@@ -2,13 +2,17 @@ import { CustomButtonPrimary } from "components/buttons/mainButton.component";
 import { IProyecto } from "interfaces/proyecto.interface";
 import { View, Text, Pressable } from "react-native";
 import { ExportsService } from "services/exports/exports.service";
+import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
 
 
 export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
 
-    const downloadFile = async(id: number) => {
-        await ExportsService.downloadFile(id);
-        console.log('archivo descargado con exito')
+    const downloadFile = async (id: number) => {
+        try {
+            await ExportsService.downloadFile(id);
+        } catch (error) {
+            console.error({error})
+        }
     }
 
     return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
@@ -64,17 +68,29 @@ export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
         <View className="flex-row justify-around gap-5 items-start">
             <View className="justify-between items-start w-1/2">
                 <Text className="text-md text-gray-500">Contratista</Text>
-                <Text className="text-xl font-bold">{proyecto.id}</Text>
+                <Text className="text-xl font-bold">
+                    {proyecto.BPIM != null || "" ? proyecto.BPIM : 'Nulo'}
+                </Text>
             </View>
             <View className="justify-between items-start w-1/2">
                 <Text className="text-md text-gray-500">Valor del proyecto</Text>
                 <Text className="text-xl font-bold">
-                    {proyecto.total_source_value != null ? proyecto.total_source_value : 'Nulo'}
+                    {proyecto.total_source_value != null 
+                    ? formatNumberWithSuffix(+proyecto.total_source_value) 
+                    : 'Nulo'}
+                </Text>
+            </View>
+        </View>
+        <View className="flex-row justify-around gap-5 items-start">
+            <View className="justify-between items-start w-1/2">
+                <Text className="text-md text-gray-500">Numero de contrato</Text>
+                <Text className="text-xl font-bold">
+                    {proyecto.contract_number != null ? proyecto.contract_number : 'Nulo'}
                 </Text>
             </View>
         </View>
 
-        <View className="justify-between items-start w-1/2 mt-6">
+        <View className="justify-center items-center w-full mt-6">
             <CustomButtonPrimary rounded onPress={() => downloadFile(+proyecto.id)} title="Descargar informe" />
         </View>
     </View>
