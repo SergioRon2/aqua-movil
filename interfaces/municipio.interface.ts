@@ -1,24 +1,9 @@
 export interface IMunicipio {
     id: number;
-    municipio: string;
-    proyectos: {
-        total: number;
-        ejecutados: number;
-        lista: IProyectos[];
-    };	
-    iniciativas: string;
-    valor: string;
-    valorEjecutado: string;
-}
-
-export interface IProyectos {
     nombre: string;
-    fechaInicio: string;
-    fechaFin: string;
-    contrato: string;
-    estado: string;
-    contratista: string;
-    sectorial: string;
-    municipio: string;
-    valor: string;
+    codigo_dane: number;
+    departamento_id: number;
+    created_at: string,
+    updated_at: string,
+    deleted_at: string
 }

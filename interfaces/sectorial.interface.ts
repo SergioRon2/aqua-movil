@@ -1,24 +1,10 @@
 export interface ISectorial {
     id: number;
-    sectorial: string;
-    proyectos: {
-        total: number;
-        ejecutados: number;
-        lista: IProyectosSectorial[];
-    };
-    iniciativas: string;
-    valor: string;
-    valorEjecutado: string;
+    name: string;
+    code: string;
+    enabled: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
 }
 
-export interface IProyectosSectorial {
-    nombre: string;
-    fechaInicio: string;
-    fechaFin: string;
-    contrato: string;
-    estado: string;
-    contratista: string;
-    sectorial: string;
-    municipio: string;
-    valor: string;
-}

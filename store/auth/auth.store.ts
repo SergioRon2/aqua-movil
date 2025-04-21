@@ -1,17 +1,37 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IUser } from 'interfaces/user.interface';
 import { create } from 'zustand';
 
 interface AuthState {
     isAuthenticated: boolean;
-    user: { id: string; name: string } | null;
-    login: (user: { id: string; name: string }) => void;
+    user: IUser | null;
+    token: string | null;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    setUser: (user: IUser) => void;
+    setToken: (token: string | null) => void;
     logout: () => void;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     user: null,
-    login: (user) => set({ isAuthenticated: true, user }),
-    logout: () => set({ isAuthenticated: false, user: null }),
+    token: null,
+    setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
+    setUser: (user: IUser | null) => set({ user }),
+    setToken: (token: string | null) => set({ token }),
+    logout: async () => {
+        set({
+            isAuthenticated: false, 
+            user: null, 
+            token: null 
+        }) 
+        
+        await AsyncStorage.multiRemove([
+            '@token',
+            '@user',
+            '@isAuthenticated',
+        ]);
+    },
 }));
 
 export default useAuthStore;
