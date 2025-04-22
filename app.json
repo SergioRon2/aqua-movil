@@ -30,7 +30,8 @@
         "foregroundImage": "./assets/img/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sergioron2.myexpoapp"
+      "package": "com.sergioron2.myexpoapp",
+      "usesCleartextTraffic": true
     },
     "extra": {
       "eas": {
