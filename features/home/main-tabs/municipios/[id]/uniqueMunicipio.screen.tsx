@@ -1,8 +1,6 @@
 import { useRoute } from "@react-navigation/native";
 import ProyectoCard from "components/cards/proyectoCard.component";
-import AreaChartComponent from "components/charts/areaChart.component";
-import BarChartComponent from "components/charts/barChart.component";
-import PieChartComponent from "components/charts/pieChart.component";
+import DonutChart from "components/charts/donutChart.component";
 import { View, Text, Dimensions } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown, useSharedValue } from "react-native-reanimated";
@@ -18,8 +16,7 @@ const UniqueMunicipioScreen = () => {
     const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
 
     const items = [
-        { title: 'Gráfico de Pastel', component: <PieChartComponent /> },
-        { title: 'Gráfico de Area', component: <AreaChartComponent /> },
+        { title: 'Gráfico de Media Dona', component: <DonutChart /> },
     ];
 
     return (

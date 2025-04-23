@@ -51,7 +51,7 @@ const SearchScreen = () => {
                 ) : filteredProjects.length > 0 ? (
                     <FlatList
                         data={filteredProjects}
-                        keyExtractor={(item) => item.id.toString()}
+                        keyExtractor={(item, index) => `${item.id}-${index}`}
                         renderItem={({ item, index }) => (
                             <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
                                 <ProyectoCard data={item} />

@@ -41,7 +41,7 @@ export const Navbar = () => {
                 </Pressable>
             }
 
-            <View className='flex-row w-4/5 gap-4 items-center justify-center'>
+            <View className='flex-row w-4/5 gap-4 items-center justify-center mt-3'>
                 <SelectedDevelopmentPlan />
 
                 <TouchableOpacity

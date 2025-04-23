@@ -1,9 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
-import { FiltersComponent } from 'components/buttons/filters.component';
+import { FiltersComponentDashboard } from 'components/buttons/filtersInfoDashboard.component';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import AreaChartComponent from 'components/charts/areaChart.component';
+import DonutChart from 'components/charts/donutChart.component';
 import PieChartComponent from 'components/charts/pieChart.component';
+import SemiDonutChart from 'components/charts/semiDonutChart.component';
 import { ScrollView, Text, View } from 'react-native';
 
 const DashboardScreen = () => {
@@ -24,7 +26,7 @@ const DashboardScreen = () => {
 
 
             {/* filters */}
-            <FiltersComponent border={false} />
+            <FiltersComponentDashboard border={false} />
 
             {/* values */}
             <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4'>
@@ -54,7 +56,7 @@ const DashboardScreen = () => {
                 </View>
                 <View className='items-center bg-white py-2 justify-center'>
                     <Text className='text-xl font-bold'>Proyectos por estados</Text>
-                    <PieChartComponent />
+                    <DonutChart />
                 </View>
             </View>
 

@@ -11,9 +11,9 @@ interface Props {
     closeModal: () => void;
 }
 
-export const ModalMunicipios = ({ active, closeModal }: Props) => {
+export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
     const [municipios, setMunicipios] = useState<IMunicipio[]>([])
-    const {setMunicipiosActivos, municipiosActivos} = useActiveStore();
+    const {setMunicipiosActivosDashboard, municipiosActivosDashboard} = useActiveStore();
 
     useEffect(() => {
         const fetchMunicipios = async () => {
@@ -26,14 +26,14 @@ export const ModalMunicipios = ({ active, closeModal }: Props) => {
 
     const handleSelectMunicipio = (municipio: IMunicipio) => {
         // Verificar si el municipio ya está en la lista
-        const isMunicipioSelected = municipiosActivos.some(m => m.id === municipio.id);
+        const isMunicipioSelected = municipiosActivosDashboard.some(m => m.id === municipio.id);
 
         if (isMunicipioSelected) {
             // Si ya está seleccionado, eliminarlo de la lista
-            setMunicipiosActivos(municipiosActivos.filter(m => m.id !== municipio.id));
+            setMunicipiosActivosDashboard(municipiosActivosDashboard.filter(m => m.id !== municipio.id));
         } else {
             // Si no está seleccionado, agregarlo a la lista
-            setMunicipiosActivos([...municipiosActivos, municipio]);
+            setMunicipiosActivosDashboard([...municipiosActivosDashboard, municipio]);
         }
 
         closeModal()
@@ -58,7 +58,7 @@ export const ModalMunicipios = ({ active, closeModal }: Props) => {
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectMunicipio(item)}>
-                                    <Text className={`font-bold text-xl ${municipiosActivos.some(m => m.id === item.id) ? 'text-pink-600' : 'text-gray-600'}`}>{item?.nombre}</Text>
+                                    <Text className={`font-bold text-xl ${municipiosActivosDashboard.some(m => m.id === item.id) ? 'text-pink-600' : 'text-gray-600'}`}>{item?.nombre}</Text>
                                 </Pressable>
                             )}
                         />

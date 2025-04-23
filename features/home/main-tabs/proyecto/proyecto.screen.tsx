@@ -3,6 +3,7 @@ import { InfoProyecto } from "components/cards/infoProyecto.component";
 import AreaChartComponent from "components/charts/areaChart.component";
 import BarChartComponent from "components/charts/barChart.component";
 import PieChartComponent from "components/charts/pieChart.component";
+import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 
@@ -27,12 +28,12 @@ const ProyectoScreen = () => {
                 <InfoProyecto proyecto={proyecto} />
             </View>
 
-            <View className="justify-center items-center mt-4">
+            <View className="justify-center items-center mt-6">
                 <Text className="text-center text-2xl font-bold py-5">Poblacion beneficiada</Text>
-                <AreaChartComponent />
+                <SemiDonutChart />
             </View>
 
-            <View className="justify-center items-center mt-4">
+            <View className="justify-center items-center mt-12">
                 <Text className="text-center text-2xl font-bold py-5">Avance del proyecto</Text>
                 <BarChartComponent data={dataBar} />
             </View>

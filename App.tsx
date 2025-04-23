@@ -5,7 +5,7 @@ import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import './global.css';
 import MainStackNavigator from 'features/layout';
-import { AuthProvider } from 'providers/auth-provider/auth-provider';
+import { AuthProvider } from 'providers/auth-provider/auth.provider';
 import { customTheme } from 'config/styles/custom-theme';
 import {
   useFonts,

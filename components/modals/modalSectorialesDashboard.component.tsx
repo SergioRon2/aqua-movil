@@ -11,9 +11,9 @@ interface Props {
     closeModal: () => void;
 }
 
-export const ModalSectoriales = ({ active, closeModal }: Props) => {
+export const ModalSectorialesDashboard = ({ active, closeModal }: Props) => {
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
-    const { setSectorialActivo } = useActiveStore();
+    const { setSectorialActivoDashboard } = useActiveStore();
 
     useEffect(() => {
         const fetchSectorals = async () => {
@@ -25,7 +25,7 @@ export const ModalSectoriales = ({ active, closeModal }: Props) => {
     }, [])
 
     const handleSelectSectorial = (sectorial: ISectorial) => {
-        setSectorialActivo(sectorial)
+        setSectorialActivoDashboard(sectorial)
         closeModal();
     }
 
