@@ -1,6 +1,7 @@
 
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, Image, Pressable } from 'react-native';
+import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 
 const ProyectoCard = ({ data, index }: any) => {
     const navigation = useNavigation();
@@ -18,7 +19,7 @@ const ProyectoCard = ({ data, index }: any) => {
                     {data?.name != null ? data?.name : 'Nulo'}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                    {data?.financial_delay != null ? data?.financial_delay : 'Nulo'}
+                    {data?.total_source_value != null ? formatNumberWithSuffix(data?.total_source_value) : 'Nulo'}
                 </Text>
             </View>
             <View className='w-1/3 justify-center items-center'>

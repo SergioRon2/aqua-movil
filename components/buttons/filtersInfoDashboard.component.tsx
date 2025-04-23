@@ -2,19 +2,19 @@ import { useState } from "react";
 import { Pressable, View, Text } from "react-native"
 import useActiveStore from "store/actives/actives.store";
 import { Ionicons } from '@expo/vector-icons'
-import { ModalMunicipios } from "components/modals/modalMunicipios.component";
-import { ModalSectoriales } from "components/modals/modalSectoriales.component";
 import { DecisionModal } from "components/modals/modalAcceptOrDecline.component";
 import { IMunicipio } from "interfaces/municipio.interface";
+import { ModalMunicipiosDashboard } from "components/modals/modalMunicipiosDashboard.component";
+import { ModalSectorialesDashboard } from "components/modals/modalSectorialesDashboard.component";
 
 interface Props {
     border?: boolean;
 }
 
-export const FiltersComponentProyectos = ({ border }: Props) => {
+export const FiltersComponentDashboard = ({ border }: Props) => {
     const [modalCleanMunicipios, setModalCleanMunicipios] = useState<boolean>(false)
     const [modalCleanSectoriales, setModalCleanSectoriales] = useState<boolean>(false)
-    const { municipiosActivos, setMunicipiosActivos, sectorialActivo, setSectorialActivo } = useActiveStore();
+    const { municipiosActivosDashboard, setMunicipiosActivosDashboard, sectorialActivoDashboard, setSectorialActivoDashboard } = useActiveStore();
     const [municipiosModal, setMunicipiosModal] = useState<boolean>(false)
     const [sectorialesModal, setSectorialesModal] = useState<boolean>(false)
     const [municipioAEliminar, setMunicipioAEliminar] = useState<IMunicipio | null>(null);
@@ -22,15 +22,15 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
     const handleCleanMunicipios = () => {
         if (!municipioAEliminar) return;
 
-        const nuevos = municipiosActivos?.filter(m => m.id !== municipioAEliminar.id) || [];
-        setMunicipiosActivos(nuevos);
+        const nuevos = municipiosActivosDashboard?.filter(m => m.id !== municipioAEliminar.id) || [];
+        setMunicipiosActivosDashboard(nuevos);
         setMunicipioAEliminar(null); // limpiar el estado
         setModalCleanMunicipios(false);
     }
 
 
     const handleCleanSectoriales = () => {
-        setSectorialActivo(undefined)
+        setSectorialActivoDashboard(undefined)
         setModalCleanSectoriales(false)
     }
 
@@ -40,12 +40,12 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
             {/* buttons */}
             <Pressable onPress={() => setMunicipiosModal(true)} className="px-6 py-2 w-1/2 rounded-sm flex-row gap-2 items-center justify-center">
                 <Text className="text-black text-xl font-bold text-center">
-                    {municipiosActivos && municipiosActivos.length > 0
-                        ? municipiosActivos.map((m, index) => (
+                    {municipiosActivosDashboard && municipiosActivosDashboard.length > 0
+                        ? municipiosActivosDashboard.map((m, index) => (
                             <View key={m.id} className="flex-row items-center">
                                 <Text className="text-black text-xl font-bold text-center mr-2">{m.nombre}</Text>
 
-                                {municipiosActivos && municipiosActivos.length > 0 && (
+                                {municipiosActivosDashboard && municipiosActivosDashboard.length > 0 && (
                                     <Pressable
                                         onPress={() => {
                                             setMunicipioAEliminar(m);
@@ -66,9 +66,9 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
             <Pressable onPress={() => setSectorialesModal(true)} className="px-6 py-2 w-1/2 gap-2 rounded-sm flex-row items-center justify-center">
                 <Text className="text-black text-xl font-bold text-center">
                     {/* first letter capitalized */}
-                    {sectorialActivo ? sectorialActivo?.name.charAt(0).toUpperCase() + sectorialActivo?.name.slice(1).toLowerCase() : 'Sectoriales'}
+                    {sectorialActivoDashboard ? sectorialActivoDashboard?.name.charAt(0).toUpperCase() + sectorialActivoDashboard?.name.slice(1).toLowerCase() : 'Sectoriales'}
                 </Text>
-                {sectorialActivo && (
+                {sectorialActivoDashboard && (
                     <Pressable onPress={() => setModalCleanSectoriales(true)} className='items-center justify-center'>
                         <Ionicons name='trash-bin' color={'#db2777'} size={18} />
                     </Pressable>
@@ -79,12 +79,12 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
             {/* modals to select */}
 
             <View>
-                <ModalMunicipios
+                <ModalMunicipiosDashboard
                     closeModal={() => setMunicipiosModal(false)}
                     active={municipiosModal}
                 />
 
-                <ModalSectoriales
+                <ModalSectorialesDashboard
                     closeModal={() => setSectorialesModal(false)}
                     active={sectorialesModal}
                 />

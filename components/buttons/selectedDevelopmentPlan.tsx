@@ -38,7 +38,7 @@ export const SelectedDevelopmentPlan = () => {
     };
 
     return (
-        <View className="w-4/5 self-center mt-4">
+        <View className="w-4/5 self-center">
             <Pressable
                 className="border-2 border-white rounded-xl py-3 px-4 items-center active:opacity-50"
                 onPress={() => setModalVisible(true)}
