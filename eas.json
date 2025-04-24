@@ -5,7 +5,7 @@
                 "buildType": "apk"
             },
             "env": {
-                "API_URL": "http://35.209.168.169:3001",
+                "API_URL": "https://gobcesar.aquagov.com:3001",
                 "API_PREFIX": "api"
             }
         },
@@ -14,7 +14,7 @@
                 "buildType": "app-bundle"
             },
             "env": {
-                "API_URL": "http://35.209.168.169:3001",
+                "API_URL": "https://gobcesar.aquagov.com:3001",
                 "API_PREFIX": "api"
             }
         }
