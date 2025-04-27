@@ -15,7 +15,7 @@ const SearchLayout = () => {
             <Stack.Screen
                 name='Proyecto'
                 children={() => (
-                    <View className="mt-7 flex-1">
+                    <View className="flex-1">
                         <Navbar />
                         <ProyectoScreen />
                     </View>

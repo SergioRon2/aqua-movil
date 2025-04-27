@@ -1,6 +1,10 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, Text } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+
+interface Props {
+    title?: string;
+}
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -30,9 +34,10 @@ const chartConfig = {
     },
 };
 
-const AreaChartComponent = () => {
+const AreaChartComponent = ({title}: Props) => {
     return (
         <View className='border border-gray-300 rounded-lg'>
+            <Text className='text-xl font-bold'>{title}</Text>
             <LineChart
                 data={data}
                 width={screenWidth * 0.9}
@@ -40,9 +45,14 @@ const AreaChartComponent = () => {
                 chartConfig={chartConfig}
                 bezier
                 style={{
-                    marginVertical: 16,
-                    borderRadius: 16,
-                    marginHorizontal: 16,
+                    marginVertical: 20,
+                    paddingVertical: 40,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 5,
+                    borderRadius: 10,
+                    backgroundColor: 'white',
                 }}
             />
         </View>

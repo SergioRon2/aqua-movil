@@ -14,16 +14,28 @@ interface Props {
 }
 
 const chartConfig = {
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
+    backgroundGradientFrom: "#fff",
+    backgroundGradientTo: "#fff",
     fillShadowGradient: "#db2777",
     fillShadowGradientOpacity: 1,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    barPercentage: 0.6,
+    color: (opacity = 1) => `#db2777`,
+    labelColor: (opacity = 0.8) => `rgba(0, 0, 0, ${opacity})`,
+    barPercentage: 1.4,
     propsForBackgroundLines: {
-        stroke: "#e3e3e3"
+        stroke: "#e3e3e3",
+        fontSize: 12,
+        strokeWidth: 2
     },
+    propsForLabels: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#333"
+    },
+    propsForYAxis: {
+        fontSize: 12,
+        fontWeight: "bold",
+        color: "#333"
+    }
 };
 
 const BarChartComponent = ({ data }: Props) => {
@@ -39,12 +51,19 @@ const BarChartComponent = ({ data }: Props) => {
                 yAxisSuffix=""
                 chartConfig={chartConfig}
                 style={{
-                    marginVertical: 16,
-                    borderRadius: 16,
+                    marginVertical: 20,
+                    paddingVertical: 40,
+                    shadowColor: '#000',          
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 5,
+                    borderRadius: 10,              
+                    backgroundColor: 'white',
                 }}
             />
         </View>
     );
 };
+
 
 export default BarChartComponent;

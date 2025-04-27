@@ -42,7 +42,7 @@ export const MunicipioCard = ({ municipioData }: Props) => {
             <View className='w-1/2 bg-pink-100 rounded-r-2xl p-5 h-full justify-center gap-4 items-center animate-fade-in'>
                 <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
                     <Text className='text-black text-md font-bold'>Valor de proyectos</Text>
-                    <Text className='text-black text-3xl font-bold'>{formatNumberWithSuffix(total)}</Text>
+                    <Text className='text-black text-4xl font-bold'>{formatNumberWithSuffix(total)}</Text>
                 </View>
                 <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
                     <Text className='text-black text-md font-bold'>Valor ejecutado</Text>

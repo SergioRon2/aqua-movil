@@ -33,8 +33,8 @@ const ProyectoScreen = () => {
                 <SemiDonutChart />
             </View>
 
-            <View className="justify-center items-center mt-12">
-                <Text className="text-center text-2xl font-bold py-5">Avance del proyecto</Text>
+            <View className="justify-center items-center my-12">
+                <Text className="text-center text-2xl font-bold pt-5">Avance del proyecto</Text>
                 <BarChartComponent data={dataBar} />
             </View>
 

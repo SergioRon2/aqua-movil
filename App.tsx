@@ -13,7 +13,9 @@ import {
   Manrope_600SemiBold,
   Manrope_700Bold,
 } from '@expo-google-fonts/manrope';
-
+import InternetProvider from 'providers/internet-provider/internet.provider';
+import { StyleSheet } from 'react-native'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 
@@ -24,24 +26,37 @@ export default function App() {
     Manrope_700Bold,
   });
 
-  
+
   return (
-    <NavigationContainer>
-      <AuthProvider>
-        <ApplicationProvider {...eva} theme={{...customTheme, 'text-font-family': 'Manrope_400Regular'}}>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-              contentStyle: {
-                backgroundColor: '#fff',
-              },
-            }}
-          >
-            <Stack.Screen name="Layout" component={MainStackNavigator} />
-          </Stack.Navigator>
-        </ApplicationProvider>
-      </AuthProvider>
-      <StatusBar style="auto" />
-    </NavigationContainer >
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <NavigationContainer>
+          <InternetProvider>
+            <AuthProvider>
+              <ApplicationProvider {...eva} theme={{ ...customTheme, 'text-font-family': 'Manrope_400Regular' }}>
+                <Stack.Navigator
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: {
+                      backgroundColor: '#fff',
+                    },
+                  }}
+                >
+                  <Stack.Screen name="Layout" component={MainStackNavigator} />
+                </Stack.Navigator>
+              </ApplicationProvider>
+            </AuthProvider>
+          </InternetProvider>
+          <StatusBar style="auto" />
+        </NavigationContainer >
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#db2777',
+  },
+});

@@ -47,7 +47,7 @@ const InternetProvider = ({ children }: Props) => {
                 onBackButtonPress={() => { }}
             >
                 <View className="bg-white rounded-2xl p-6 items-center shadow-xl">
-                    <Text className="text-xl font-bold text-red-600 mb-2">
+                    <Text className="text-xl font-bold text-pink-600 mb-2">
                         Sin conexión
                     </Text>
                     <Text className="text-base text-center text-gray-700 mb-4">

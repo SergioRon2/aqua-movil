@@ -12,7 +12,7 @@ const ProyectoCard = ({ data, index }: any) => {
 
     return (
         <Pressable 
-            className={`bg-white rounded-lg my-2 flex-row animate-fade-in`} onPress={handleNavigate}
+            className={`bg-white border-2 border-pink-600 rounded-lg my-2 flex-row shadow-lg`} onPress={handleNavigate}
         >
             <View className="p-3 w-2/3">
                 <Text className="text-md font-bold mb-1">

@@ -51,7 +51,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                                     transparent={true}
                                     onRequestClose={() => setModalVisible(false)}
                                 >
-                                    <View className="flex-1 justify-center items-center bg-black bg-opacity-75">
+                                    <View className="flex-1 justify-center items-center bg-black/75">
                                         <View className="bg-white p-8 rounded-lg w-3/4 gap-4">
                                             <Text className="text-xl font-bold mb-4">Municipios</Text>
                                             <ScrollView>
