@@ -9,11 +9,11 @@ import SemiDonutChart from 'components/charts/semiDonutChart.component';
 import { ScrollView, Text, View } from 'react-native';
 
 const DashboardScreen = () => {
-    const navigation = useNavigation();
+    // const navigation = useNavigation();
 
-    const handleNavigation = () => {
-        navigation.navigate('Proyectos');
-    };
+    // const handleNavigation = () => {
+    //     navigation.navigate('Proyectos');
+    // };
 
     return (
         <ScrollView
@@ -42,11 +42,11 @@ const DashboardScreen = () => {
 
 
             {/* view projects */}
-            <View className='p-4 mx-auto w-11/12 border justify-center items-center border-gray-200 bg-white rounded-lg'>
+            {/* <View className='p-4 mx-auto w-11/12 border justify-center items-center border-gray-200 bg-white rounded-lg'>
                 <Text className="animate-fade-in text-xl p-2 font-bold">Ver proyectos</Text>
                 <Text className="animate-fade-in text-base text-gray-500 p-4 font-bold text-center">Aqui puedes ver una lista de todos los proyectos actuales, recuerda que solo es una vista basica y dinamica de todos los datos por proyecto.</Text>
                 <CustomButtonPrimary title='Ver todos los proyectos' onPress={handleNavigation} />
-            </View>
+            </View> */}
 
 
             {/* charts */}
@@ -54,7 +54,7 @@ const DashboardScreen = () => {
                 <View className='items-center bg-white justify-center'>
                     <AreaChartComponent />
                 </View>
-                <View className='items-center bg-white py-2 justify-center'>
+                <View className='items-center bg-white py-2 justify-center border border-gray-200 rounded-lg'>
                     <Text className='text-xl font-bold'>Proyectos por estados</Text>
                     <DonutChart />
                 </View>
@@ -62,7 +62,7 @@ const DashboardScreen = () => {
 
 
             {/* aditional cards */}
-            <View className='mx-auto w-11/12'>
+            {/* <View className='mx-auto w-11/12'>
                 <Text className="animate-fade-in p-4 text-xl font-bold mb-4">Proyectos</Text>
                 <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
                     <Text className="text-lg font-bold">Card 1</Text>
@@ -76,7 +76,7 @@ const DashboardScreen = () => {
                     <Text className="text-lg font-bold">Card 3</Text>
                     <Text className="text-gray-600">This is some content for card 3.</Text>
                 </View>
-            </View>
+            </View> */}
         </ScrollView>
     );
 };

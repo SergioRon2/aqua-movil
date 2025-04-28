@@ -10,15 +10,18 @@ import {
 import { IDevelopmentPlan } from "interfaces/development-plan.interface";
 import { DevelopmentPlanService } from "services/development-plan/development-plan.service";
 import { CustomButtonPrimary } from "./mainButton.component";
+import { ActivityIndicator } from "react-native-paper";
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
     const [selectedPlan, setSelectedPlan] = useState<IDevelopmentPlan | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDevelopmentPlan = async () => {
             try {
+                setIsLoading(true);
                 const res = await DevelopmentPlanService.getDevelopmentPlans();
                 const plans = res?.data?.data || [];
                 setDevelopmentPlans(plans);
@@ -27,6 +30,8 @@ export const SelectedDevelopmentPlan = () => {
                 }
             } catch (error) {
                 console.error({ error });
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchDevelopmentPlan();
@@ -39,44 +44,56 @@ export const SelectedDevelopmentPlan = () => {
 
     return (
         <View className="w-4/5 self-center">
-            <Pressable
-                className="border-2 border-white rounded-xl py-3 px-4 items-center active:opacity-50"
-                onPress={() => setModalVisible(true)}
-            >
-                <Text className="text-white font-semibold text-center">
-                    {`${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearBegin}` || "Seleccionar"}
-                </Text>
-            </Pressable>
-
-            <Modal
-                animationType="slide"
-                transparent
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View className="flex-1 justify-center items-center bg-black/40 px-5">
-                    <View className="bg-white rounded-2xl p-5 w-full max-h-[70%]">
-                        <Text className="text-2xl font-bold mb-4 text-gray-800">Selecciona un plan</Text>
-
-                        <FlatList
-                            data={developmentPlans}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    className="py-4 border-b border-gray-200"
-                                    onPress={() => handleSelect(item)}
-                                >
-                                    <Text className="text-base text-gray-700">{item.name}</Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-
-                        <View className="py-2 items-center justify-center">
-                            <CustomButtonPrimary rounded title="Cerrar" onPress={() => setModalVisible(false)} />
-                        </View>
-                    </View>
+            {isLoading ? (
+                <View className="border-2 border-white rounded-xl py-3 px-4 items-center">
+                    <ActivityIndicator
+                        className="self-center"
+                        size={'small'}
+                        color="#fff"
+                    />
                 </View>
-            </Modal>
-        </View>
+            ) : (
+                <>
+                    <Pressable
+                        className="border-2 border-white rounded-xl py-3 px-4 items-center active:opacity-50"
+                        onPress={() => setModalVisible(true)}
+                    >
+                        <Text className="text-white font-semibold text-center">
+                            {`${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearBegin}` || "Seleccionar"}
+                        </Text>
+                    </Pressable >
+
+                    <Modal
+                        animationType="fade"
+                        transparent
+                        visible={modalVisible}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View className="flex-1 justify-center items-center bg-black/40 px-5">
+                            <View className="bg-white rounded-2xl p-5 w-full max-h-[70%]">
+                                <Text className="text-2xl font-bold mb-4 text-gray-800">Selecciona un plan</Text>
+
+                                <FlatList
+                                    data={developmentPlans}
+                                    keyExtractor={(item) => item.id.toString()}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            className="py-4 border-b border-gray-200"
+                                            onPress={() => handleSelect(item)}
+                                        >
+                                            <Text className="text-base text-gray-700">{item.name}</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+
+                                <View className="py-2 items-center justify-center">
+                                    <CustomButtonPrimary rounded title="Cerrar" onPress={() => setModalVisible(false)} />
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                </>
+            )}
+        </View >
     );
 };

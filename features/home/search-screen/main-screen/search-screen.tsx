@@ -1,6 +1,7 @@
 import { BackButton } from 'components/buttons/backButton.component';
 import ProyectoCard from 'components/cards/proyectoCard.component';
 import { IProyecto } from 'interfaces/proyecto.interface';
+import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Text, View, TextInput } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
@@ -32,7 +33,7 @@ const SearchScreen = () => {
     );
 
     return (
-        <View className='flex-1 items-center justify-start'>
+        <View className='flex-1 bg-white items-center justify-start'>
             <View className='h-1/6 gap-3 w-full rounded-3xl items-center justify-center flex-row'>
                 <BackButton />
                 <TextInput
@@ -59,9 +60,15 @@ const SearchScreen = () => {
                         )}
                     />
                 ) : (
-                    <Text className='text-base text-gray-500 mt-10'>
-                        No se encontraron resultados.
-                    </Text>
+                    <View className='justify-center items-center m-auto'>
+                        <LottieView
+                            source={require('../../../../assets/lottie/not_found.json')}
+                            autoPlay
+                            loop
+                            style={{ width: 200, height: 200 }}
+                        />
+                        <Text className="text-center text-lg text-gray-500 font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                    </View>
                 )}
             </View>
         </View>

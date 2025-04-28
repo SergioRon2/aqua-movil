@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 // Tab Navigator
 const MainTabNavigator = () => {
     return (
-        <View style={{ flex: 1 }} className="mt-8">
+        <View style={{ flex: 1 }}>
             <Navbar />
             <IAButton />
             <Tab.Navigator
