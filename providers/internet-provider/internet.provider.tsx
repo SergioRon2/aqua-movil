@@ -1,61 +1,84 @@
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode, createContext } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import Modal from 'react-native-modal';
 import { View, Text, Pressable } from 'react-native';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { Loading } from 'components/loading/loading.component';
+import LottieView from 'lottie-react-native';
 
 type Props = {
     children: ReactNode;
 };
 
-const InternetProvider = ({ children }: Props) => {
-    const [isConnected, setIsConnected] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [loading, setLoading] = useState<boolean>(false)
+const InternetContext = createContext<boolean | null>(null);
 
-    const fetchInternet = () => {
-        setModalVisible(false)
-        setLoading(true)
+const InternetProvider = ({ children }: Props) => {
+    const [isConnected, setIsConnected] = useState<boolean | null>(true);
+
+    useEffect(() => {
+        const checkInternetConnection = async () => {
+            const state = await NetInfo.fetch();
+            setIsConnected(state.isConnected && state.isInternetReachable);
+        };
+
+        checkInternetConnection();
+
+        const unsubscribe = NetInfo.addEventListener((state) => {
+            setIsConnected(state.isConnected && state.isInternetReachable);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const fetchInternet = async () => {
+        setIsConnected(null);
         setTimeout(() => {
-            setLoading(false);
-            NetInfo.addEventListener(state => {
-                const connected = state.isConnected ?? false;
-                setIsConnected(connected);
-                setModalVisible(!connected);
+            NetInfo.fetch().then((state) => {
+                setIsConnected(state.isConnected && state.isInternetReachable);
             });
-        }, 3000)
+        }, 2000)
     }
 
-    useEffect(() => console.log(isConnected), [isConnected])
-
-    if (loading) {
-        <Loading /> 
+    if (isConnected === null) {
+        <Loading />
     }
 
     return (
         <>
-            {children}
+            <InternetContext.Provider value={isConnected}>
+                {children}
+            </InternetContext.Provider>
 
-            <Modal
-                isVisible={modalVisible}
-                animationIn="zoomInDown"
-                animationOut="zoomOutUp"
-                backdropOpacity={0.6}
-                useNativeDriver
-                onBackdropPress={() => { }}
-                onBackButtonPress={() => { }}
-            >
-                <View className="bg-white rounded-2xl p-6 items-center shadow-xl">
-                    <Text className="text-xl font-bold text-pink-600 mb-2">
-                        Sin conexión
-                    </Text>
-                    <Text className="text-base text-center text-gray-700 mb-4">
-                        No tienes acceso a internet. Por favor revisa tu conexión.
-                    </Text>
-                    <CustomButtonPrimary onPress={fetchInternet} title='Reintentar' />
+            {!isConnected && (
+                <View className='bg-white'>
+                    <Modal
+                        isVisible
+                        animationIn="zoomInDown"
+                        animationOut="zoomOutUp"
+                        backdropColor='#fff'
+                        backdropOpacity={1}
+                        useNativeDriver
+                        onBackdropPress={() => { }}
+                        onBackButtonPress={() => { }}
+                    >
+                        <View className="bg-white rounded-2xl p-6 items-center shadow-xl">
+                            <LottieView
+                                source={require('../../assets/lottie/not_internet.json')}
+                                autoPlay
+                                loop
+                                style={{ width: 200, height: 200 }}
+                            />
+                            <Text className="text-xl font-bold text-pink-600 mb-2">
+                                Sin conexión
+                            </Text>
+                            <Text className="text-base text-center text-gray-700 mb-4">
+                                No tienes acceso a internet. Por favor revisa tu conexión.
+                            </Text>
+                            <CustomButtonPrimary rounded onPress={fetchInternet} title='Reintentar' />
+                        </View>
+                    </Modal>
                 </View>
-            </Modal>
+            )}
         </>
     );
 };

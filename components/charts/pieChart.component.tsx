@@ -37,7 +37,7 @@ const data = [
 
 const PieChartComponent = () => {
     return (
-        <View>
+        <View className='animate-fade-in'>
             <PieChart
                 data={data}
                 width={screenWidth * 0.9}
