@@ -36,7 +36,7 @@ const chartConfig = {
 
 const AreaChartComponent = ({title}: Props) => {
     return (
-        <View className='border border-gray-300 rounded-lg'>
+        <View className='border border-gray-300 rounded-lg animate-fade-in'>
             <Text className='text-xl font-bold'>{title}</Text>
             <LineChart
                 data={data}

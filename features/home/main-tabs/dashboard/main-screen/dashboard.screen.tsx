@@ -1,12 +1,20 @@
-import { useNavigation } from '@react-navigation/native';
 import { FiltersComponentDashboard } from 'components/buttons/filtersInfoDashboard.component';
-import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import AreaChartComponent from 'components/charts/areaChart.component';
 import DonutChart from 'components/charts/donutChart.component';
-import PieChartComponent from 'components/charts/pieChart.component';
-import SemiDonutChart from 'components/charts/semiDonutChart.component';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+import { StateService } from 'services/states/states.service';
+
+type ProjectState = {
+    state_id: number;
+    state_code: string;
+    state_name: string;
+    amount_project: number;
+};
+
+const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
 
 const DashboardScreen = () => {
     // const navigation = useNavigation();
@@ -14,6 +22,34 @@ const DashboardScreen = () => {
     // const handleNavigation = () => {
     //     navigation.navigate('Proyectos');
     // };
+
+    const [projectsByState, setProjectsByState] = useState<ProjectState[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(()=> {
+        const fetchProjectsByState = async () => {
+            try {
+                setLoading(true)
+                const res = await StateService.getStatesData();
+                setProjectsByState(res?.data?.list_state_response_filter)
+            } catch (error) {
+                console.error({error})   
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchProjectsByState();
+    }, [])
+
+    const totalProjects = (projectsByState || []).reduce((sum, item) => sum + item.amount_project, 0);
+
+    const chartData: { label: string; value: number; color: string }[] = (projectsByState || []).map((item, index) => ({
+        label: item.state_name,
+        value: (item.amount_project / totalProjects) * 100,
+        color: COLORS[index % COLORS.length],
+    }));
+    
 
     return (
         <ScrollView
@@ -54,9 +90,15 @@ const DashboardScreen = () => {
                 <View className='items-center bg-white justify-center'>
                     <AreaChartComponent />
                 </View>
-                <View className='items-center bg-white py-2 justify-center border border-gray-200 rounded-lg'>
-                    <Text className='text-xl font-bold'>Proyectos por estados</Text>
-                    <DonutChart />
+                <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#db2777" className='my-4' />
+                    ) : (
+                        <>
+                            <Text className='text-2xl text-gray-800 font-bold'>Proyectos por estados</Text>
+                            <DonutChart data={chartData} />
+                        </>
+                    )}
                 </View>
             </View>
 

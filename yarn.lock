@@ -4679,6 +4679,11 @@ getenv@^1.0.0:
   resolved "https://registry.npmjs.org/getenv/-/getenv-1.0.0.tgz"
   integrity sha512-7yetJWqbS9sbn0vIfliPsFgoXMKn/YMF+Wuiog97x+urnSRRRZ7xB+uVkwGKzRgq9CDFfMQnE9ruL5DHv9c6Xg==
 
+gifted-charts-core@0.1.62:
+  version "0.1.62"
+  resolved "https://registry.npmjs.org/gifted-charts-core/-/gifted-charts-core-0.1.62.tgz"
+  integrity sha512-b3fweez3P+RojgC3BDpetC+rivvuKSvDtA9ydvnvxbfBoB6tOVEbY5Vq4tEGiLmt9XOBOJpRTJiFTgYtr0NreA==
+
 glob-parent@^5.1.2:
   version "5.1.2"
   resolved "https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz"
@@ -6931,6 +6936,18 @@ react-native-dotenv@^3.4.11:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
     prop-types "^15.7.2"
+
+react-native-gifted-charts@^1.4.60:
+  version "1.4.60"
+  resolved "https://registry.npmjs.org/react-native-gifted-charts/-/react-native-gifted-charts-1.4.60.tgz"
+  integrity sha512-cdbFSj8/kCxAw4yeJEOuZC4f4Fk9fdjNYSsS20OdyKqflmjVKl06NgMEZagTKFWNXX6TRHI5X9J2Ovk9P0DSPg==
+  dependencies:
+    gifted-charts-core "0.1.62"
+
+react-native-linear-gradient@*, react-native-linear-gradient@^2.8.3:
+  version "2.8.3"
+  resolved "https://registry.npmjs.org/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz"
+  integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
 
 react-native-modal@^14.0.0-rc.1:
   version "14.0.0-rc.1"

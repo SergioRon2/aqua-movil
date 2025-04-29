@@ -40,7 +40,7 @@ const chartConfig = {
 
 const BarChartComponent = ({ data }: Props) => {
     return (
-        <View>
+        <View className='animate-fade-in'>
             <BarChart
                 data={data}
                 width={screenWidth * 0.9}

@@ -15,7 +15,7 @@ const SemiDonutChart = ({
     const strokeDashoffset = circleCircumference - percentageValue;
 
     return (
-        <View style={styles.container}>
+        <View className='animate-fade-in' style={styles.container}>
             <Svg width={diameter + strokeWidth * 2} height={adjustedHeight}>
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">

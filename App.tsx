@@ -31,9 +31,9 @@ export default function App() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <NavigationContainer>
-          <InternetProvider>
-            <AuthProvider>
-              <ApplicationProvider {...eva} theme={{ ...customTheme, 'text-font-family': 'Manrope_400Regular' }}>
+          <ApplicationProvider {...eva} theme={{ ...customTheme, 'text-font-family': 'Manrope_400Regular' }}>
+            <InternetProvider>
+              <AuthProvider>
                 <Stack.Navigator
                   screenOptions={{
                     headerShown: false,
@@ -44,9 +44,9 @@ export default function App() {
                 >
                   <Stack.Screen name="Layout" component={MainStackNavigator} />
                 </Stack.Navigator>
-              </ApplicationProvider>
-            </AuthProvider>
-          </InternetProvider>
+              </AuthProvider>
+            </InternetProvider>
+          </ApplicationProvider>
           <StatusBar style="auto" />
         </NavigationContainer >
       </SafeAreaView>
