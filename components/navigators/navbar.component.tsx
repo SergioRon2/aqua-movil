@@ -5,9 +5,10 @@ import useActiveStore from 'store/actives/actives.store';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { SelectedDevelopmentPlan } from 'components/buttons/selectedDevelopmentPlan';
+import useStylesStore from 'store/styles/styles.store';
 
 export const Navbar = () => {
-    const [selected, setSelected] = useState<number>(2)
+    const {globalColor} = useStylesStore()
     const { searchActive, setSearchActive } = useActiveStore();
     const height = useSharedValue(80);
     const navigation = useNavigation();
@@ -31,8 +32,8 @@ export const Navbar = () => {
 
     return (
         <Animated.View
-            className="bg-pink-600 w-full h-auto rounded-b-3xl justify-center items-center"
-            style={animatedStyle}
+            className="w-full h-auto rounded-b-3xl justify-center items-center"
+            style={[animatedStyle, { backgroundColor: globalColor }]}
         >
 
             {searchActive &&

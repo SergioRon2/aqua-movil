@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import Modal from 'react-native-modal'
 import { SectoralService } from "services/sectoral/sectoral.service";
 import useActiveStore from "store/actives/actives.store";
+import useStylesStore from "store/styles/styles.store";
 
 interface Props {
     active: boolean,
@@ -14,6 +15,7 @@ interface Props {
 export const ModalSectoriales = ({ active, closeModal }: Props) => {
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
     const { setSectorialActivo } = useActiveStore();
+    const {globalColor} = useStylesStore()
 
     useEffect(() => {
         const fetchSectorals = async () => {
@@ -57,7 +59,7 @@ export const ModalSectoriales = ({ active, closeModal }: Props) => {
 
                         <CustomButtonPrimary rounded onPress={closeModal} title="Cerrar" />
                     </View>
-                </View> : <ActivityIndicator size={'large'} color={'#DB2777'} />
+                </View> : <ActivityIndicator size={'large'} color={globalColor} />
             }
         </Modal>
     )

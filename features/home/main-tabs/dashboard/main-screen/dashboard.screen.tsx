@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { StateService } from 'services/states/states.service';
+import useStylesStore from 'store/styles/styles.store';
 
 type ProjectState = {
     state_id: number;
@@ -17,6 +18,7 @@ type ProjectState = {
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
 
 const DashboardScreen = () => {
+    const {globalColor} = useStylesStore()
     // const navigation = useNavigation();
 
     // const handleNavigation = () => {
@@ -92,7 +94,7 @@ const DashboardScreen = () => {
                 </View>
                 <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
                     {loading ? (
-                        <ActivityIndicator size="small" color="#db2777" className='my-4' />
+                        <ActivityIndicator size="small" color={globalColor} className='my-4' />
                     ) : (
                         <>
                             <Text className='text-2xl text-gray-800 font-bold'>Proyectos por estados</Text>

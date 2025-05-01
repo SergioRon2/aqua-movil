@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import useStylesStore from 'store/styles/styles.store';
 
 const SemiDonutChart = ({
     percentage = 100,
@@ -8,6 +9,7 @@ const SemiDonutChart = ({
     strokeWidth = 20,
     max = 100,
 }) => {
+    const {globalColor} = useStylesStore()
     const diameter = radius * 2;
     const adjustedHeight = radius + strokeWidth; // más alto para que no se corte
     const circleCircumference = Math.PI * radius;
@@ -19,8 +21,8 @@ const SemiDonutChart = ({
             <Svg width={diameter + strokeWidth * 2} height={adjustedHeight}>
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-                        <Stop offset="0%" stopColor="#db2777" />
-                        <Stop offset="100%" stopColor="#b90555" />
+                        <Stop offset="0%" stopColor={globalColor} />
+                        <Stop offset="100%" stopColor={globalColor} />
                     </LinearGradient>
                 </Defs>
 

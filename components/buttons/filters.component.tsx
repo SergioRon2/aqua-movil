@@ -6,12 +6,14 @@ import { ModalMunicipios } from "components/modals/modalMunicipios.component";
 import { ModalSectoriales } from "components/modals/modalSectoriales.component";
 import { DecisionModal } from "components/modals/modalAcceptOrDecline.component";
 import { IMunicipio } from "interfaces/municipio.interface";
+import useStylesStore from "store/styles/styles.store";
 
 interface Props {
     border?: boolean;
 }
 
 export const FiltersComponentProyectos = ({ border }: Props) => {
+    const {globalColor} = useStylesStore()
     const [modalCleanMunicipios, setModalCleanMunicipios] = useState<boolean>(false)
     const [modalCleanSectoriales, setModalCleanSectoriales] = useState<boolean>(false)
     const { municipiosActivos, setMunicipiosActivos, sectorialActivo, setSectorialActivo } = useActiveStore();
@@ -35,7 +37,7 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
     }
 
     return (
-        <View className={`bg-white flex-row w-full h-auto mx-auto mb-4 justify-center items-center animate-fade-in ${border ? 'border-2 border-pink-600' : ''}`} >
+        <View style={border && {borderColor: globalColor}} className={`bg-white flex-row w-full h-auto mx-auto mb-4 justify-center items-center ${border ? 'border-2' : ''}`} >
 
             {/* buttons */}
             <Pressable onPress={() => setMunicipiosModal(true)} className="px-6 py-2 w-1/2 rounded-sm flex-row gap-2 items-center justify-center">
@@ -53,7 +55,7 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
                                         }}
                                         className='items-center justify-center'
                                     >
-                                        <Ionicons name='trash-bin' color={'#db2777'} size={18} />
+                                        <Ionicons name='trash-bin' color={globalColor} size={18} />
                                     </Pressable>
                                 )}
                                 {/* {index < municipiosActivos.length - 1 && <Text className="text-black mx-2">,</Text>} */}
@@ -70,7 +72,7 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
                 </Text>
                 {sectorialActivo && (
                     <Pressable onPress={() => setModalCleanSectoriales(true)} className='items-center justify-center'>
-                        <Ionicons name='trash-bin' color={'#db2777'} size={18} />
+                        <Ionicons name='trash-bin' color={globalColor} size={18} />
                     </Pressable>
                 )}
             </Pressable>

@@ -1,6 +1,6 @@
 import { useRoute } from "@react-navigation/native";
 import ProyectoCard from "components/cards/proyectoCard.component";
-import DonutChart from "components/charts/donutChart.component";
+import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { View, Text, Dimensions } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown, useSharedValue } from "react-native-reanimated";
@@ -16,7 +16,7 @@ const UniqueMunicipioScreen = () => {
     const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
 
     const items = [
-        { title: 'Gráfico de Media Dona', component: <DonutChart /> },
+        { title: 'Gráfico de Media Dona', component: <SemiDonutChart /> },
     ];
 
     return (

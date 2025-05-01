@@ -8,6 +8,7 @@ import { parseProgress } from 'utils/parseProgress';
 import React, { useState } from 'react';
 import { Modal, Button, ScrollView } from 'react-native';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
+import useStylesStore from 'store/styles/styles.store';
 
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const ProyectoCardPresentable = ({ proyecto }: Props) => {
+    const {globalColor} = useStylesStore()
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -30,8 +32,9 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
 
     return (
         <Pressable
+            style={{ borderColor: globalColor }}
             onPress={handleNavigate}
-            className="bg-white border-2 border-pink-600 p-4 w-11/12 rounded-2xl justify-center items-start mx-auto mt-4 shadow-xl"
+            className="bg-white border-2 p-4 w-11/12 rounded-2xl justify-center items-start mx-auto mt-4 shadow-xl"
         >
             <Text style={{ fontSize: 12 }} className="text-black font-bold">{proyecto.name}</Text>
 
@@ -43,7 +46,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                             municipios.length > 1 ? (
                             <>
                                 <Pressable className='py-4' onPress={() => setModalVisible(true)}>
-                                    <Text className='text-pink-600 font-bold'>Ver municipios</Text>
+                                    <Text style={{color: globalColor}} className='font-bold'>Ver municipios</Text>
                                 </Pressable>
                                 <Modal
                                     visible={modalVisible}
@@ -85,7 +88,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                         <View className="flex-row items-center gap-2">
                             <ProgressBar
                                 progress={progresoFinanciero}
-                                color="#db2777"
+                                color={globalColor}
                                 className='w-2/4 h-auto'
                                 style={{ height: 10, borderRadius: 5, backgroundColor: '#aaa' }}
                             />
@@ -98,7 +101,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                         <View className="flex-row items-center gap-2">
                             <ProgressBar
                                 progress={progresoFisico}
-                                color="#db2777"
+                                color={globalColor}
                                 className='w-2/4 h-auto'
                                 style={{ height: 10, borderRadius: 5, backgroundColor: '#aaa' }}
                             />

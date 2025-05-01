@@ -1,9 +1,6 @@
 import { useRoute } from "@react-navigation/native";
 import ProyectoCard from "components/cards/proyectoCard.component";
-import AreaChartComponent from "components/charts/areaChart.component";
-import BarChartComponent from "components/charts/barChart.component";
-import DonutChart from "components/charts/donutChart.component";
-import PieChartComponent from "components/charts/pieChart.component";
+import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { View, Text, Dimensions } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
@@ -16,7 +13,7 @@ const UniqueSectorialScreen = () => {
     const { sectorial } = route.params;
 
     const items = [
-        { title: 'Gráfico de Dona', component: <DonutChart /> },
+        { title: 'Gráfico de Dona', component: <SemiDonutChart /> },
     ];
 
     return (

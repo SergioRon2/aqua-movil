@@ -5,6 +5,7 @@ import { View, Text, Pressable } from 'react-native';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { Loading } from 'components/loading/loading.component';
 import LottieView from 'lottie-react-native';
+import useStylesStore from 'store/styles/styles.store';
 
 type Props = {
     children: ReactNode;
@@ -13,6 +14,7 @@ type Props = {
 const InternetContext = createContext<boolean | null>(null);
 
 const InternetProvider = ({ children }: Props) => {
+    const {globalColor} = useStylesStore()
     const [isConnected, setIsConnected] = useState<boolean | null>(true);
 
     useEffect(() => {
@@ -68,7 +70,7 @@ const InternetProvider = ({ children }: Props) => {
                                 loop
                                 style={{ width: 200, height: 200 }}
                             />
-                            <Text className="text-xl font-bold text-pink-600 mb-2">
+                            <Text style={{color: globalColor}} className="text-xl font-bold mb-2">
                                 Sin conexión
                             </Text>
                             <Text className="text-base text-center text-gray-700 mb-4">

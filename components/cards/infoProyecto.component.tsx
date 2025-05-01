@@ -3,10 +3,12 @@ import { IProyecto } from "interfaces/proyecto.interface";
 import { useState } from "react";
 import { View, Text, Pressable, Modal, ScrollView } from "react-native";
 import { ExportsService } from "services/exports/exports.service";
+import useStylesStore from "store/styles/styles.store";
 import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
 
 
 export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
+    const {globalColor} = useStylesStore()
     const [modalVisible, setModalVisible] = useState(false);
     const municipios = proyecto?.municipios_texto?.split(',');
     const downloadFile = async (id: number) => {
@@ -66,7 +68,7 @@ export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
                     municipios.length > 1 ? (
                     <>
                         <Pressable className='' onPress={() => setModalVisible(true)}>
-                            <Text className='text-pink-600 font-bold text-lg'>Ver municipios</Text>
+                            <Text style={{color: globalColor}} className='font-bold text-lg'>Ver municipios</Text>
                         </Pressable>
                         <Modal
                             visible={modalVisible}
