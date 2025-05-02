@@ -25,6 +25,7 @@ export const CustomButtonPrimary = ({ onPress, title, rounded, backgroundWhite }
 
 
     return <Pressable
+        className="shadow-lg"
         style={[
             { borderRadius: rounded ? 25 : 0, width: '95%', padding: 12 },
             backgroundWhite ? { backgroundColor: '#fff', borderWidth: 1, borderColor: globalColor } : { backgroundColor: globalColor, borderWidth: 0 },

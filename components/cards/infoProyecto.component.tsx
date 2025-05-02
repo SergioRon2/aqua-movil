@@ -24,7 +24,7 @@ export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
             <View className="justify-between items-start w-1/2">
                 <Text className="text-md text-gray-500">Fecha inicio</Text>
                 <Text className="text-lg font-bold">
-                    {proyecto.projectBankDate != null ? proyecto.projectBankDate : 'Nulo'}
+                    {proyecto.fechaProyecto != null ? proyecto.fechaProyecto : 'Nulo'}
                 </Text>
             </View>
             <View className="justify-between items-start w-1/2">
@@ -38,7 +38,7 @@ export const InfoProyecto = ({ proyecto }: { proyecto: IProyecto }) => {
             <View className="justify-between items-start w-1/2">
                 <Text className="text-md text-gray-500">Contrato</Text>
                 <Text className="text-lg font-bold">
-                    {proyecto.type != null ? proyecto.type : 'Nulo'}
+                    {proyecto.type != null ? proyecto.type.toUpperCase() : 'Nulo'}
                 </Text>
             </View>
             <View className="justify-between items-start w-1/2">

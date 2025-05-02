@@ -7,6 +7,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { StateService } from 'services/states/states.service';
 import useStylesStore from 'store/styles/styles.store';
+import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 
 type ProjectState = {
     state_id: number;
@@ -15,10 +16,15 @@ type ProjectState = {
     amount_project: number;
 };
 
+type Values = {
+    value_total_project: string;
+    value_total_executed: string;
+}
+
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
 
 const DashboardScreen = () => {
-    const {globalColor} = useStylesStore()
+    const { globalColor } = useStylesStore()
     // const navigation = useNavigation();
 
     // const handleNavigation = () => {
@@ -26,22 +32,33 @@ const DashboardScreen = () => {
     // };
 
     const [projectsByState, setProjectsByState] = useState<ProjectState[]>([])
+    const [values, setValues] = useState<Values>({
+        value_total_project: '0',
+        value_total_executed: '0'
+    })
     const [loading, setLoading] = useState(true)
 
-    useEffect(()=> {
-        const fetchProjectsByState = async () => {
+    useEffect(() => {
+        const fetchProjectsByDashboard = async () => {
             try {
                 setLoading(true)
                 const res = await StateService.getStatesData();
+                // estados para el donut chart
                 setProjectsByState(res?.data?.list_state_response_filter)
+
+                // valores para el dashboard
+                setValues({
+                    value_total_project: res?.data?.value_total_project,
+                    value_total_executed: res?.data?.value_total_executed
+                })
             } catch (error) {
-                console.error({error})   
+                console.error({ error })
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchProjectsByState();
+        fetchProjectsByDashboard();
     }, [])
 
     const totalProjects = (projectsByState || []).reduce((sum, item) => sum + item.amount_project, 0);
@@ -51,7 +68,7 @@ const DashboardScreen = () => {
         value: (item.amount_project / totalProjects) * 100,
         color: COLORS[index % COLORS.length],
     }));
-    
+
 
     return (
         <ScrollView
@@ -68,14 +85,23 @@ const DashboardScreen = () => {
 
             {/* values */}
             <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4'>
-                <View className='items-start w-1/2'>
-                    <Text className='text-4xl font-bold'>$ 6.25 M</Text>
-                    <Text className='font-bold text-gray-500'>Valor ejecutado</Text>
-                </View>
-                <View className='items-start w-1/2'>
-                    <Text className='text-4xl font-bold'>$ 10.00 M</Text>
-                    <Text className='font-bold text-gray-500'>Valor de proyectos</Text>
-                </View>
+                {loading
+                    ? <ActivityIndicator size="small" color={globalColor} className='my-4' />
+                    : <>
+                        <View className='items-start w-1/2'>
+                            <Text className='text-4xl font-bold'>
+                                ${formatNumberWithSuffix(+values.value_total_executed)}
+                            </Text>
+                            <Text className='font-bold text-gray-500'>Valor ejecutado</Text>
+                        </View>
+                        <View className='items-start w-1/2'>
+                            <Text className='text-4xl font-bold'>
+                                ${formatNumberWithSuffix(+values.value_total_project)}
+                            </Text>
+                            <Text className='font-bold text-gray-500'>Valor de proyectos</Text>
+                        </View>
+                    </>
+                }
             </View>
 
 

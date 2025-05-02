@@ -12,7 +12,7 @@ export const BackButton = () => {
     }
 
     return (
-        <Pressable style={{backgroundColor: globalColor}} className="p-4 w-16 h-16 rounded-full justify-center items-center animate-fade-in" onPress={handleBackNavigation}>
+        <Pressable style={{backgroundColor: globalColor}} className="p-4 w-16 h-16 rounded-full justify-center items-center" onPress={handleBackNavigation}>
             <Ionicons color={'#fff'} size={22} name='arrow-back-outline'  />
         </Pressable>
     )

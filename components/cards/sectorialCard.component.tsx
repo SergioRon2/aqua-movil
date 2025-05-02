@@ -6,15 +6,18 @@ import { parseCurrency } from 'utils/parseCurrency';
 import { Ionicons } from '@expo/vector-icons';
 import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 import useStylesStore from 'store/styles/styles.store';
+import { capitalize } from 'utils/capitalize';
+import { memo } from 'react';
 
 interface Props {
     sectorialData: ISectorial;
 }
 
-export const SectorialCard = ({ sectorialData }: any) => {
+const SectorialCard = ({ sectorialData }: Props) => {
     const {globalColor} = useStylesStore()
-    const total = parseCurrency(sectorialData.valor);
-    const ejecutado = parseCurrency(sectorialData.valorEjecutado);
+    // const total = sectorialData.valor
+    const total = 100
+    const ejecutado = sectorialData.id
     const progress = total > 0 ? ejecutado / total : 0;
 
     const navigation = useNavigation();
@@ -25,17 +28,23 @@ export const SectorialCard = ({ sectorialData }: any) => {
 
     return (
         <Pressable onPress={handleNavigate} className='flex-row h-40 w-11/12 rounded-2xl justify-center items-center mx-auto mt-5 shadow-lg'>
-            <View style={{backgroundColor: globalColor}} className='w-1/2 h-full rounded-l-2xl justify-center gap-2 items-center animate-fade-in'>
-                <Text className='text-white text-2xl font-bold animate-fade-in'>{sectorialData.sectorial}</Text>
+            <View style={{backgroundColor: globalColor}} className='w-1/2 h-full rounded-l-2xl justify-center items-center animate-fade-in'>
+                <Text
+                    className='text-white text-2xl font-bold animate-fade-in text-center'
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                >
+                    {capitalize(sectorialData.name)}
+                </Text>
                 <View className='flex-col justify-center items-center w-full mt-2 animate-fade-in'>
                     <View className='flex-row ml-16 justify-start w-full items-center mt-2'>
                         <Ionicons color={'white'} name='briefcase' size={20} />
-                        <Text className='text-white ml-2 text-lg font-bold'>{sectorialData.proyectos.total}</Text>
+                        <Text className='text-white ml-2 text-lg font-bold'>{sectorialData.id}</Text>
                         <Text className='text-white ml-1 text-lg font-bold'>Proyectos</Text>
                     </View>
                     <View className='flex-row ml-16 justify-start items-center w-full mt-2'>
                         <Ionicons color={'white'} name='rocket' size={20} />
-                        <Text className='text-white text-lg ml-2 font-bold'>{sectorialData.iniciativas}</Text>
+                        <Text className='text-white text-lg ml-2 font-bold'>{sectorialData.code}</Text>
                         <Text className='text-white text-lg ml-1 font-bold'>Iniciativas</Text>
                     </View>
                 </View>
@@ -43,7 +52,7 @@ export const SectorialCard = ({ sectorialData }: any) => {
             <View style={{borderColor: globalColor}} className='w-1/2 bg-white border-2 rounded-r-2xl p-5 h-full justify-center gap-4 items-center animate-fade-in'>
                 <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
                     <Text className='text-black text-md font-bold '>Valor de proyectos</Text>
-                    <Text className='text-black text-4xl font-bold'>{formatNumberWithSuffix(total)}</Text>
+                    <Text className='text-black text-4xl font-bold'>{total}</Text>
                 </View>
                 <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
                     <Text className='text-black text-md font-bold'>Valor ejecutado</Text>
@@ -63,3 +72,5 @@ export const SectorialCard = ({ sectorialData }: any) => {
         </Pressable>
     );
 }
+
+export default memo(SectorialCard);

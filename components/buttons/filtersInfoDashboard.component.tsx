@@ -7,6 +7,7 @@ import { IMunicipio } from "interfaces/municipio.interface";
 import { ModalMunicipiosDashboard } from "components/modals/modalMunicipiosDashboard.component";
 import { ModalSectorialesDashboard } from "components/modals/modalSectorialesDashboard.component";
 import useStylesStore from "store/styles/styles.store";
+import { capitalize } from "utils/capitalize";
 
 interface Props {
     border?: boolean;
@@ -58,7 +59,6 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
                                         <Ionicons name='trash-bin' color={globalColor} size={18} />
                                     </Pressable>
                                 )}
-                                {/* {index < municipiosActivos.length - 1 && <Text className="text-black mx-2">,</Text>} */}
                             </View>
                         ))
                         : 'Municipios'}
@@ -68,7 +68,7 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
             <Pressable onPress={() => setSectorialesModal(true)} className="px-6 py-2 w-1/2 gap-2 rounded-sm flex-row items-center justify-center">
                 <Text className="text-black text-xl font-bold text-center">
                     {/* first letter capitalized */}
-                    {sectorialActivoDashboard ? sectorialActivoDashboard?.name.charAt(0).toUpperCase() + sectorialActivoDashboard?.name.slice(1).toLowerCase() : 'Sectoriales'}
+                    {sectorialActivoDashboard ? capitalize(sectorialActivoDashboard?.name) : 'Sectoriales'}
                 </Text>
                 {sectorialActivoDashboard && (
                     <Pressable onPress={() => setModalCleanSectoriales(true)} className='items-center justify-center'>

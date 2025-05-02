@@ -1,22 +1,54 @@
-import { MunicipioCard } from 'components/cards/municipioCard.component';
-import { municipios } from 'data/data';
+import MunicipioCard from 'components/cards/municipioCard.component';
+import { Loading } from 'components/loading/loading.component';
+import { IMunicipio } from 'interfaces/municipio.interface';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, FlatList } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { MunicipalitiesService } from 'services/municipalities/municipalities.service';
 
 const Municipios = () => {
+    const [municipios, setMunicipios] = useState<IMunicipio[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMunicipios = async () => {
+            try {
+                setLoading(true);
+                const res = await MunicipalitiesService.getMunicipalitiesValledupar();
+                setMunicipios(res?.data);
+            } catch (error) {
+                console.error('Error fetching municipios:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMunicipios();
+
+    }, [])
+
+    const renderItem = useCallback(
+        ({ item, index }: { item: IMunicipio; index: number }) => (
+            <Animated.View entering={index < 10 ? FadeInDown.delay(index * 100) : undefined}>
+                <MunicipioCard municipioData={item} />
+            </Animated.View>
+        ),
+        []
+    );
+
     return (
-        <View className='h-full'>
+        <View className='h-full bg-white'>
             <Text className='text-2xl font-bold text-center py-4'>Municipios</Text>
-            <FlatList
-                data={municipios}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item, index }) => (
-                    <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
-                        <MunicipioCard municipioData={item} />
-                    </Animated.View>
-                )}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
+            {loading ? (
+                <Loading />
+            ) : (
+                <FlatList
+                    data={municipios}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                />
+            )}
         </View>
     )
 }

@@ -6,37 +6,36 @@ import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 import { Ionicons } from '@expo/vector-icons';
 import { parseCurrency } from 'utils/parseCurrency';
 import useStylesStore from 'store/styles/styles.store';
+import { memo } from 'react';
 
 interface Props {
-    municipioData: any;
+    municipioData: IMunicipio;
 }
 
-export const MunicipioCard = ({ municipioData }: Props) => {
+const MunicipioCard = ({ municipioData }: Props) => {
     const {globalColor} = useStylesStore()
-    const total = parseCurrency(municipioData.valor);
-    const ejecutado = parseCurrency(municipioData.valorEjecutado);
+    const total = municipioData.codigo_dane
+    const ejecutado = municipioData.id
     const progress = total > 0 ? ejecutado / total : 0;
     const navigation = useNavigation();
 
     const handleNavigate = () => {
         navigation.navigate('UniqueMunicipio', { municipio: municipioData });
     };
-
-    console.log(formatNumberWithSuffix(total))
-
+    console.log('render')
     return (
         <Pressable onPress={handleNavigate} className='flex-row h-40 w-11/12 rounded-2xl justify-center items-center mx-auto mt-5 shadow-lg'>
             <View style={{backgroundColor: globalColor}} className='w-1/2 h-full rounded-l-2xl justify-center gap-2 items-center animate-fade-in'>
-                <Text className='text-white text-2xl font-bold animate-fade-in'>{municipioData.municipio}</Text>
+                <Text className='text-white text-2xl font-bold animate-fade-in'>{municipioData?.nombre}</Text>
                 <View className='flex-col justify-center items-center w-full mt-2 animate-fade-in'>
                     <View className='flex-row ml-16 justify-start w-full items-center mt-2'>
                         <Ionicons color={'white'} name='briefcase' size={20} />
-                        <Text className='text-white ml-2 text-lg font-bold'>{municipioData.proyectos.total}</Text>
+                        <Text className='text-white ml-2 text-lg font-bold'>{municipioData?.codigo_dane}</Text>
                         <Text className='text-white ml-1 text-lg font-bold'>Proyectos</Text>
                     </View>
                     <View className='flex-row ml-16 justify-start items-center w-full mt-2'>
                         <Ionicons color={'white'} name='rocket' size={20} />
-                        <Text className='text-white text-lg ml-2 font-bold'>{municipioData.iniciativas}</Text>
+                        <Text className='text-white text-lg ml-2 font-bold'>{municipioData?.id}</Text>
                         <Text className='text-white text-lg ml-1 font-bold'>Iniciativas</Text>
                     </View>
                 </View>
@@ -64,3 +63,5 @@ export const MunicipioCard = ({ municipioData }: Props) => {
         </Pressable>
     );
 }
+
+export default memo(MunicipioCard);

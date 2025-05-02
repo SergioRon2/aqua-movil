@@ -7,6 +7,7 @@ import { ModalSectoriales } from "components/modals/modalSectoriales.component";
 import { DecisionModal } from "components/modals/modalAcceptOrDecline.component";
 import { IMunicipio } from "interfaces/municipio.interface";
 import useStylesStore from "store/styles/styles.store";
+import { capitalize } from "utils/capitalize";
 
 interface Props {
     border?: boolean;
@@ -68,7 +69,7 @@ export const FiltersComponentProyectos = ({ border }: Props) => {
             <Pressable onPress={() => setSectorialesModal(true)} className="px-6 py-2 w-1/2 gap-2 rounded-sm flex-row items-center justify-center">
                 <Text className="text-black text-xl font-bold text-center">
                     {/* first letter capitalized */}
-                    {sectorialActivo ? sectorialActivo?.name.charAt(0).toUpperCase() + sectorialActivo?.name.slice(1).toLowerCase() : 'Sectoriales'}
+                    {sectorialActivo ? capitalize(sectorialActivo?.name) : 'Sectoriales'}
                 </Text>
                 {sectorialActivo && (
                     <Pressable onPress={() => setModalCleanSectoriales(true)} className='items-center justify-center'>
