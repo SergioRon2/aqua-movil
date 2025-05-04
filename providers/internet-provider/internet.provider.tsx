@@ -69,6 +69,60 @@ const InternetProvider = ({ children }: Props) => {
                                 autoPlay
                                 loop
                                 style={{ width: 200, height: 200 }}
+                                colorFilters={[
+                                    {
+                                        keypath: 'Line3 Outlines 5',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line2 Outlines 5',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line1 Outlines 5',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line3 Outlines 3',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line2 Outlines 3',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line1 Outlines 3',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line3 Outlines 2',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line2 Outlines 2',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line1 Outlines 2',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line3 Outlines',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line2 Outlines',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Line1 Outlines',
+                                        color: globalColor,
+                                    },
+                                    {
+                                        keypath: 'Dot Outlines',
+                                        color: globalColor,
+                                    },
+                                ]}
                             />
                             <Text style={{color: globalColor}} className="text-xl font-bold mb-2">
                                 Sin conexión

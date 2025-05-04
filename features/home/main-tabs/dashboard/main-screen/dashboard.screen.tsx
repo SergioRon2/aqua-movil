@@ -1,12 +1,15 @@
 import { FiltersComponentDashboard } from 'components/buttons/filtersInfoDashboard.component';
 import { SelectedYears } from 'components/buttons/selectedYears.component';
-import AreaChartComponent from 'components/charts/areaChart.component';
+import BarChartComponent from 'components/charts/barChart.component';
 import DonutChart from 'components/charts/donutChart.component';
+import { Loading } from 'components/loading/loading.component';
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { StateService } from 'services/states/states.service';
 import useStylesStore from 'store/styles/styles.store';
+import { capitalize } from 'utils/capitalize';
+import { formatLabel } from 'utils/formatLabel';
 import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 
 type ProjectState = {
@@ -21,7 +24,11 @@ type Values = {
     value_total_executed: string;
 }
 
-const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+type SectorialInfo = {
+    sector_id: number;
+    sector_name: string;
+    amount_project: number;
+};
 
 const DashboardScreen = () => {
     const { globalColor } = useStylesStore()
@@ -32,6 +39,7 @@ const DashboardScreen = () => {
     // };
 
     const [projectsByState, setProjectsByState] = useState<ProjectState[]>([])
+    const [sectorialInfo, setSectorialInfo] = useState<SectorialInfo[]>([])
     const [values, setValues] = useState<Values>({
         value_total_project: '0',
         value_total_executed: '0'
@@ -45,7 +53,7 @@ const DashboardScreen = () => {
                 const res = await StateService.getStatesData();
                 // estados para el donut chart
                 setProjectsByState(res?.data?.list_state_response_filter)
-
+                setSectorialInfo(res?.data?.list_sectorial_response)
                 // valores para el dashboard
                 setValues({
                     value_total_project: res?.data?.value_total_project,
@@ -61,14 +69,24 @@ const DashboardScreen = () => {
         fetchProjectsByDashboard();
     }, [])
 
+    // donut chart data
     const totalProjects = (projectsByState || []).reduce((sum, item) => sum + item.amount_project, 0);
 
-    const chartData: { label: string; value: number; color: string }[] = (projectsByState || []).map((item, index) => ({
+    const chartData: { label: string; value: number; }[] = (projectsByState || []).map((item, index) => ({
         label: item.state_name,
         value: (item.amount_project / totalProjects) * 100,
-        color: COLORS[index % COLORS.length],
+        // color: COLORS[index % COLORS.length],
     }));
 
+
+    const transformSectorialDataForBarChart = () => {
+        return sectorialInfo.map((sector) => ({
+            label: sector.sector_name,
+            value: sector.amount_project,
+        }));
+    };
+
+    const barChartData = transformSectorialDataForBarChart();
 
     return (
         <ScrollView
@@ -86,7 +104,7 @@ const DashboardScreen = () => {
             {/* values */}
             <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4'>
                 {loading
-                    ? <ActivityIndicator size="small" color={globalColor} className='my-4' />
+                    ? <Loading />
                     : <>
                         <View className='items-start w-1/2'>
                             <Text className='text-4xl font-bold'>
@@ -115,12 +133,26 @@ const DashboardScreen = () => {
 
             {/* charts */}
             <View className='gap-4 mb-4 my-3 mx-auto w-11/12'>
-                <View className='items-center bg-white justify-center'>
-                    <AreaChartComponent />
+
+                {/* bar chart */}
+                <View className='bg-white w-full py-2 border border-gray-200 rounded-lg'>
+                    {loading ? (
+                        <Loading />
+                    ) : (
+                        <BarChartComponent 
+                            title='Proyectos filtrados' 
+                            data={{ 
+                                labels: barChartData.map(item => formatLabel(capitalize(item.label))), 
+                                datasets: [{ data: barChartData.map(item => item.value) }] 
+                            }} 
+                        />
+                    )}
                 </View>
+
+                {/* donut chart */}
                 <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
                     {loading ? (
-                        <ActivityIndicator size="small" color={globalColor} className='my-4' />
+                        <Loading />
                     ) : (
                         <>
                             <Text className='text-2xl text-gray-800 font-bold'>Proyectos por estados</Text>

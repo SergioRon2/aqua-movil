@@ -22,7 +22,7 @@ const MunicipioCard = ({ municipioData }: Props) => {
     const handleNavigate = () => {
         navigation.navigate('UniqueMunicipio', { municipio: municipioData });
     };
-    console.log('render')
+
     return (
         <Pressable onPress={handleNavigate} className='flex-row h-40 w-11/12 rounded-2xl justify-center items-center mx-auto mt-5 shadow-lg'>
             <View style={{backgroundColor: globalColor}} className='w-1/2 h-full rounded-l-2xl justify-center gap-2 items-center animate-fade-in'>

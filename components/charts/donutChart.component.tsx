@@ -1,11 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
+import useStylesStore from 'store/styles/styles.store';
+import { getRandomColor } from 'utils/getRandomColor';
+
+// const getRandomColor = () => {
+//     const letters = '0123456789ABCDEF';
+//     let color = '#';
+//     for (let i = 0; i < 6; i++) {
+//         color += letters[Math.floor(Math.random() * 16)];
+//     }
+//     return color;
+// };
 
 type DonutDataItem = {
     label: string;
     value: number;
-    color: string;
 };
 
 type DonutChartProps = {
@@ -19,11 +29,10 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
     radius = 80,
     strokeWidth = 20,
 }) => {
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-
+    const { globalColor } = useStylesStore();
     const chartData = data.map(item => ({
         value: item.value,
-        color: item.color,
+        color: getRandomColor(globalColor),
         text: item.label,
     }));
 
@@ -46,7 +55,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
             <View style={styles.legendContainer}>
                 {data.map((item, index) => (
                     <View key={index} style={styles.legendItem}>
-                        <View style={[styles.colorBox, { backgroundColor: item.color }]} />
+                        <View style={[styles.colorBox, { backgroundColor: chartData[index].color }]} />
                         <Text style={styles.legendText}>
                             {`${item.label}: ${item.value.toFixed(1)}%`}
                         </Text>

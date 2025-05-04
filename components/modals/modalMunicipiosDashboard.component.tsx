@@ -19,7 +19,7 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
 
     useEffect(() => {
         const fetchMunicipios = async () => {
-            const { data } = await MunicipalitiesService.getMunicipalitiesValledupar()
+            const { data } = await MunicipalitiesService.getMunicipalitiesCesar()
             setMunicipios(data)
         }
 

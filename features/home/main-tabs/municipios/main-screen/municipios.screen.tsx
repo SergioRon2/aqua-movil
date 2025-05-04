@@ -14,7 +14,7 @@ const Municipios = () => {
         const fetchMunicipios = async () => {
             try {
                 setLoading(true);
-                const res = await MunicipalitiesService.getMunicipalitiesValledupar();
+                const res = await MunicipalitiesService.getMunicipalitiesCesar();
                 setMunicipios(res?.data);
             } catch (error) {
                 console.error('Error fetching municipios:', error);
@@ -24,7 +24,6 @@ const Municipios = () => {
         };
 
         fetchMunicipios();
-
     }, [])
 
     const renderItem = useCallback(

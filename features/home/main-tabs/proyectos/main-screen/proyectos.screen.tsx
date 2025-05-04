@@ -8,6 +8,7 @@ import { ProjectsService } from 'services/projects/projects.service';
 import useActiveStore from 'store/actives/actives.store';
 import LottieView from 'lottie-react-native';
 import useStylesStore from 'store/styles/styles.store';
+import { Loading } from 'components/loading/loading.component';
 
 const ProyectosScreen = () => {
     const { globalColor } = useStylesStore()
@@ -44,9 +45,7 @@ const ProyectosScreen = () => {
             <FiltersComponentProyectos border />
 
             {loading ? (
-                <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color={globalColor} />
-                </View>
+                <Loading />
             ) : proyectos.length > 0 ? (
                 <FlatList
                     data={proyectos}
