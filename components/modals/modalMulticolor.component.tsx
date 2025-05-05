@@ -15,7 +15,7 @@ const customSwatches = [
     '#7CFC00', // Verde
     '#FFD700', // Dorado
     '#8A2BE2', // Azul violeta
-    '#000000', // Negro
+    '#333388', // Azul marino
 ];
 
 export const ModalMulticolor = ({ visible, setVisible }: Props) => {

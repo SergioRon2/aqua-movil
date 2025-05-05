@@ -54,7 +54,7 @@ const DashboardScreen = () => {
                 // estados para el donut chart
                 setProjectsByState(res?.data?.list_state_response_filter)
                 setSectorialInfo(res?.data?.list_sectorial_response)
-                // valores para el dashboard
+                // valores para el bar chart
                 setValues({
                     value_total_project: res?.data?.value_total_project,
                     value_total_executed: res?.data?.value_total_executed
@@ -102,10 +102,12 @@ const DashboardScreen = () => {
             <FiltersComponentDashboard border={false} />
 
             {/* values */}
-            <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4'>
-                {loading
-                    ? <Loading />
-                    : <>
+            {loading 
+                ?   <View className='justify-center items-center w-full h-full'>
+                        <Loading />
+                    </View>
+                : <>
+                    <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4 shadow-lg'>
                         <View className='items-start w-1/2'>
                             <Text className='text-4xl font-bold'>
                                 ${formatNumberWithSuffix(+values.value_total_executed)}
@@ -118,67 +120,57 @@ const DashboardScreen = () => {
                             </Text>
                             <Text className='font-bold text-gray-500'>Valor de proyectos</Text>
                         </View>
-                    </>
-                }
-            </View>
+                    </View>
 
 
-            {/* view projects */}
-            {/* <View className='p-4 mx-auto w-11/12 border justify-center items-center border-gray-200 bg-white rounded-lg'>
-                <Text className="animate-fade-in text-xl p-2 font-bold">Ver proyectos</Text>
-                <Text className="animate-fade-in text-base text-gray-500 p-4 font-bold text-center">Aqui puedes ver una lista de todos los proyectos actuales, recuerda que solo es una vista basica y dinamica de todos los datos por proyecto.</Text>
-                <CustomButtonPrimary title='Ver todos los proyectos' onPress={handleNavigation} />
-            </View> */}
+                    {/* view projects */}
+                    {/* <View className='p-4 mx-auto w-11/12 border justify-center items-center border-gray-200 bg-white rounded-lg'>
+                        <Text className="animate-fade-in text-xl p-2 font-bold">Ver proyectos</Text>
+                        <Text className="animate-fade-in text-base text-gray-500 p-4 font-bold text-center">Aqui puedes ver una lista de todos los proyectos actuales, recuerda que solo es una vista basica y dinamica de todos los datos por proyecto.</Text>
+                        <CustomButtonPrimary title='Ver todos los proyectos' onPress={handleNavigation} />
+                    </View> */}
 
 
-            {/* charts */}
-            <View className='gap-4 mb-4 my-3 mx-auto w-11/12'>
+                    {/* charts */}
+                    <View className='gap-4 mb-4 my-3 mx-auto w-11/12 shadow-lg'>
 
-                {/* bar chart */}
-                <View className='bg-white w-full py-2 border border-gray-200 rounded-lg'>
-                    {loading ? (
-                        <Loading />
-                    ) : (
-                        <BarChartComponent 
-                            title='Proyectos filtrados' 
-                            data={{ 
-                                labels: barChartData.map(item => formatLabel(capitalize(item.label))), 
-                                datasets: [{ data: barChartData.map(item => item.value) }] 
-                            }} 
-                        />
-                    )}
-                </View>
+                        {/* bar chart */}
+                        <View className='bg-white w-full py-2 border border-gray-200 rounded-lg'>
+                            <BarChartComponent
+                                horizontalScroll
+                                title='Sectoriales'
+                                data={{
+                                    labels: barChartData.map(item => formatLabel(capitalize(item.label))),
+                                    datasets: [{ data: barChartData.map(item => item.value) }]
+                                }}
+                            />
+                        </View>
 
-                {/* donut chart */}
-                <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
-                    {loading ? (
-                        <Loading />
-                    ) : (
-                        <>
+                        {/* donut chart */}
+                        <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
                             <Text className='text-2xl text-gray-800 font-bold'>Proyectos por estados</Text>
                             <DonutChart data={chartData} />
-                        </>
-                    )}
-                </View>
-            </View>
+                        </View>
+                    </View>
 
 
-            {/* aditional cards */}
-            {/* <View className='mx-auto w-11/12'>
-                <Text className="animate-fade-in p-4 text-xl font-bold mb-4">Proyectos</Text>
-                <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
-                    <Text className="text-lg font-bold">Card 1</Text>
-                    <Text className="text-gray-600">This is some content for card 1.</Text>
-                </View>
-                <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
-                    <Text className="text-lg font-bold">Card 2</Text>
-                    <Text className="text-gray-600">This is some content for card 2.</Text>
-                </View>
-                <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
-                    <Text className="text-lg font-bold">Card 3</Text>
-                    <Text className="text-gray-600">This is some content for card 3.</Text>
-                </View>
-            </View> */}
+                    {/* aditional cards */}
+                    {/* <View className='mx-auto w-11/12'>
+                        <Text className="animate-fade-in p-4 text-xl font-bold mb-4">Proyectos</Text>
+                        <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
+                            <Text className="text-lg font-bold">Card 1</Text>
+                            <Text className="text-gray-600">This is some content for card 1.</Text>
+                        </View>
+                        <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
+                            <Text className="text-lg font-bold">Card 2</Text>
+                            <Text className="text-gray-600">This is some content for card 2.</Text>
+                        </View>
+                        <View className="animate-fade-in bg-white border border-gray-200 p-4 rounded-lg mb-4">
+                            <Text className="text-lg font-bold">Card 3</Text>
+                            <Text className="text-gray-600">This is some content for card 3.</Text>
+                        </View>
+                    </View> */}
+                </>}
         </ScrollView>
     );
 };

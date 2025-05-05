@@ -44,10 +44,8 @@ let colorIndex = 0;
 export const getRandomColor = (baseColor: string) => {
     const { h, s, l } = hexToHSL(baseColor);
 
-    // Añadir un pequeño ajuste al matiz, en lugar de incrementar el mismo valor en cada llamada
-    const hue = (h + colorIndex * 15) % 360;  // Menor incremento para variación más sutil
+    const hue = (h + colorIndex * 60) % 360;
     colorIndex++;
 
-    // Si deseas que la saturación o luminosidad varíen, puedes ajustarlos aquí
     return hslToHex(hue, s, l); 
 };

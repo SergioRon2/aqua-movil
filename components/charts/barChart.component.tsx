@@ -7,6 +7,7 @@ import useStylesStore from 'store/styles/styles.store';
 const screenWidth = Dimensions.get('window').width;
 
 interface Props {
+    horizontalScroll?: boolean;
     title?: string;
     data: {
         labels: string[];
@@ -16,7 +17,7 @@ interface Props {
     };
 }
 
-const BarChartComponent = ({ data, title }: Props) => {
+const BarChartComponent = ({ data, title, horizontalScroll }: Props) => {
     const { globalColor } = useStylesStore();
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<{ label: string, value: number } | null>(null);
@@ -43,11 +44,13 @@ const BarChartComponent = ({ data, title }: Props) => {
             {title && (
                 <Text className="text-center font-bold text-xl">{title}</Text>
             )}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal={horizontalScroll} showsHorizontalScrollIndicator={false}>
                 <BarChart
                     data={convertedData}
                     barWidth={barWidth}
                     spacing={30}
+                    barBorderTopLeftRadius={18}
+                    barBorderTopRightRadius={18}
                     barBorderRadius={2}
                     yAxisThickness={1}
                     xAxisThickness={1}
@@ -57,6 +60,7 @@ const BarChartComponent = ({ data, title }: Props) => {
                     xAxisLabelTextStyle={{
                         color: '#333',
                         fontSize: 12,
+                        fontWeight: 'bold',
                         width: barWidth + 30,
                         textAlign: 'center',
                         numberOfLines: 2,

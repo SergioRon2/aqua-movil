@@ -27,7 +27,7 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
 
         const nuevos = municipiosActivosDashboard?.filter(m => m.id !== municipioAEliminar.id) || [];
         setMunicipiosActivosDashboard(nuevos);
-        setMunicipioAEliminar(null); // limpiar el estado
+        setMunicipioAEliminar(null);
         setModalCleanMunicipios(false);
     }
 
