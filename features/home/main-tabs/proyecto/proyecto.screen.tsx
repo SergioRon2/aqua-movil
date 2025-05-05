@@ -1,10 +1,9 @@
 import { useRoute } from "@react-navigation/native";
 import { InfoProyecto } from "components/cards/infoProyecto.component";
-import AreaChartComponent from "components/charts/areaChart.component";
 import BarChartComponent from "components/charts/barChart.component";
-import PieChartComponent from "components/charts/pieChart.component";
 import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import useStylesStore from "store/styles/styles.store";
 
 
 const ProyectoScreen = () => {
@@ -28,14 +27,13 @@ const ProyectoScreen = () => {
                 <InfoProyecto proyecto={proyecto} />
             </View>
 
-            <View className="justify-center items-center mt-6">
+            <View className="justify-center items-center mt-6 bg-white border rounded-lg px-4 h-60 border-gray-200 shadow-lg">
                 <Text className="text-center text-2xl font-bold py-5">Poblacion beneficiada</Text>
                 <SemiDonutChart />
             </View>
 
-            <View className="justify-center items-center my-12">
-                <Text className="text-center text-2xl font-bold pt-5">Avance del proyecto</Text>
-                <BarChartComponent data={dataBar} />
+            <View className="justify-center items-center mt-5 mb-12 bg-white border-2 rounded-lg p-4 h-auto border-gray-200 shadow-lg">
+                <BarChartComponent title="Avance del proyecto" horizontalScroll={false} data={dataBar} />
             </View>
 
         </ScrollView>

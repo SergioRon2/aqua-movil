@@ -1,62 +1,49 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { PieChart } from 'react-native-gifted-charts';
+import useStylesStore from 'store/styles/styles.store';
 
-const SemiDonutChart = ({
-    percentage = 100,
+type SemiDonutChartProps = {
+    percentage?: number;
+    max?: number;
+    radius?: number;
+    strokeWidth?: number;
+};
+
+const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
+    percentage = 20,
+    max = 100,
     radius = 80,
     strokeWidth = 20,
-    max = 100,
 }) => {
-    const diameter = radius * 2;
-    const adjustedHeight = radius + strokeWidth; // más alto para que no se corte
-    const circleCircumference = Math.PI * radius;
-    const percentageValue = (percentage > max ? max : percentage) * circleCircumference / max;
-    const strokeDashoffset = circleCircumference - percentageValue;
+    const { globalColor } = useStylesStore();
+    const clampedPercentage = Math.min(percentage, max);
+    const remainder = max - clampedPercentage;
+
+    const data = [
+        {
+            value: clampedPercentage,
+            color: globalColor,
+        },
+        {
+            value: remainder,
+            color: '#f0f0f0',
+        },
+    ];
 
     return (
-        <View className='animate-fade-in' style={styles.container}>
-            <Svg width={diameter + strokeWidth * 2} height={adjustedHeight}>
-                <Defs>
-                    <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-                        <Stop offset="0%" stopColor="#db2777" />
-                        <Stop offset="100%" stopColor="#b90555" />
-                    </LinearGradient>
-                </Defs>
-
-                {/* Fondo */}
-                <Circle
-                    cx={diameter / 2 + strokeWidth}
-                    cy={radius + strokeWidth}
-                    r={radius}
-                    stroke="#f0f0f0"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circleCircumference}, ${circleCircumference}`}
-                    strokeDashoffset={0}
-                    fill="transparent"
-                    rotation="-180"
-                    origin={`${diameter / 2 + strokeWidth}, ${radius + strokeWidth}`}
-                    strokeLinecap="round"
-                />
-
-                {/* Progreso */}
-                <Circle
-                    cx={diameter / 2 + strokeWidth}
-                    cy={radius + strokeWidth}
-                    r={radius}
-                    stroke="url(#grad)"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circleCircumference}, ${circleCircumference}`}
-                    strokeDashoffset={strokeDashoffset}
-                    fill="transparent"
-                    rotation="-180"
-                    origin={`${diameter / 2 + strokeWidth}, ${radius + strokeWidth}`}
-                    strokeLinecap="round"
-                />
-                <View style={[styles.textContainer, { top: radius / 2 + strokeWidth }]}>
-                    <Text style={styles.percentageText}>{percentage}%</Text>
-                </View>
-            </Svg>
+        <View style={styles.container}>
+            <PieChart
+                donut
+                semiCircle
+                showText={false}
+                data={data}
+                radius={radius}
+                innerRadius={radius - strokeWidth}
+                centerLabelComponent={() => (
+                    <Text style={styles.percentageText}>{`${clampedPercentage}%`}</Text>
+                )}
+            />
         </View>
     );
 };
@@ -66,14 +53,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
-    textContainer: {
-        position: 'relative',
-        alignItems: 'center',
-    },
     percentageText: {
         fontSize: 24,
         fontWeight: '600',
         color: '#4a4a4a',
+        marginTop: 10, // ajusta esto si quieres mover el texto más al centro
     },
 });
 

@@ -3,7 +3,6 @@ import SearchScreen from "./main-screen/search-screen";
 import ProyectoScreen from "../main-tabs/proyecto/proyecto.screen";
 import { View } from "react-native";
 import { Navbar } from "components/navigators/navbar.component";
-import IAButton from "components/buttons/IAButton.component";
 
 
 const SearchLayout = () => {

@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import Modal from 'react-native-modal'
 import { MunicipalitiesService } from "services/municipalities/municipalities.service";
 import useActiveStore from "store/actives/actives.store";
+import useStylesStore from "store/styles/styles.store";
 
 interface Props {
     active: boolean,
@@ -12,12 +13,13 @@ interface Props {
 }
 
 export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
+    const { globalColor } = useStylesStore()
     const [municipios, setMunicipios] = useState<IMunicipio[]>([])
-    const {setMunicipiosActivosDashboard, municipiosActivosDashboard} = useActiveStore();
+    const { setMunicipiosActivosDashboard, municipiosActivosDashboard } = useActiveStore();
 
     useEffect(() => {
         const fetchMunicipios = async () => {
-            const { data } = await MunicipalitiesService.getMunicipalitiesValledupar()
+            const { data } = await MunicipalitiesService.getMunicipalitiesCesar()
             setMunicipios(data)
         }
 
@@ -58,15 +60,15 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectMunicipio(item)}>
-                                    <Text className={`font-bold text-xl ${municipiosActivosDashboard.some(m => m.id === item.id) ? 'text-pink-600' : 'text-gray-600'}`}>{item?.nombre}</Text>
+                                    <Text style={{ color: municipiosActivosDashboard.some(m => m.id === item.id) ? globalColor : '#333' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
                                 </Pressable>
                             )}
                         />
 
                         <CustomButtonPrimary rounded onPress={closeModal} title="Cerrar" />
                     </View>
-                </View> : <ActivityIndicator size={'large'} color={'#DB2777'} />
-            } 
+                </View> : <ActivityIndicator size={'large'} color={globalColor} />
+            }
         </Modal>
     )
 }

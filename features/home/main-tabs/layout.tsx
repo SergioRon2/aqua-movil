@@ -8,19 +8,21 @@ import SectorialesLayout from './sectoriales/layout';
 import MunicipiosLayout from './municipios/layout';
 import ProyectosLayout from './proyectos/layout';
 import SettingsScreen from './settings/settings.screen';
+import useStylesStore from 'store/styles/styles.store';
 
 const Tab = createBottomTabNavigator();
 
 // Tab Navigator
 const MainTabNavigator = () => {
+    const {globalColor} = useStylesStore()
     return (
         <View style={{ flex: 1 }}>
             <Navbar />
-            <IAButton />
+            {/* <IAButton /> */}
             <Tab.Navigator
                 initialRouteName="Home"
                 screenOptions={{
-                    tabBarActiveTintColor: '#db2777',
+                    tabBarActiveTintColor: globalColor,
                     tabBarInactiveTintColor: 'gray',
                     headerShown: false,
                 }}

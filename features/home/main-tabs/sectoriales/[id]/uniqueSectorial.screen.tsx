@@ -1,68 +1,79 @@
 import { useRoute } from "@react-navigation/native";
 import ProyectoCard from "components/cards/proyectoCard.component";
-import AreaChartComponent from "components/charts/areaChart.component";
-import BarChartComponent from "components/charts/barChart.component";
-import DonutChart from "components/charts/donutChart.component";
-import PieChartComponent from "components/charts/pieChart.component";
-import { View, Text, Dimensions } from "react-native";
+import SemiDonutChart from "components/charts/semiDonutChart.component";
+import { IProyecto } from "interfaces/proyecto.interface";
+import LottieView from "lottie-react-native";
+import { useEffect, useState } from "react";
+import { View, Text, Dimensions, ActivityIndicator } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
-
-const { width } = Dimensions.get('window');
+import { ProjectsService } from "services/projects/projects.service";
+import useStylesStore from "store/styles/styles.store";
 
 const UniqueSectorialScreen = () => {
+    const { globalColor } = useStylesStore()
     const route = useRoute();
     const { sectorial } = route.params;
+    const [proyectos, setProyectos] = useState<IProyecto[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProyectos = async () => {
+            try {
+                setLoading(true);
+                const res = await ProjectsService.getAll({ sectorial_id: sectorial.id });
+                setProyectos(res?.data?.data);
+            } catch (error) {
+                console.error('Error fetching proyectos:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchProyectos();
+    }, [sectorial.id])
 
     const items = [
-        { title: 'Gráfico de Dona', component: <DonutChart /> },
+        { title: 'Gráfico de Dona', component: <SemiDonutChart /> },
     ];
 
     return (
         <View className="animate-fade-in px-12 w-full">
             <Text className="text-3xl font-bold text-center py-6">
-                {sectorial.sectorial}
+                {sectorial.name}
             </Text>
 
-            <View>
-                <Carousel
-                    width={width * 0.85}
-                    height={300}
-                    data={items}
-                    loop={false}
-                    style={{ alignSelf: 'center' }}
-                    renderItem={({ item }) => {
-                        return (
-                            <View
-                                style={{
-                                    backgroundColor: 'white',
-                                    borderRadius: 16,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                {item.component}
-                            </View>
-                        );
-                    }}
-                />
+            <View style={{ borderColor: globalColor }} className="w-full py-16 rounded-xl bg-white border-2 justify-center items-center mb-5">
+                <SemiDonutChart />
             </View>
 
             <Text className="text-2xl font-bold py-2">
                 Proyectos
             </Text>
 
-            <View className="rounded-2xl justify-center animate-fade-in">
-                <FlatList 
-                    data={sectorial.proyectos.lista}
-                    keyExtractor={(item) => item.nombre}
-                    renderItem={({ item, index }) => (
-                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
-                            <ProyectoCard data={item} />
-                        </Animated.View>
-                    )}
-                    contentContainerStyle={{ paddingBottom: 20 }}
-                />
+            <View className="rounded-2xl justify-center animate-fade-in py-5 h-2/4">
+                {
+                    loading ? (
+                        <ActivityIndicator size={'large'} color={globalColor} />
+                    ) :
+                        proyectos.length > 0 ? (
+                            <FlatList
+                                data={proyectos}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
+                                renderItem={({ item, index }) => (
+                                    <Animated.View entering={index < 10 ? FadeInDown.delay(index * 200) : undefined} exiting={FadeOutDown}>
+                                        <ProyectoCard data={item} />
+                                    </Animated.View>
+                                )}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                            />
+                        ) : (
+                            <View className='justify-center items-center m-auto'>
+                                <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                            </View>
+                        )
+                }
             </View>
         </View>
     );

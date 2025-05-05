@@ -3,7 +3,7 @@ import { aquaApi } from "config/api/aqua-api";
 export class MunicipalitiesService {
     static PREFIX = 'municipios';
 
-    static getMunicipalitiesValledupar = async () => {
+    static getMunicipalitiesCesar = async () => {
         try {
             const response = await aquaApi.get(`/${this.PREFIX}/municipioAll?departamento_id=9`)
             return response.data;

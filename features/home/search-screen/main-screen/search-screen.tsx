@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react';
 import { FlatList, Text, View, TextInput } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { ProjectsService } from 'services/projects/projects.service';
+import useStylesStore from 'store/styles/styles.store';
 
 const SearchScreen = () => {
+    const {globalColor} = useStylesStore()
     const [searchValue, setSearchValue] = useState<string>('');
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
 
@@ -40,7 +42,8 @@ const SearchScreen = () => {
                     onChangeText={handleChange}
                     value={searchValue}
                     placeholder='Filtra por el nombre'
-                    className='border-pink-600 border-2 rounded-full px-6 py-4 w-2/3'
+                    style={{borderColor: globalColor}}
+                    className='border-2 rounded-full px-6 py-4 w-2/3'
                 />
             </View>
 
@@ -67,7 +70,7 @@ const SearchScreen = () => {
                             loop
                             style={{ width: 200, height: 200 }}
                         />
-                        <Text className="text-center text-lg text-gray-500 font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                        <Text style={{color: globalColor}} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
                     </View>
                 )}
             </View>

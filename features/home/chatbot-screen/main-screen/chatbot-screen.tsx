@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BackButton } from 'components/buttons/backButton.component';
+import useStylesStore from 'store/styles/styles.store';
 
 const ChatbotScreen = () => {
+    const {globalColor} = useStylesStore()
     const route = useRoute<any>();
     const { option } = route.params;
     const [input, setInput] = useState(option?.label || '');
@@ -24,7 +26,8 @@ const ChatbotScreen = () => {
 
     const renderMessage = ({ item }: { item: { id: string; text: string; sender: 'user' | 'bot' } }) => (
         <View
-            className={`my-1 p-3 rounded-xl max-w-[75%] ${item.sender === 'user' ? 'self-end bg-pink-600' : 'self-start bg-gray-300'
+            style={{backgroundColor: item.sender === 'user' ? globalColor : '#f0f0f0'}}
+            className={`my-1 p-3 rounded-xl max-w-[75%] ${item.sender === 'user' ? 'self-end' : 'self-start'
                 }`}
         >
             <Text className={`${item.sender === 'user' ? 'text-white' : 'text-black'} text-base`}>{item.text}</Text>
@@ -35,7 +38,7 @@ const ChatbotScreen = () => {
         <View className="flex-1 bg-gray-100">
 
             {/* Header */}
-            <View className="p-4 bg-pink-600 items-center justify-start flex-row">
+            <View style={{backgroundColor: globalColor}} className="p-4 items-center justify-start flex-row">
                 {/* Back button */}
                 <View className='absolute mx-2'>
                     <BackButton />
@@ -65,8 +68,9 @@ const ChatbotScreen = () => {
                     placeholder="Resuelve tus dudas con Kira, tu asistente virtual"
                 />
                 <TouchableOpacity
+                    style={{backgroundColor: globalColor}}
                     onPress={handleSend}
-                    className="bg-pink-600 rounded-lg py-2 px-4 justify-center items-center"
+                    className="rounded-lg py-2 px-4 justify-center items-center"
                 >
                     <Ionicons name="send" size={20} color="white" />
                 </TouchableOpacity>
