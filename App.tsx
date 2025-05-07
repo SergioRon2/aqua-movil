@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Stack = createStackNavigator();
 
 export default function App() {
-  const { setGlobalColor } = useStylesStore();
+  const { setGlobalColor, globalColor } = useStylesStore();
   
   useEffect(() => {
     const loadColor = async () => {
@@ -35,7 +35,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={{flex: 1, backgroundColor: globalColor}} edges={['top', 'left', 'right']}>
         <NavigationContainer>
           <ApplicationProvider {...eva} theme={{ ...customTheme, 'text-font-family': 'Manrope_400Regular' }}>
             <InternetProvider>
