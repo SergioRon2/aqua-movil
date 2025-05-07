@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Aqua",
-    "slug": "aqua",
+    "slug": "my-expo-app",
     "version": "1.0.0",
     "web": {
       "favicon": "./assets/img/logo.png"
@@ -12,7 +12,6 @@
     "plugins": [],
     "orientation": "portrait",
     "icon": "./assets/img/logo.png",
-
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/img/logo.png",
@@ -30,13 +29,14 @@
         "foregroundImage": "./assets/img/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sergioron2.myexpoapp",
+      "package": "com.fqtecnologia.aqua",
       "usesCleartextTraffic": true
     },
     "extra": {
       "eas": {
         "projectId": "99b26faf-1f04-4a48-827d-54a20b656488"
       }
-    }
+    },
+    "owner": "sergioron2"
   }
 }
