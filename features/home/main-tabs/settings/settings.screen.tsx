@@ -4,10 +4,12 @@ import useAuthStore from 'store/auth/auth.store';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ModalMulticolor } from 'components/modals/modalMulticolor.component';
+import { DecisionModal } from 'components/modals/modalAcceptOrDecline.component';
 
 const SettingsScreen = () => {
     const { logout, user } = useAuthStore();
     const [isColorModalVisible, setColorModalVisible] = useState(false);
+    const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
 
     return (
         <View className="flex-1 justify-between py-8 items-center bg-white animate-fade-in">
@@ -16,8 +18,16 @@ const SettingsScreen = () => {
                     <Ionicons name="person-outline" size={40} color="black" />
                 </View>
                 <View>
-                    <Text className="text-xl font-bold mb-2">{user?.name}</Text>
-                    <Text className="text-md text-gray-600 font-semibold mb-2">{user?.email}</Text>
+                    {
+                        user ? (
+                            <>
+                                <Text className="text-xl font-bold mb-2">{user?.name}</Text>
+                                <Text className="text-md text-gray-600 font-semibold mb-2">{user?.email}</Text>
+                            </>
+                        ) : (
+                            <Text className='text-lg font-bold text-red-800'>Error al cargar los datos.</Text>
+                        )
+                    }
                 </View>
             </View>
 
@@ -30,7 +40,23 @@ const SettingsScreen = () => {
             </View>
 
 
-            <CustomButtonPrimary rounded title='Cerrar sesion' onPress={logout} />
+            <View className='w-full px-5 mb-5 m-auto justify-center items-center'>
+                <DecisionModal
+                    title='¿Desea cerrar sesion?'
+                    active={isLogoutModalVisible}
+                    acceptButtonFunction={() => {
+                        logout();
+                        setLogoutModalVisible(false);
+                    }}
+                    declineButtonFunction={() => setLogoutModalVisible(false)}
+                />
+
+                <CustomButtonPrimary
+                    rounded
+                    title="Cerrar sesión"
+                    onPress={() => setLogoutModalVisible(true)}
+                />
+            </View>
 
 
             <View>

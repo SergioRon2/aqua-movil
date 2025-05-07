@@ -11,8 +11,6 @@ import Carousel from 'react-native-reanimated-carousel';
 import { ProjectsService } from "services/projects/projects.service";
 import useStylesStore from "store/styles/styles.store";
 
-const { width } = Dimensions.get('window');
-
 const UniqueMunicipioScreen = () => {
     const route = useRoute();
     const { globalColor } = useStylesStore()
@@ -34,14 +32,7 @@ const UniqueMunicipioScreen = () => {
         }
 
         fetchProyectos();
-    }, [municipio.id])
-
-    const values = [40, 75, 50, 90, 30, 60];
-    const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
-
-    const items = [
-        { title: 'Gráfico de Media Dona', component: <SemiDonutChart /> },
-    ];
+    }, [municipio.id]);
 
     return (
         <View className="animate-fade-in px-12 w-full">
