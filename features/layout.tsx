@@ -3,17 +3,18 @@ import LoginScreen from './login/login.screen';
 import useAuthStore from 'store/auth/auth.store';
 import { useEffect } from 'react';
 import HomeNavigator from './home/layout';
+import useStylesStore from 'store/styles/styles.store';
 
 const Stack = createStackNavigator();
 
 const MainStackNavigator = () => {
-
-    return (
+    const {globalColor} = useStylesStore();
+    return ( 
         <Stack.Navigator
             screenOptions={{
                 headerShown: false,
                 contentStyle: {
-                    backgroundColor: '#fff',
+                    backgroundColor: globalColor,
                 },
             }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
