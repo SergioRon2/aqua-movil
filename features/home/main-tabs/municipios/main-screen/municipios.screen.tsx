@@ -1,6 +1,7 @@
 import MunicipioCard from 'components/cards/municipioCard.component';
 import { Loading } from 'components/loading/loading.component';
 import { IMunicipio } from 'interfaces/municipio.interface';
+import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, FlatList } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -36,17 +37,27 @@ const Municipios = () => {
     );
 
     return (
-        <View className='h-full bg-white'>
-            <Text className='text-2xl font-bold text-center py-4'>Municipios</Text>
+        <View className="h-full bg-white">
+            <Text className="text-2xl font-bold text-center py-4">Municipios</Text>
             {loading ? (
                 <Loading />
-            ) : (
+            ) : municipios && municipios.length > 0 ? (
                 <FlatList
                     data={municipios}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 20 }}
                 />
+            ) : (
+                <View className="flex justify-center items-center">
+                    <LottieView
+                        source={require('../../../../../assets/lottie/not_found.json')}
+                        autoPlay
+                        loop
+                        style={{ width: 350, height: 350 }}
+                    />
+                    <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
+                </View>
             )}
         </View>
     )

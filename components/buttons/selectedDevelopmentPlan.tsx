@@ -11,6 +11,7 @@ import { IDevelopmentPlan } from "interfaces/development-plan.interface";
 import { DevelopmentPlanService } from "services/development-plan/development-plan.service";
 import { CustomButtonPrimary } from "./mainButton.component";
 import { ActivityIndicator } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
@@ -26,7 +27,18 @@ export const SelectedDevelopmentPlan = () => {
                 const plans = res?.data?.data || [];
                 setDevelopmentPlans(plans);
                 if (plans.length > 0) {
-                    setSelectedPlan(plans[0]);
+                    const storedPlan = await AsyncStorage.getItem('selectedPlan');
+                    if (storedPlan) {
+                        const parsedPlan = JSON.parse(storedPlan);
+                        const foundPlan = plans.find((plan: IDevelopmentPlan) => plan.id === parsedPlan.id);
+                        if (foundPlan) {
+                            setSelectedPlan(foundPlan);
+                        } else {
+                            setSelectedPlan(plans[0]);
+                        }
+                    } else {
+                        setSelectedPlan(plans[0]);
+                    }
                 }
             } catch (error) {
                 console.error({ error });
@@ -37,8 +49,9 @@ export const SelectedDevelopmentPlan = () => {
         fetchDevelopmentPlan();
     }, []);
 
-    const handleSelect = (plan: IDevelopmentPlan) => {
+    const handleSelect = async(plan: IDevelopmentPlan) => {
         setSelectedPlan(plan);
+        await AsyncStorage.setItem('selectedPlan', JSON.stringify(plan));
         setModalVisible(false);
     };
 
@@ -59,7 +72,7 @@ export const SelectedDevelopmentPlan = () => {
                         onPress={() => setModalVisible(true)}
                     >
                         <Text className="text-white font-semibold text-center">
-                            {`${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearBegin}` || "Seleccionar"}
+                            {selectedPlan ? `${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearBegin}` : 'Selecciona un plan'}
                         </Text>
                     </Pressable >
 
