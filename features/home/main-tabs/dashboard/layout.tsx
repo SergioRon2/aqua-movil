@@ -22,6 +22,7 @@ const DashboardLayout = () => {
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="Proyectos" component={ProyectosScreen} />
             <Stack.Screen name="Proyecto" component={ProyectoScreen} />
+            {/* <Stack.Screen name="Proyecto-Dashboard-Sectoriales" component={ProyectoDashboardSectorialesScreen} /> */}
             <Stack.Screen name="SearchScreen" component={SearchScreen} />
             <Stack.Screen name="ChatbotLayout" component={ChatbotLayout} />
         </Stack.Navigator>

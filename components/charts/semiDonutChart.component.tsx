@@ -8,6 +8,8 @@ type SemiDonutChartProps = {
     max?: number;
     radius?: number;
     strokeWidth?: number;
+    height?: number;
+    color?: string;
 };
 
 const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
@@ -15,6 +17,8 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
     max = 100,
     radius = 80,
     strokeWidth = 20,
+    height = 150,
+    color
 }) => {
     const { globalColor } = useStylesStore();
     const clampedPercentage = Math.min(percentage, max);
@@ -23,7 +27,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
     const data = [
         {
             value: clampedPercentage,
-            color: globalColor,
+            color: color || globalColor,
         },
         {
             value: remainder,
@@ -32,7 +36,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
     ];
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { height: height}]}>
             <PieChart
                 donut
                 semiCircle
@@ -51,7 +55,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
     },
     percentageText: {
         fontSize: 24,

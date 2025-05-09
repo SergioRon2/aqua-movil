@@ -15,7 +15,7 @@ interface Props {
 export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
     const { globalColor } = useStylesStore()
     const [municipios, setMunicipios] = useState<IMunicipio[]>([])
-    const { setMunicipiosActivosDashboard, municipiosActivosDashboard } = useActiveStore();
+    const { setMunicipioActivoDashboard } = useActiveStore();
 
     useEffect(() => {
         const fetchMunicipios = async () => {
@@ -27,19 +27,10 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
     }, [])
 
     const handleSelectMunicipio = (municipio: IMunicipio) => {
-        // Verificar si el municipio ya está en la lista
-        const isMunicipioSelected = municipiosActivosDashboard.some(m => m.id === municipio.id);
-
-        if (isMunicipioSelected) {
-            // Si ya está seleccionado, eliminarlo de la lista
-            setMunicipiosActivosDashboard(municipiosActivosDashboard.filter(m => m.id !== municipio.id));
-        } else {
-            // Si no está seleccionado, agregarlo a la lista
-            setMunicipiosActivosDashboard([...municipiosActivosDashboard, municipio]);
-        }
-
-        closeModal()
+        setMunicipioActivoDashboard(municipio)
+        closeModal();
     }
+
 
     return (
         <Modal
@@ -58,9 +49,9 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
                             data={municipios}
                             className="w-full"
                             keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => (
+                            renderItem={({ item, index }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectMunicipio(item)}>
-                                    <Text style={{ color: municipiosActivosDashboard.some(m => m.id === item.id) ? globalColor : '#333' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
+                                    <Text style={{ color: '#333' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
                                 </Pressable>
                             )}
                         />

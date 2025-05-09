@@ -8,7 +8,7 @@ import { Loading } from 'components/loading/loading.component';
 import useStylesStore from 'store/styles/styles.store';
 
 const LoginScreen = () => {
-    const {globalColor} = useStylesStore()
+    const { globalColor } = useStylesStore()
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { setUser, setToken, setIsAuthenticated } = useAuthStore()
@@ -96,6 +96,9 @@ const LoginScreen = () => {
     return (
         <View className="flex-1 bg-white justify-center p-8 animate-fade-in">
             <View className='gap-4 px-6 py-2 justify-center'>
+                <View className='flex-row justify-center items-center w-full'>
+                    <Image className='w-24 h-24' source={require('../../assets/img/logo.png')} />
+                </View>
                 <Image style={{ height: 150 }} className='mx-auto w-full' source={require('../../assets/img/logo gobcesar HORIZONTAL.png')} />
                 <View className='justify-center items-center mb-5'>
                     <TextInput
@@ -118,7 +121,7 @@ const LoginScreen = () => {
                     <CustomButtonPrimary rounded onPress={handleLogin} title='Login' />
                 </View>
                 <View>
-                    <Text className="text-center text-sm text-gray-700 animate-fade-in">Terminos y condiciones de la app <Text style={{color: globalColor}} className="font-bold">aquí</Text></Text>
+                    <Text className="text-center text-sm text-gray-700 animate-fade-in">Terminos y condiciones de la app <Text style={{ color: globalColor }} className="font-bold">aquí</Text></Text>
                 </View>
             </View>
         </View>

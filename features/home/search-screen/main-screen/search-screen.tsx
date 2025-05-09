@@ -6,17 +6,19 @@ import { useEffect, useState } from 'react';
 import { FlatList, Text, View, TextInput } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { ProjectsService } from 'services/projects/projects.service';
+import useActiveStore from 'store/actives/actives.store';
 import useStylesStore from 'store/styles/styles.store';
 
 const SearchScreen = () => {
-    const {globalColor} = useStylesStore()
+    const { fechaInicio, fechaFin } = useActiveStore();
+    const { globalColor } = useStylesStore()
     const [searchValue, setSearchValue] = useState<string>('');
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
 
     useEffect(() => {
         const fetchProyectos = async () => {
             try {
-                const res = await ProjectsService.getAll();
+                const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin });
                 setProyectos(res?.data?.data || []);
             } catch (error) {
                 console.error({ error });
@@ -24,7 +26,7 @@ const SearchScreen = () => {
         };
 
         fetchProyectos();
-    }, []);
+    }, [fechaInicio, fechaFin]);
 
     const handleChange = (text: string) => {
         setSearchValue(text);
@@ -41,9 +43,9 @@ const SearchScreen = () => {
                 <TextInput
                     onChangeText={handleChange}
                     value={searchValue}
-                    placeholder='Filtra por el nombre'
-                    style={{borderColor: globalColor}}
-                    className='border-2 rounded-full px-6 py-4 w-2/3'
+                    placeholder='Buscar'
+                    style={{ borderColor: globalColor }}
+                    className='border rounded-full px-6 py-4 w-2/3'
                 />
             </View>
 
@@ -51,6 +53,9 @@ const SearchScreen = () => {
                 {!searchValue ? (
                     <Text className='text-xl text-center'>
                         Hola, ¿estás buscando algún proyecto?
+                        <Text className="font-mono text-base mt-4">
+                            {`Recuerda que la informacion filtrada es del ${fechaInicio} hasta ${fechaFin}`}
+                        </Text>
                     </Text>
                 ) : filteredProjects.length > 0 ? (
                     <FlatList
@@ -70,7 +75,7 @@ const SearchScreen = () => {
                             loop
                             style={{ width: 200, height: 200 }}
                         />
-                        <Text style={{color: globalColor}} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
                     </View>
                 )}
             </View>

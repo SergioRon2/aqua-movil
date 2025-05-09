@@ -47,8 +47,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [token, isAuthenticated, loading]);
 
-    console.log({ token, isAuthenticated });
-
     if (loading) {
         return <Loading />;
     }

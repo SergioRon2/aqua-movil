@@ -19,25 +19,36 @@ interface Props {
 
 const BarChartComponent = ({ data, title, horizontalScroll }: Props) => {
     const { globalColor } = useStylesStore();
-    const [showModal, setShowModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<{ label: string, value: number } | null>(null);
 
-    const convertedData = data.labels.map((label, index) => ({
-        value: data.datasets[0].data[index],
-        label,
-        frontColor: globalColor,
-        onPress: () => {
-            setSelectedItem({ label, value: data.datasets[0].data[index] });
-            setShowModal(true);
-        }
-    }));
+    const hasRealData = data.datasets[0].data.some(value => value > 0);
 
+    const convertedData = hasRealData
+        ? data.labels.map((label, index) => ({
+            value: data.datasets[0].data[index],
+            label,
+            frontColor: globalColor,
+        }))
+        : [
+            {
+                label: 'Sin datos',
+                value: 1,
+                frontColor: '#e0e0e0',
+            },
+        ];
+
+    // Evitar división por 0
     const averageLabelLength =
-        data.labels.reduce((acc, label) => acc + label.length, 0) / data.labels.length;
+        data.labels.length > 0
+            ? data.labels.reduce((acc, label) => acc + label.length, 0) / data.labels.length
+            : 5;
+
     const barWidth = Math.min(Math.max(averageLabelLength * 5, 30), 80);
 
-    const longestLabel = Math.max(...data.labels.map(label => label.length));
-    const chartWidth = Math.max(screenWidth, data.labels.length * 80 + longestLabel * 5);
+    const longestLabel = Math.max(...data.labels.map(label => label.length), 8);
+    const chartWidth = Math.max(screenWidth, convertedData.length * 80 + longestLabel * 5);
+
+    // Si no hay datos reales, usar 4 como máximo para stepValue
+    const stepValue = Math.ceil((hasRealData ? Math.max(...data.datasets[0].data) : 4) / 4);
 
     return (
         <View className="animate-fade-in w-full">
@@ -65,41 +76,16 @@ const BarChartComponent = ({ data, title, horizontalScroll }: Props) => {
                         textAlign: 'center',
                         numberOfLines: 2,
                     }}
-                    stepValue={Math.ceil(Math.max(...data.datasets[0].data) / 4)}
+                    stepValue={stepValue}
                     showValuesAsTopLabel
                     isAnimated
                     width={chartWidth}
                     height={250}
                 />
             </ScrollView>
-
-
-            <View>
-                {showModal && selectedItem && (
-                    <Modal
-                        transparent
-                        animationType="fade"
-                        visible={showModal}
-                        onRequestClose={() => setShowModal(false)}
-                    >
-                        <View className="flex-1 justify-center items-center bg-black/50">
-                            <View className="p-6 bg-white items-center rounded-2xl w-5/6 shadow-2xl gap-6 border border-gray-200">
-                                <Text className="text-2xl font-extrabold text-center text-gray-800">{selectedItem.label}</Text>
-                                <Text className="text-gray-500 text-lg font-medium text-center">
-                                    Su valor es <Text className="text-gray-800 font-bold">{selectedItem.value}</Text>
-                                </Text>
-                                <CustomButtonPrimary 
-                                    rounded 
-                                    title="Cerrar" 
-                                    onPress={() => setShowModal(false)}
-                                />
-                            </View>
-                        </View>
-                    </Modal>
-                )}
-            </View>
         </View>
     );
+
 };
 
 export default BarChartComponent;

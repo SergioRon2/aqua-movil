@@ -13,7 +13,7 @@ import { Loading } from 'components/loading/loading.component';
 const ProyectosScreen = () => {
     const { globalColor } = useStylesStore()
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
-    const { municipiosActivos, sectorialActivo } = useActiveStore();
+    const { municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin } = useActiveStore();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,24 +22,30 @@ const ProyectosScreen = () => {
                 setLoading(true);
                 const municipioIds = municipiosActivos.map((m) => m.id);
                 const sectorialId = sectorialActivo?.id;
+                const estadoId = estadoActivo?.id;
                 const res = await ProjectsService.getAll({
                     municipio_ids: municipioIds,
                     sectorial_id: sectorialId,
+                    estado_id: estadoId,
+                    fechaInicio: fechaInicio,
+                    fechaFin: fechaFin
                 });
                 setProyectos(res?.data?.data);
             } catch (error) {
-                console.log({ error })
+                console.error({ error })
             } finally {
                 setLoading(false)
             }
         }
 
         fetchProyectos()
-    }, [municipiosActivos, sectorialActivo])
+    }, [municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin])
 
     return (
         <View className='flex-1 bg-white p-4'>
-            <Text className='text-2xl text-center font-bold my-4'>Proyectos</Text>
+            <View>
+                <Text className='text-2xl text-center font-bold my-4'>Proyectos</Text>
+            </View>
 
             {/* filters */}
             <FiltersComponentProyectos border />
