@@ -12,10 +12,12 @@ import { DevelopmentPlanService } from "services/development-plan/development-pl
 import { CustomButtonPrimary } from "./mainButton.component";
 import { ActivityIndicator } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import useActiveStore from "store/actives/actives.store";
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
     const [selectedPlan, setSelectedPlan] = useState<IDevelopmentPlan | null>(null);
+    const { setPlanDesarrolloActivo } = useActiveStore()
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -33,11 +35,14 @@ export const SelectedDevelopmentPlan = () => {
                         const foundPlan = plans.find((plan: IDevelopmentPlan) => plan.id === parsedPlan.id);
                         if (foundPlan) {
                             setSelectedPlan(foundPlan);
+                            setPlanDesarrolloActivo(foundPlan)
                         } else {
                             setSelectedPlan(plans[0]);
+                            setPlanDesarrolloActivo(plans[0])
                         }
                     } else {
                         setSelectedPlan(plans[0]);
+                        setPlanDesarrolloActivo(plans[0])
                     }
                 }
             } catch (error) {
@@ -49,16 +54,18 @@ export const SelectedDevelopmentPlan = () => {
         fetchDevelopmentPlan();
     }, []);
 
-    const handleSelect = async(plan: IDevelopmentPlan) => {
+    const handleSelect = async (plan: IDevelopmentPlan) => {
         setSelectedPlan(plan);
+        setPlanDesarrolloActivo(plan);
         await AsyncStorage.setItem('selectedPlan', JSON.stringify(plan));
         setModalVisible(false);
     };
+    
 
     return (
-        <View className="w-4/5 self-center">
+        <View className="w-3/5 self-center">
             {isLoading ? (
-                <View className="border-2 border-white rounded-xl py-3 px-4 items-center">
+                <View className="border border-white rounded-xl py-3 px-4 items-center">
                     <ActivityIndicator
                         className="self-center"
                         size={'small'}
@@ -68,11 +75,11 @@ export const SelectedDevelopmentPlan = () => {
             ) : (
                 <>
                     <Pressable
-                        className="border-2 border-white rounded-xl py-3 px-4 items-center active:opacity-50"
+                        className="border border-white rounded-xl py-3 px-4 items-center active:opacity-50"
                         onPress={() => setModalVisible(true)}
                     >
                         <Text className="text-white font-semibold text-center">
-                            {selectedPlan ? `${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearBegin}` : 'Selecciona un plan'}
+                            {selectedPlan ? `${selectedPlan?.name}, ${selectedPlan?.yearBegin} - ${selectedPlan?.yearEnd}` : 'Selecciona un plan'}
                         </Text>
                     </Pressable >
 

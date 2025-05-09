@@ -23,3 +23,30 @@ export interface IProyecto {
     physical_delay: number | null;
     physical_current: number | null;
 }
+
+
+export interface IProyectoDashboard {
+    id: number;
+    latitude: number;
+    longitude: number;
+    title: string;
+    title_show: string;
+    project_name: string;
+    municipio_name: string;
+    departamento_name: string;
+    value_init_project: string;
+    project_value: string;      
+    population: number;
+    list_contract: any[];
+    development_plan: string;
+    sector: string;
+    start_actSigning_date: string | null;
+    value_exec: number;
+    value_per_payment: number;
+    state: string | null;
+    amount_extension: number;
+    amount_months_extension: number;
+    date_end_all: string;
+    term_end: number;
+    time_exec: number;
+}

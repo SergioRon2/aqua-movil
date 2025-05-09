@@ -17,16 +17,14 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
     const {globalColor} = useStylesStore()
     const [modalCleanMunicipios, setModalCleanMunicipios] = useState<boolean>(false)
     const [modalCleanSectoriales, setModalCleanSectoriales] = useState<boolean>(false)
-    const { municipiosActivosDashboard, setMunicipiosActivosDashboard, sectorialActivoDashboard, setSectorialActivoDashboard } = useActiveStore();
+    const { municipioActivoDashboard, setMunicipioActivoDashboard, sectorialActivoDashboard, setSectorialActivoDashboard } = useActiveStore();
     const [municipiosModal, setMunicipiosModal] = useState<boolean>(false)
     const [sectorialesModal, setSectorialesModal] = useState<boolean>(false)
     const [municipioAEliminar, setMunicipioAEliminar] = useState<IMunicipio | null>(null);
 
     const handleCleanMunicipios = () => {
         if (!municipioAEliminar) return;
-
-        const nuevos = municipiosActivosDashboard?.filter(m => m.id !== municipioAEliminar.id) || [];
-        setMunicipiosActivosDashboard(nuevos);
+        setMunicipioActivoDashboard(undefined);
         setMunicipioAEliminar(null);
         setModalCleanMunicipios(false);
     }
@@ -38,35 +36,34 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
     }
 
     return (
-        <View style={border && {borderColor: globalColor}} className={`bg-white flex-row w-full h-auto mx-auto mb-4 justify-center items-center animate-fade-in ${border ? 'border-2' : ''}`} >
+        <View style={border && {borderColor: globalColor}} className={`bg-white flex-row w-full h-auto mb-4 justify-center items-center animate-fade-in gap-2 px-3`} >
 
             {/* buttons */}
-            <Pressable onPress={() => setMunicipiosModal(true)} className="px-6 py-2 w-1/2 rounded-sm flex-row gap-2 items-center justify-center">
+            <Pressable style={{borderColor: globalColor}} onPress={() => setMunicipiosModal(true)} className="px-6 border py-2 w-1/2 rounded-full flex-row gap-2 items-center justify-center">
                 <Text className="text-black text-xl font-bold text-center">
-                    {municipiosActivosDashboard && municipiosActivosDashboard.length > 0
-                        ? municipiosActivosDashboard.map((m, index) => (
-                            <View key={m.id} className="flex-row items-center">
-                                <Text className="text-black text-xl font-bold text-center mr-2">{m.nombre}</Text>
-
-                                {municipiosActivosDashboard && municipiosActivosDashboard.length > 0 && (
-                                    <Pressable
-                                        onPress={() => {
-                                            setMunicipioAEliminar(m);
-                                            setModalCleanMunicipios(true);
-                                        }}
-                                        className='items-center justify-center'
-                                    >
-                                        <Ionicons name='trash-bin' color={globalColor} size={18} />
-                                    </Pressable>
-                                )}
-                            </View>
-                        ))
-                        : 'Municipios'}
+                    {municipioActivoDashboard ? (
+                        <View className="flex-row items-center">
+                            <Text className="text-black text-lg font-bold text-center mr-2">
+                                {municipioActivoDashboard.nombre}
+                            </Text>
+                            <Pressable
+                                onPress={() => {
+                                    setMunicipioAEliminar(municipioActivoDashboard);
+                                    setModalCleanMunicipios(true);
+                                }}
+                                className="items-center justify-center"
+                            >
+                                <Ionicons name="trash-bin" color={globalColor} size={18} />
+                            </Pressable>
+                        </View>
+                    ) : (
+                        'Municipios'
+                    )}
                 </Text>
             </Pressable>
 
-            <Pressable onPress={() => setSectorialesModal(true)} className="px-6 py-2 w-1/2 gap-2 rounded-sm flex-row items-center justify-center">
-                <Text className="text-black text-xl font-bold text-center">
+            <Pressable style={{borderColor: globalColor}} onPress={() => setSectorialesModal(true)} className="px-6 border py-2 w-1/2 gap-2 rounded-full flex-row items-center justify-center">
+                <Text className="text-black text-lg font-bold text-center">
                     {/* first letter capitalized */}
                     {sectorialActivoDashboard ? capitalize(sectorialActivoDashboard?.name) : 'Sectoriales'}
                 </Text>
@@ -80,7 +77,7 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
 
             {/* modals to select */}
 
-            <View>
+            <View className="absolute">
                 <ModalMunicipiosDashboard
                     closeModal={() => setMunicipiosModal(false)}
                     active={municipiosModal}
@@ -94,7 +91,7 @@ export const FiltersComponentDashboard = ({ border }: Props) => {
 
 
             {/* basic modals */}
-            <View>
+            <View className="absolute">
                 <DecisionModal
                     active={modalCleanMunicipios}
                     acceptButtonFunction={handleCleanMunicipios}

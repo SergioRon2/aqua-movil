@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import IAButton from 'components/buttons/IAButton.component';
 import { Navbar } from 'components/navigators/navbar.component';
 import DashboardLayout from './dashboard/layout';
 import SectorialesLayout from './sectoriales/layout';

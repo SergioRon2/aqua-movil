@@ -1,28 +1,40 @@
 import { useRoute } from "@react-navigation/native";
 import ProyectoCard from "components/cards/proyectoCard.component";
+import DonutChartComponent from "components/charts/donutChart.component";
 import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { IProyecto } from "interfaces/proyecto.interface";
-import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { View, Text, Dimensions, ActivityIndicator } from "react-native";
+import { View, Text, Dimensions, ActivityIndicator, ScrollView } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
+import { InfoService } from "services/info/info.service";
 import { ProjectsService } from "services/projects/projects.service";
+import useActiveStore from "store/actives/actives.store";
 import useStylesStore from "store/styles/styles.store";
 
 const UniqueSectorialScreen = () => {
     const { globalColor } = useStylesStore()
+    const { fechaInicio, fechaFin } = useActiveStore();
     const route = useRoute();
     const { sectorial } = route.params;
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [avances, setAvances] = useState({
+        avanceFinanciero: { name: '', value: 0 },
+        avanceFisico: { name: '', value: 0 },
+        indicadorTiempo: { name: '', value: 0 },
+    });
 
     useEffect(() => {
         const fetchProyectos = async () => {
             try {
                 setLoading(true);
-                const res = await ProjectsService.getAll({ sectorial_id: sectorial.id });
+                const res = await ProjectsService.getAll({ 
+                    sectorial_id: sectorial.id, 
+                    fechaInicio: fechaInicio, 
+                    fechaFin: fechaFin 
+                });
                 setProyectos(res?.data?.data);
             } catch (error) {
                 console.error('Error fetching proyectos:', error);
@@ -32,10 +44,43 @@ const UniqueSectorialScreen = () => {
         }
 
         fetchProyectos();
-    }, [sectorial.id])
+    }, [sectorial.id, fechaInicio, fechaFin])
+
+    useEffect(() => {
+        const fetchInfo = async () => {
+            try {
+                const res = await InfoService.getInfoByAllData({ 
+                    sectorial_id: sectorial.id, 
+                    fechaInicio: fechaInicio, 
+                    fechaFin: fechaFin 
+                });
+                setAvances({
+                    avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
+                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                    indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
+                });
+            } catch (error) {
+                console.error({ error })
+            }
+        }
+
+        fetchInfo();
+    }, [sectorial.id, fechaInicio, fechaFin])
 
     const items = [
-        { title: 'Gráfico de Dona', component: <SemiDonutChart /> },
+        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} /> },
+        { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value} height={240} /> },
+        // { 
+        //     title: 'Gráfico de Dona', 
+        //     component: <DonutChartComponent 
+        //         height={240} 
+        //         dataRow 
+        //         data={[
+        //             { label: avances?.avanceFinanciero?.name, value: avances?.avanceFinanciero?.value }, 
+        //             { label: avances?.avanceFisico?.name, value: avances?.avanceFisico?.value }]} 
+        //     /> 
+        // },
+        { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={240} /> },
     ];
 
     return (
@@ -44,15 +89,27 @@ const UniqueSectorialScreen = () => {
                 {sectorial.name}
             </Text>
 
-            <View style={{ borderColor: globalColor }} className="w-full py-16 rounded-xl bg-white border-2 justify-center items-center mb-5">
-                <SemiDonutChart />
+            <View className="w-full justify-center items-center">
+                <Carousel
+                    loop
+                    width={Dimensions.get('window').width - 50}
+                    height={290}
+                    data={items}
+                    scrollAnimationDuration={1000}
+                    renderItem={({ item }) => (
+                        <View className="w-full gap-5 rounded-xl bg-white border border-gray-300 justify-center items-center mb-5">
+                            <Text className="text-lg font-bold mt-4">{item.title}</Text>
+                            {item.component}
+                        </View>
+                    )}
+                />
             </View>
 
-            <Text className="text-2xl font-bold py-2">
-                Proyectos
-            </Text>
 
             <View className="rounded-2xl justify-center animate-fade-in py-5 h-2/4">
+                <Text className="text-2xl font-bold py-2">
+                    Proyectos
+                </Text>
                 {
                     loading ? (
                         <ActivityIndicator size={'large'} color={globalColor} />
