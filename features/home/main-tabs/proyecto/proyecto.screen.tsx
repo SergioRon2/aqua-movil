@@ -1,24 +1,29 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { InfoProyecto } from "components/cards/infoProyecto.component";
 import BarChartComponent from "components/charts/barChart.component";
 import SemiDonutChart from "components/charts/semiDonutChart.component";
 import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { Dimensions, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Dimensions, Pressable, ScrollView, Text, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { InfoService } from "services/info/info.service";
+import { ProjectsService } from "services/projects/projects.service";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from "store/internet/internet.store";
 
 
 const ProyectoScreen = () => {
     const route = useRoute();
     const { proyecto } = route.params;
     const { fechaInicio, fechaFin } = useActiveStore()
+    const [infoProject, setInfoProject] = useState<any>();
     const [avances, setAvances] = useState({
         avanceFinanciero: { name: '', value: 0 },
         avanceFisico: { name: '', value: 0 },
         indicadorTiempo: { name: '', value: 0 },
     });
+    const { online } = useInternetStore();
 
     const dataBar = {
         labels: ['Avance Fisico', 'Avance Financiero'],
@@ -30,18 +35,46 @@ const ProyectoScreen = () => {
     }
 
     useEffect(() => {
+        const fetchInfoProject = async () => {
+            try {
+                const res = await ProjectsService.getProjectInfoById(proyecto.id)
+                setInfoProject(res.data)
+            } catch (error) {
+                console.error({ error })
+            }
+        }
+
+        fetchInfoProject()
+    }, [])
+
+
+    useEffect(() => {
         const fetchInfo = async () => {
             try {
-                const res = await InfoService.getInfoByAllData({ 
-                    project_id: proyecto.id, 
-                    fechaInicio: fechaInicio, 
-                    fechaFin: fechaFin 
-                });
-                setAvances({
-                    avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
-                    indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
-                });
+                if (online) {
+                    const res = await InfoService.getInfoByAllData({
+                        project_id: proyecto.id,
+                        fechaInicio: fechaInicio,
+                        fechaFin: fechaFin
+                    });
+                    const avancesData = {
+                        avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
+                        avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                        indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
+                    };
+                    setAvances(avancesData);
+                    // Guardar en AsyncStorage
+                    await AsyncStorage.setItem(
+                        `avances_data`,
+                        JSON.stringify(avancesData)
+                    );
+                } else {
+                    // Leer de AsyncStorage
+                    const stored = await AsyncStorage.getItem(`avances_data`);
+                    if (stored) {
+                        setAvances(JSON.parse(stored));
+                    }
+                }
             } catch (error) {
                 console.error({ error })
             }
@@ -50,19 +83,10 @@ const ProyectoScreen = () => {
         fetchInfo();
     }, [proyecto.id])
 
+
     const items = [
         { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} /> },
         { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value} height={240} /> },
-        // { 
-        //     title: 'Gráfico de Dona', 
-        //     component: <DonutChartComponent 
-        //         height={240} 
-        //         dataRow 
-        //         data={[
-        //             { label: avances?.avanceFinanciero?.name, value: avances?.avanceFinanciero?.value }, 
-        //             { label: avances?.avanceFisico?.name, value: avances?.avanceFisico?.value }]} 
-        //     /> 
-        // },
         { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={240} /> },
     ];
 
@@ -74,7 +98,7 @@ const ProyectoScreen = () => {
                         <Text className="text-md font-bold text-center">{proyecto.name || proyecto.title}</Text>
 
                         <View>
-                            <InfoProyecto proyecto={proyecto} />
+                            <InfoProyecto infoProyecto={infoProject} proyecto={proyecto} />
                         </View>
 
                         <View className="justify-center items-center mt-6 bg-white border rounded-lg px-4 h-auto border-gray-200 shadow-lg">

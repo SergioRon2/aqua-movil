@@ -51,19 +51,29 @@ export const SelectedYears = () => {
                 renderItem={({ item, index }) => (
                     <Pressable
                         onPress={() => {
-                            setSelected(index + 1);
-                            const year = item;
-                            const fechaInicio = `${year}-01-01`;
-                            const fechaFin = `${year}-12-31`;
-
-                            setFechaInicio(fechaInicio)
-                            setFechaFin(fechaFin)
+                            if (selected === index + 1) {
+                                // Tocar el mismo año -> seleccionar TODO el rango
+                                setSelected(0); // 0 = modo "rango completo"
+                                const fechaInicio = `${startYear}-01-01`;
+                                const fechaFin = `${endYear}-12-31`;
+                                setFechaInicio(fechaInicio);
+                                setFechaFin(fechaFin);
+                            } else {
+                                // Tocar un año diferente -> seleccionar solo ese año
+                                setSelected(index + 1);
+                                const year = item;
+                                const fechaInicio = `${year}-01-01`;
+                                const fechaFin = `${year}-12-31`;
+                                setFechaInicio(fechaInicio);
+                                setFechaFin(fechaFin);
+                            }
                         }}
                         style={selected === index + 1 && { borderColor: globalColor }}
                         className={`${selected === index + 1 ? 'border-b-2' : 'bg-transparent'} px-6 m-1 rounded-sm`}
                     >
                         <Text className="text-black text-xl font-bold text-center">{item}</Text>
                     </Pressable>
+
                 )}
             />
         </View>

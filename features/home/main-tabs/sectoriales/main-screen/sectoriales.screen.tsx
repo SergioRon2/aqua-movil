@@ -1,22 +1,44 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import SectorialCard from 'components/cards/sectorialCard.component';
 import { Loading } from 'components/loading/loading.component';
+import { generarReporteSectorialesHTML } from 'components/pdfTemplates/sectorialesReporte.component';
 import { ISectorial } from 'interfaces/sectorial.interface';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, FlatList } from 'react-native';
+import { View, Text, ScrollView, FlatList, Alert, Modal } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { SectoralService } from 'services/sectoral/sectoral.service';
+import useInternetStore from 'store/internet/internet.store';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import useActiveStore from 'store/actives/actives.store';
+import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 
 const Sectoriales = () => {
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadingReporte, setLoadingReporte] = useState(false);
+    const { online } = useInternetStore();
+    const { fechaInicio, fechaFin } = useActiveStore();
 
     useEffect(() => {
         const fetchSectoriales = async () => {
             try {
-                setLoading(true)
-                const res = await SectoralService.getAllSectorals();
-                setSectoriales(res?.data?.data)
+                setLoading(true);
+                if (online) {
+                    const res = await SectoralService.getAllSectorals();
+                    setSectoriales(res?.data?.data);
+                    // Save to AsyncStorage
+                    await AsyncStorage.setItem('sectoriales', JSON.stringify(res?.data?.data));
+                } else {
+                    // Get from AsyncStorage
+                    const stored = await AsyncStorage.getItem('sectoriales');
+                    if (stored) {
+                        setSectoriales(JSON.parse(stored));
+                    } else {
+                        setSectoriales([]);
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching sectoriales:', error);
             } finally {
@@ -26,6 +48,22 @@ const Sectoriales = () => {
 
         fetchSectoriales();
     }, [])
+
+    const createPDF = async (sectorialesData: ISectorial[]) => {
+        setLoadingReporte(true)
+        try {
+            const html = await generarReporteSectorialesHTML(sectorialesData, fechaInicio!, fechaFin!);
+
+            const { uri } = await Print.printToFileAsync({ html });
+
+            await Sharing.shareAsync(uri);
+        } catch (error) {
+            console.error('Error al generar el PDF:', error);
+            Alert.alert('Error', 'No se pudo generar el PDF.');
+        } finally {
+            setLoadingReporte(false)
+        }
+    };
 
     return (
         <View className='h-full bg-white'>
@@ -41,7 +79,12 @@ const Sectoriales = () => {
                             <SectorialCard sectorialData={item} />
                         </Animated.View>
                     )}
-                    contentContainerStyle={{ paddingBottom: 20 }}
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    ListFooterComponent={
+                        <View className='w-full justify-center items-center mt-4'>
+                            <CustomButtonPrimary onPress={() => createPDF(sectoriales)} rounded title='Descargar informe' />
+                        </View>
+                    }
                 />
             ) : (
                 <View className="flex justify-center items-center">
@@ -54,6 +97,20 @@ const Sectoriales = () => {
                     <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
                 </View>
             )}
+
+
+            <Modal
+                visible={loadingReporte}
+                transparent
+                animationType="fade"
+            >
+                <View className="flex-1 bg-black/30 justify-center items-center">
+                    <View className='bg-white w-2/3 h-auto rounded-lg shadow-lg items-center justify-center'>
+                        <Loading />
+                        <Text className="text-black mt-4">Generando reporte...</Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 };

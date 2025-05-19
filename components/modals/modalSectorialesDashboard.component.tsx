@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CustomButtonPrimary } from "components/buttons/mainButton.component";
 import { ISectorial } from "interfaces/sectorial.interface";
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import Modal from 'react-native-modal'
 import { SectoralService } from "services/sectoral/sectoral.service";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from "store/internet/internet.store";
 import useStylesStore from "store/styles/styles.store";
 
 interface Props {
@@ -13,14 +15,29 @@ interface Props {
 }
 
 export const ModalSectorialesDashboard = ({ active, closeModal }: Props) => {
-    const {globalColor} = useStylesStore()
+    const { globalColor } = useStylesStore()
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
-    const { setSectorialActivoDashboard } = useActiveStore();
+    const { setSectorialActivoDashboard, sectorialActivoDashboard } = useActiveStore();
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchSectorals = async () => {
-            const res = await SectoralService.getAllSectorals()
-            setSectoriales(res?.data?.data)
+            try {
+                let sectorialsData;
+                if (online) {
+                    const res = await SectoralService.getAllSectorals();
+                    sectorialsData = res?.data?.data;
+                    if (sectorialsData) {
+                        await AsyncStorage.setItem('sectorialesDashboard', JSON.stringify(sectorialsData));
+                    }
+                } else {
+                    const stored = await AsyncStorage.getItem('sectorialesDashboard');
+                    sectorialsData = stored ? JSON.parse(stored) : [];
+                }
+                setSectoriales(sectorialsData);
+            } catch (error) {
+                console.error({error})
+            }
         }
 
         fetchSectorals();
@@ -50,7 +67,10 @@ export const ModalSectorialesDashboard = ({ active, closeModal }: Props) => {
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectSectorial(item)}>
-                                    <Text className="font-bold text-gray-500 text-xl">
+                                    <Text
+                                        className="font-bold text-xl"
+                                        style={{ color: item.id === sectorialActivoDashboard?.id ? globalColor : '#6B7280' }}
+                                    >
                                         {item?.name.charAt(0).toUpperCase() + item?.name.slice(1).toLowerCase()}
                                     </Text>
                                 </Pressable>

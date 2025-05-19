@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import ProyectoCard from 'components/cards/proyectoCard.component';
 import { IProyectoDashboard } from 'interfaces/proyecto.interface';
@@ -7,6 +8,7 @@ import { Modal, View, Text, FlatList, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { StateService } from 'services/states/states.service';
 import useActiveStore from 'store/actives/actives.store';
+import useInternetStore from 'store/internet/internet.store';
 import useStylesStore from 'store/styles/styles.store';
 
 interface Props {
@@ -19,19 +21,32 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
     const [proyectos, setProyectos] = useState<IProyectoDashboard[]>([])
     const [loading, setLoading] = useState(true)
     const { globalColor } = useStylesStore()
-    const {fechaInicio, fechaFin} = useActiveStore()
+    const { fechaInicio, fechaFin } = useActiveStore()
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchProjectsByDashboard = async () => {
             try {
                 setLoading(true)
-                const res = await StateService.getStatesData({
-                    sectorial_id: selectedItem.sector_id, 
-                    fechaInicio: fechaInicio, 
-                    fechaFin: fechaFin
-                });
-                // estados para el bar chart
-                setProyectos(res?.data?.projects)
+                let projectsData: IProyectoDashboard[] = [];
+                if (online) {
+                    const res = await StateService.getStatesData({
+                        sectorial_id: selectedItem.sector_id,
+                        fechaInicio,
+                        fechaFin
+                    });
+                    projectsData = res?.data?.projects || [];
+                    // Guarda todos los datos recibidos en AsyncStorage (sin identificadores específicos)
+                    await AsyncStorage.setItem(
+                        'projects_data',
+                        JSON.stringify(projectsData)
+                    );
+                } else {
+                    // Si no hay internet, usa los datos guardados
+                    const stored = await AsyncStorage.getItem('projects_data');
+                    projectsData = stored ? JSON.parse(stored) : [];
+                }
+                setProyectos(projectsData);
             } catch (error) {
                 console.error({ error })
             } finally {

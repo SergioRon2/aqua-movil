@@ -3,6 +3,7 @@ import SearchScreen from "./main-screen/search-screen";
 import ProyectoScreen from "../main-tabs/proyecto/proyecto.screen";
 import { View } from "react-native";
 import { Navbar } from "components/navigators/navbar.component";
+import SubProyectoScreen from "../main-tabs/subproyecto/subproyecto.screen";
 
 
 const SearchLayout = () => {
@@ -17,6 +18,15 @@ const SearchLayout = () => {
                     <View className="flex-1">
                         <Navbar />
                         <ProyectoScreen />
+                    </View>
+                )}
+            />
+            <Stack.Screen
+                name='SubProyecto'
+                children={() => (
+                    <View className="flex-1">
+                        <Navbar />
+                        <SubProyectoScreen />
                     </View>
                 )}
             />
