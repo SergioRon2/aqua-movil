@@ -9,6 +9,8 @@ import { memo, useEffect, useState } from 'react';
 import { StateService } from 'services/states/states.service';
 import { capitalize } from 'utils/capitalize';
 import useActiveStore from 'store/actives/actives.store';
+import useInternetStore from 'store/internet/internet.store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
     municipioData: IMunicipio;
@@ -18,19 +20,30 @@ const MunicipioCard = ({ municipioData }: Props) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [municipioInfo, setMunicipioInfo] = useState<any>()
     const { globalColor } = useStylesStore()
-    const {fechaInicio, fechaFin} = useActiveStore()
+    const { fechaInicio, fechaFin } = useActiveStore()
     const navigation = useNavigation();
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchProjectsByDashboard = async () => {
             try {
-                setLoading(true)
-                const res = await StateService.getStatesData({ municipio_id: municipioData.id, fechaInicio: fechaInicio, fechaFin: fechaFin });
-                setMunicipioInfo(res?.data)
+                setLoading(true);
+                let data;
+                if (online) {
+                    const res = await StateService.getStatesData({ municipio_id: municipioData.id, fechaInicio, fechaFin });
+                    data = res?.data;
+                    // Guarda en storage
+                    await AsyncStorage.setItem('municipioInfo', JSON.stringify(data));
+                } else {
+                    // Intenta obtener de storage
+                    const stored = await AsyncStorage.getItem('municipioInfo');
+                    data = stored ? JSON.parse(stored) : null;
+                }
+                setMunicipioInfo(data);
             } catch (error) {
-                console.error({ error })
+                console.error({ error });
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
         }
 

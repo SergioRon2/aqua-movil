@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CustomButtonPrimary } from "components/buttons/mainButton.component";
 import { IMunicipio } from "interfaces/municipio.interface";
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import Modal from 'react-native-modal'
 import { MunicipalitiesService } from "services/municipalities/municipalities.service";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from "store/internet/internet.store";
 import useStylesStore from "store/styles/styles.store";
 
 interface Props {
@@ -15,12 +17,25 @@ interface Props {
 export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
     const { globalColor } = useStylesStore()
     const [municipios, setMunicipios] = useState<IMunicipio[]>([])
-    const { setMunicipioActivoDashboard } = useActiveStore();
+    const { setMunicipioActivoDashboard, municipioActivoDashboard } = useActiveStore();
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchMunicipios = async () => {
-            const { data } = await MunicipalitiesService.getMunicipalitiesCesar()
-            setMunicipios(data)
+            try {
+                if (online) {
+                    const { data } = await MunicipalitiesService.getMunicipalitiesCesar();
+                    setMunicipios(data);
+                    await AsyncStorage.setItem('modalMunicipiosDashboard', JSON.stringify(data));
+                } else {
+                    const storedData = await AsyncStorage.getItem('modalMunicipiosDashboard');
+                    if (storedData) {
+                        setMunicipios(JSON.parse(storedData));
+                    }
+                }
+            } catch (error) {
+                console.error({error})
+            }
         }
 
         fetchMunicipios();
@@ -51,7 +66,7 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item, index }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectMunicipio(item)}>
-                                    <Text style={{ color: '#333' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
+                                    <Text style={{ color: item.id === municipioActivoDashboard?.id ? globalColor : '#6B7280' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
                                 </Pressable>
                             )}
                         />

@@ -1,57 +1,68 @@
 import React, { useEffect, useState, ReactNode, createContext } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import Modal from 'react-native-modal';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { Loading } from 'components/loading/loading.component';
 import LottieView from 'lottie-react-native';
 import useStylesStore from 'store/styles/styles.store';
+import useInternetStore from 'store/internet/internet.store';
 
 type Props = {
     children: ReactNode;
 };
 
-const InternetContext = createContext<boolean | null>(null);
-
 const InternetProvider = ({ children }: Props) => {
-    const {globalColor} = useStylesStore()
-    const [isConnected, setIsConnected] = useState<boolean | null>(true);
+    const { globalColor } = useStylesStore()
+    const { setOnline, online } = useInternetStore();
+    const [modalOffline, setModalOffline] = useState<boolean>(true);
 
     useEffect(() => {
         const checkInternetConnection = async () => {
-            const state = await NetInfo.fetch();
-            setIsConnected(state.isConnected && state.isInternetReachable);
+            try {
+                const state = await NetInfo.fetch();
+                const isOnline = state.isConnected && (state.isInternetReachable ?? true);
+                setOnline(isOnline);
+                setModalOffline(!isOnline);
+            } catch (error) {
+                console.error('Error checking internet connection:', error);
+                setOnline(false);
+                setModalOffline(true);
+            }
         };
 
         checkInternetConnection();
 
         const unsubscribe = NetInfo.addEventListener((state) => {
-            setIsConnected(state.isConnected && state.isInternetReachable);
+            try {
+                const isOnline = state.isConnected && (state.isInternetReachable ?? true);
+                setOnline(isOnline);
+                setModalOffline(!isOnline);
+            } catch (error) {
+                console.error('Error handling internet state change:', error);
+                setOnline(false);
+                setModalOffline(true);
+            }
+
+            console.log('Connectivity changed:', {
+                isConnected: state.isConnected,
+                isInternetReachable: state.isInternetReachable,
+            });
         });
 
         return () => unsubscribe();
     }, []);
 
-    const fetchInternet = async () => {
-        setIsConnected(null);
-        setTimeout(() => {
-            NetInfo.fetch().then((state) => {
-                setIsConnected(state.isConnected && state.isInternetReachable);
-            });
-        }, 2000)
+    if (online === null) {
+        return <Loading />
     }
 
-    if (isConnected === null) {
-        <Loading />
-    }
 
     return (
         <>
-            <InternetContext.Provider value={isConnected}>
-                {children}
-            </InternetContext.Provider>
+            {children}
 
-            {!isConnected && (
+            {modalOffline && (
                 <View className='bg-white'>
                     <Modal
                         isVisible
@@ -124,13 +135,13 @@ const InternetProvider = ({ children }: Props) => {
                                     },
                                 ]}
                             />
-                            <Text style={{color: globalColor}} className="text-xl font-bold mb-2">
-                                Sin conexión
+                            <Text style={{ color: globalColor }} className="text-xl font-bold mb-2">
+                                Sin conexión, pero no te preocupes!
                             </Text>
                             <Text className="text-base text-center text-gray-700 mb-4">
-                                No tienes acceso a internet. Por favor revisa tu conexión.
+                                No tienes acceso a internet pero puedes acceder a la informacion tomada la ultima vez que tuviste acceso a internet.
                             </Text>
-                            <CustomButtonPrimary rounded onPress={fetchInternet} title='Reintentar' />
+                            <CustomButtonPrimary rounded onPress={() => setModalOffline(false)} title='Aceptar' />
                         </View>
                     </Modal>
                 </View>

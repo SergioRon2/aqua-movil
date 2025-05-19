@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BackButton } from 'components/buttons/backButton.component';
 import ProyectoCard from 'components/cards/proyectoCard.component';
 import { IProyecto } from 'interfaces/proyecto.interface';
@@ -7,6 +8,7 @@ import { FlatList, Text, View, TextInput } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { ProjectsService } from 'services/projects/projects.service';
 import useActiveStore from 'store/actives/actives.store';
+import useInternetStore from 'store/internet/internet.store';
 import useStylesStore from 'store/styles/styles.store';
 
 const SearchScreen = () => {
@@ -14,12 +16,34 @@ const SearchScreen = () => {
     const { globalColor } = useStylesStore()
     const [searchValue, setSearchValue] = useState<string>('');
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchProyectos = async () => {
             try {
-                const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin });
-                setProyectos(res?.data?.data || []);
+                if (online) {
+                    const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin });
+                    setProyectos(res?.data?.data || []);
+                    // Guarda los datos en AsyncStorage
+                    try {
+                        await AsyncStorage.setItem('proyectos', JSON.stringify(res?.data?.data || []));
+                    } catch (storageError) {
+                        console.error('Error guardando en AsyncStorage', storageError);
+                    }
+                } else {
+                    // Si no hay conexión, usa los datos de AsyncStorage
+                    try {
+                        const storedProyectos = await AsyncStorage.getItem('proyectos');
+                        if (storedProyectos) {
+                            setProyectos(JSON.parse(storedProyectos));
+                        } else {
+                            setProyectos([]);
+                        }
+                    } catch (storageError) {
+                        console.error('Error leyendo de AsyncStorage', storageError);
+                        setProyectos([]);
+                    }
+                }
             } catch (error) {
                 console.error({ error });
             }
@@ -53,9 +77,6 @@ const SearchScreen = () => {
                 {!searchValue ? (
                     <Text className='text-xl text-center'>
                         Hola, ¿estás buscando algún proyecto?
-                        <Text className="font-mono text-base mt-4">
-                            {`Recuerda que la informacion filtrada es del ${fechaInicio} hasta ${fechaFin}`}
-                        </Text>
                     </Text>
                 ) : filteredProjects.length > 0 ? (
                     <FlatList

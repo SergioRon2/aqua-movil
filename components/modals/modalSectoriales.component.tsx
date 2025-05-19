@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CustomButtonPrimary } from "components/buttons/mainButton.component";
 import { ISectorial } from "interfaces/sectorial.interface";
 import { useEffect, useState } from "react";
@@ -5,6 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native
 import Modal from 'react-native-modal'
 import { SectoralService } from "services/sectoral/sectoral.service";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from "store/internet/internet.store";
 import useStylesStore from "store/styles/styles.store";
 
 interface Props {
@@ -14,13 +16,28 @@ interface Props {
 
 export const ModalSectoriales = ({ active, closeModal }: Props) => {
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
-    const { setSectorialActivo } = useActiveStore();
-    const {globalColor} = useStylesStore()
+    const { setSectorialActivo, sectorialActivo } = useActiveStore();
+    const { globalColor } = useStylesStore()
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchSectorals = async () => {
-            const res = await SectoralService.getAllSectorals()
-            setSectoriales(res?.data?.data)
+            try {
+                if (online) {
+                    const res = await SectoralService.getAllSectorals();
+                    setSectoriales(res?.data?.data);
+                    // Guarda los datos en AsyncStorage
+                    await AsyncStorage.setItem('sectoriales', JSON.stringify(res?.data?.data));
+                } else {
+                    // Obtiene los datos de AsyncStorage si está offline
+                    const stored = await AsyncStorage.getItem('sectoriales');
+                    if (stored) {
+                        setSectoriales(JSON.parse(stored));
+                    }
+                }
+            } catch (error) {
+                console.error({error})
+            }
         }
 
         fetchSectorals();
@@ -50,7 +67,7 @@ export const ModalSectoriales = ({ active, closeModal }: Props) => {
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectSectorial(item)}>
-                                    <Text className="font-bold text-gray-500 text-xl">
+                                    <Text style={{ color: item.id === sectorialActivo?.id ? globalColor : '#6B7280' }} className="font-bold text-xl">
                                         {item?.name.charAt(0).toUpperCase() + item?.name.slice(1).toLowerCase()}
                                     </Text>
                                 </Pressable>

@@ -13,6 +13,7 @@ import { CustomButtonPrimary } from "./mainButton.component";
 import { ActivityIndicator } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from 'store/internet/internet.store';
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
@@ -20,14 +21,23 @@ export const SelectedDevelopmentPlan = () => {
     const { setPlanDesarrolloActivo } = useActiveStore()
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchDevelopmentPlan = async () => {
             try {
                 setIsLoading(true);
-                const res = await DevelopmentPlanService.getDevelopmentPlans();
-                const plans = res?.data?.data || [];
-                setDevelopmentPlans(plans);
+                let plans: IDevelopmentPlan[] = [];
+                if (online) {
+                    const res = await DevelopmentPlanService.getDevelopmentPlans();
+                    plans = res?.data?.data || [];
+                    setDevelopmentPlans(plans);
+                    await AsyncStorage.setItem('developmentPlans', JSON.stringify(plans));
+                } else {
+                    const storedPlans = await AsyncStorage.getItem('developmentPlans');
+                    plans = storedPlans ? JSON.parse(storedPlans) : [];
+                    setDevelopmentPlans(plans);
+                }
                 if (plans.length > 0) {
                     const storedPlan = await AsyncStorage.getItem('selectedPlan');
                     if (storedPlan) {
@@ -60,7 +70,7 @@ export const SelectedDevelopmentPlan = () => {
         await AsyncStorage.setItem('selectedPlan', JSON.stringify(plan));
         setModalVisible(false);
     };
-    
+
 
     return (
         <View className="w-3/5 self-center">

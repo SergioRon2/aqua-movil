@@ -1,12 +1,12 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CustomButtonPrimary } from "components/buttons/mainButton.component";
 import { IEstado } from "interfaces/estado.interface";
-import { ISectorial } from "interfaces/sectorial.interface";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native'
 import Modal from 'react-native-modal'
-import { SectoralService } from "services/sectoral/sectoral.service";
 import { StateService } from "services/states/states.service";
 import useActiveStore from "store/actives/actives.store";
+import useInternetStore from "store/internet/internet.store";
 import useStylesStore from "store/styles/styles.store";
 
 interface Props {
@@ -16,19 +16,32 @@ interface Props {
 
 export const ModalEstados = ({ active, closeModal }: Props) => {
     const [estados, setEstados] = useState<IEstado[]>([])
-    const { setEstadoActivo } = useActiveStore();
-    const {globalColor} = useStylesStore()
+    const { setEstadoActivo, estadoActivo } = useActiveStore();
+    const { globalColor } = useStylesStore();
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchStates = async () => {
-            const res = await StateService.getTypeStates()
-            setEstados(res?.data)
+            try {
+                let estadosData;
+                if (online) {
+                    const res = await StateService.getTypeStates();
+                    estadosData = res?.data;
+                    await AsyncStorage.setItem('estados', JSON.stringify(estadosData));
+                } else {
+                    const storedEstados = await AsyncStorage.getItem('estados');
+                    estadosData = storedEstados ? JSON.parse(storedEstados) : [];
+                }
+                setEstados(estadosData);
+            } catch (error) {
+                console.error({error})
+            }
         }
 
         fetchStates();
     }, [])
 
-    const handleSelectSectorial = (estado: IEstado) => {
+    const handleSelectEstado = (estado: IEstado) => {
         setEstadoActivo(estado)
         closeModal();
     }
@@ -51,8 +64,8 @@ export const ModalEstados = ({ active, closeModal }: Props) => {
                             className="w-full"
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item }) => (
-                                <Pressable className="w-full my-3" onPress={() => handleSelectSectorial(item)}>
-                                    <Text className="font-bold text-gray-500 text-xl">
+                                <Pressable className="w-full my-3" onPress={() => handleSelectEstado(item)}>
+                                    <Text style={{ color: item.id === estadoActivo?.id ? globalColor : '#6B7280' }} className="font-bold text-xl">
                                         {item?.name.charAt(0).toUpperCase() + item?.name.slice(1).toLowerCase()}
                                     </Text>
                                 </Pressable>

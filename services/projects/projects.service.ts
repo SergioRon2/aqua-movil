@@ -28,4 +28,22 @@ export class ProjectsService {
             throw new Error(`Error fetching projects: ${error}`);
         }
     }
+
+    static readonly getProjectInfoById = async (idProject: number) => {
+        try {
+            const response = await aquaApi.get(`/projects/${idProject}`)
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error fetching project info: ${error}`);
+        }
+    }
+
+    static readonly getSubProjects = async (contractId: number) => {
+        try {
+            const response = await aquaApi.get(`/projects/getByContractId/${contractId}`)
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error fetching subprojects: ${error}`);
+        }
+    }
 }

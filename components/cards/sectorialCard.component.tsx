@@ -10,6 +10,8 @@ import { capitalize } from 'utils/capitalize';
 import { memo, useEffect, useState } from 'react';
 import { StateService } from 'services/states/states.service';
 import useActiveStore from 'store/actives/actives.store';
+import useInternetStore from 'store/internet/internet.store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
     sectorialData: ISectorial;
@@ -17,10 +19,10 @@ interface Props {
 
 const SectorialCard = ({ sectorialData }: Props) => {
     const { globalColor } = useStylesStore()
-    const {fechaInicio, fechaFin} = useActiveStore()
+    const { fechaInicio, fechaFin } = useActiveStore()
     const [loading, setLoading] = useState<boolean>(false)
     const [sectorialInfo, setSectorialInfo] = useState<any>()
-
+    const { online } = useInternetStore();
     const navigation = useNavigation();
 
     const handleNavigate = () => {
@@ -31,12 +33,28 @@ const SectorialCard = ({ sectorialData }: Props) => {
         const fetchProjectsByDashboard = async () => {
             try {
                 setLoading(true)
-                const res = await StateService.getStatesData({
-                    sectorial_id: sectorialData.id, 
-                    fechaInicio: fechaInicio, 
-                    fechaFin: fechaFin
-                });
-                setSectorialInfo(res?.data)
+                let data;
+
+                if (online) {
+                    const res = await StateService.getStatesData({
+                        sectorial_id: sectorialData.id,
+                        fechaInicio: fechaInicio,
+                        fechaFin: fechaFin
+                    });
+                    data = res?.data;
+                    setSectorialInfo(data);
+                    // Guarda en storage
+                    await AsyncStorage.setItem("sectorialInfo", JSON.stringify(data));
+                } else {
+                    // Obtiene de storage
+                    const storedData = await AsyncStorage.getItem("sectorialInfo");
+                    if (storedData) {
+                        data = JSON.parse(storedData);
+                        setSectorialInfo(data);
+                    } else {
+                        setSectorialInfo(undefined);
+                    }
+                }
             } catch (error) {
                 console.error({ error })
             } finally {
