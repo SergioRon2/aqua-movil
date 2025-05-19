@@ -65,9 +65,9 @@ export const generarTablaProyectosHTML = (proyectos: IProyecto[]) => {
                 <th>Subproyectos</th>
                 <th>No. Contrato</th>
                 <th>Valor Proyecto</th>
-                <th>Nombre Estado</th>
-                <th>Nombre Sector</th>
-                <th>Texto Municipios</th>
+                <th>Estado</th>
+                <th>Sector</th>
+                <th>Municipios</th>
                 <th>Financiero Actual (%)</th>
                 <th>Físico Actual (%)</th>
                 </tr>

@@ -144,7 +144,7 @@ const UniqueMunicipioScreen = () => {
     return (
         <View className="w-full animate-fade-in px-12">
             <View className="flex-row items-center justify-center gap-4">
-                <Text className="py-6 text-center text-3xl font-bold">{municipio.nombre}</Text>
+                <Text className="py-4 text-center text-3xl font-bold">{municipio.nombre}</Text>
                 <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
                     <Ionicons
                         name="archive-outline"

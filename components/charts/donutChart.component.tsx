@@ -73,7 +73,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
                         <View key={index} style={styles.legendItem}>
                             <View style={[styles.colorBox, { backgroundColor: chartData[index].color || '#ccc' }]} />
                             <Text style={styles.legendText}>
-                                {`${item.label}: ${item.value}%`}
+                                {`${item.label}: ${item.value.toFixed(1)}%`}
                             </Text>
                         </View>
                     ))}

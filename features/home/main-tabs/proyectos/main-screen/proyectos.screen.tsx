@@ -64,7 +64,7 @@ const ProyectosScreen = () => {
         try {
             const html = await generarTablaProyectosHTML(proyectos);
 
-            const { uri } = await Print.printToFileAsync({ html });
+            const { uri } = await Print.printToFileAsync({ html, width: 1600 });
 
             // console.log('PDF generado:', uri, { html });
 
