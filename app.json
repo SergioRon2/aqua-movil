@@ -3,6 +3,7 @@
     "name": "Aqua",
     "slug": "my-expo-app",
     "version": "1.0.0",
+    "main": "node_modules/expo/AppEntry.js",
     "web": {
       "favicon": "./assets/img/logo.png"
     },
@@ -29,8 +30,7 @@
         "foregroundImage": "./assets/img/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.fqtecnologia.aqua",
-      "usesCleartextTraffic": true
+      "package": "com.fqtecnologia.aqua"
     },
     "extra": {
       "eas": {

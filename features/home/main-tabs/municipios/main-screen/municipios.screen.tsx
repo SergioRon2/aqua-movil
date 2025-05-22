@@ -17,7 +17,6 @@ import useActiveStore from 'store/actives/actives.store';
 const Municipios = () => {
     const [municipios, setMunicipios] = useState<IMunicipio[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loadingReporte, setLoadingReporte] = useState(false);
     const { online } = useInternetStore();
     const { fechaInicio, fechaFin } = useActiveStore();
 
@@ -59,7 +58,6 @@ const Municipios = () => {
     );
 
     const createPDF = async (municipiosData: IMunicipio[]) => {
-        setLoadingReporte(true)
         try {
             const html = await generarReporteMunicipiosHTML(municipiosData, fechaInicio!, fechaFin!);
 
@@ -71,8 +69,6 @@ const Municipios = () => {
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
-        } finally {
-            setLoadingReporte(false)
         }
     };
 
@@ -108,20 +104,6 @@ const Municipios = () => {
                     <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
                 </View>
             )}
-
-            {/* Modal para loading */}
-            <Modal
-                visible={loadingReporte}
-                transparent
-                animationType="fade"
-            >
-                <View className="flex-1 bg-black/30 justify-center items-center">
-                    <View className='bg-white w-2/3 h-auto rounded-lg shadow-lg items-center justify-center'>
-                        <Loading />
-                        <Text className="text-black mt-4">Generando reporte...</Text>
-                    </View>
-                </View>
-            </Modal>
         </View>
     )
 }
