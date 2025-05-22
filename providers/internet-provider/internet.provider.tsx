@@ -43,11 +43,6 @@ const InternetProvider = ({ children }: Props) => {
                 setOnline(false);
                 setModalOffline(true);
             }
-
-            console.log('Connectivity changed:', {
-                isConnected: state.isConnected,
-                isInternetReachable: state.isInternetReachable,
-            });
         });
 
         return () => unsubscribe();

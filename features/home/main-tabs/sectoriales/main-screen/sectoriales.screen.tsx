@@ -17,7 +17,6 @@ import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 const Sectoriales = () => {
     const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
     const [loading, setLoading] = useState(true)
-    const [loadingReporte, setLoadingReporte] = useState(false);
     const { online } = useInternetStore();
     const { fechaInicio, fechaFin } = useActiveStore();
 
@@ -50,7 +49,6 @@ const Sectoriales = () => {
     }, [])
 
     const createPDF = async (sectorialesData: ISectorial[]) => {
-        setLoadingReporte(true)
         try {
             const html = await generarReporteSectorialesHTML(sectorialesData, fechaInicio!, fechaFin!);
 
@@ -60,8 +58,6 @@ const Sectoriales = () => {
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
-        } finally {
-            setLoadingReporte(false)
         }
     };
 
@@ -97,20 +93,6 @@ const Sectoriales = () => {
                     <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
                 </View>
             )}
-
-
-            <Modal
-                visible={loadingReporte}
-                transparent
-                animationType="fade"
-            >
-                <View className="flex-1 bg-black/30 justify-center items-center">
-                    <View className='bg-white w-2/3 h-auto rounded-lg shadow-lg items-center justify-center'>
-                        <Loading />
-                        <Text className="text-black mt-4">Generando reporte...</Text>
-                    </View>
-                </View>
-            </Modal>
         </View>
     )
 };
