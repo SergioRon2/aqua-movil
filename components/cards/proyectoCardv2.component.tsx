@@ -22,9 +22,9 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
 
     const municipios = proyecto?.municipios_texto?.split(',');
 
-    const valorTotal = proyecto.total_source_value;
-    const progresoFinanciero = parseProgress(proyecto.financial_current ?? 0) / 100;
-    const progresoFisico = parseProgress(proyecto.physical_current ?? 0) / 100;
+    const valorTotal = proyecto.value_project;
+    const progresoFinanciero = proyecto.financial_current ? proyecto.financial_current / 100 : 0;
+    const progresoFisico = proyecto.physical_current ? proyecto.physical_current / 100 : 0;
 
     const handleNavigate = () => {
         navigation.navigate('Proyecto', { proyecto });

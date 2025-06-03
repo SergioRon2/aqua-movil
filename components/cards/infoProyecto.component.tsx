@@ -12,6 +12,9 @@ import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { generarReporteProyectoHTML } from "components/pdfTemplates/proyectoUnicoReporte.component";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useInternetStore from "store/internet/internet.store";
+import * as FileSystem from 'expo-file-system';
 
 type Props = {
     proyecto: any;
@@ -27,13 +30,28 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
     const [subProjects, setSubProjects] = useState<any>();
     const municipios = proyecto?.municipios_texto?.split(',');
     const [loading, setLoading] = useState<boolean>(false)
+    const { online } = useInternetStore();
 
     useEffect(() => {
         const fetchSubProjects = async () => {
             try {
                 setLoading(true)
-                const res = await ProjectsService.getSubProjects(infoProyecto?.principal_contract_id)
-                setSubProjects(res.data)
+                const storageKey = `subprojects_${infoProyecto?.principal_contract_id}`;
+                if (online === null) {
+                    return;
+                }
+                if (online) {
+                    const res = await ProjectsService.getSubProjects(infoProyecto?.principal_contract_id);
+                    setSubProjects(res.data);
+                    await AsyncStorage.setItem(storageKey, JSON.stringify(res.data));
+                } else {
+                    const cached = await AsyncStorage.getItem(storageKey);
+                    if (cached) {
+                        setSubProjects(JSON.parse(cached));
+                    } else {
+                        setSubProjects([]);
+                    }
+                }
             } catch (error) {
                 console.error({ error })
             } finally {
@@ -66,9 +84,6 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
             Alert.alert('Error', 'No se pudo generar el PDF.');
         }
     };
-
-    console.log(infoProyecto?.files)
-
 
     return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
         {infoProyecto?.description && (

@@ -21,6 +21,9 @@ const SearchScreen = () => {
     useEffect(() => {
         const fetchProyectos = async () => {
             try {
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin });
                     setProyectos(res?.data?.data || []);

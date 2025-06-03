@@ -24,6 +24,9 @@ export const ModalSectorialesDashboard = ({ active, closeModal }: Props) => {
         const fetchSectorals = async () => {
             try {
                 let sectorialsData;
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await SectoralService.getAllSectorals();
                     sectorialsData = res?.data?.data;

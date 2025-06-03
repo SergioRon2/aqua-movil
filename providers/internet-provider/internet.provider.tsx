@@ -21,7 +21,7 @@ const InternetProvider = ({ children }: Props) => {
         const checkInternetConnection = async () => {
             try {
                 const state = await NetInfo.fetch();
-                const isOnline = state.isConnected && (state.isInternetReachable ?? true);
+                const isOnline = state.isConnected && state.isInternetReachable === true;
                 setOnline(isOnline);
                 setModalOffline(!isOnline);
             } catch (error) {
@@ -46,7 +46,7 @@ const InternetProvider = ({ children }: Props) => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, []); 
 
     if (online === null) {
         return <Loading />

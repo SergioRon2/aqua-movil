@@ -16,7 +16,7 @@ import useInternetStore from "store/internet/internet.store";
 const ProyectoScreen = () => {
     const route = useRoute();
     const { proyecto } = route.params;
-    const { fechaInicio, fechaFin } = useActiveStore()
+    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
     const [infoProject, setInfoProject] = useState<any>();
     const [avances, setAvances] = useState({
         avanceFinanciero: { name: '', value: 0 },
@@ -51,8 +51,15 @@ const ProyectoScreen = () => {
     useEffect(() => {
         const fetchInfo = async () => {
             try {
+                if (online === null) {
+                    return;
+                }
+
+
                 if (online) {
+                    console.log(fechaInicio, fechaFin)
                     const res = await InfoService.getInfoByAllData({
+                        development_plan_id: planDesarrolloActivo?.id,
                         project_id: proyecto.id,
                         fechaInicio: fechaInicio,
                         fechaFin: fechaFin
@@ -62,6 +69,7 @@ const ProyectoScreen = () => {
                         avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
                         indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
                     };
+                    console.log({ avancesData })
                     setAvances(avancesData);
                     // Guardar en AsyncStorage
                     await AsyncStorage.setItem(

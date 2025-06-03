@@ -4,8 +4,8 @@ import ProyectoCard from "components/cards/proyectoCard.component";
 import SemiDonutChart from "components/charts/semiDonutChart.component";
 import { generarResumenSectorialUnicoHTML } from "components/pdfTemplates/sectorialUnicoReporte.component";
 import { IProyecto } from "interfaces/proyecto.interface";
-import { useEffect, useState } from "react";
-import { View, Text, Dimensions, ActivityIndicator, ScrollView, Alert, Pressable } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { View, Text, Dimensions, ActivityIndicator, ScrollView, Alert, Pressable, RefreshControl } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
@@ -17,14 +17,17 @@ import useStylesStore from "store/styles/styles.store";
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
+import { Loading } from "components/loading/loading.component";
+import * as FileSystem from 'expo-file-system';
 
 const UniqueSectorialScreen = () => {
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin } = useActiveStore();
+    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore();
     const route = useRoute();
     const { sectorial } = route.params;
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [avances, setAvances] = useState({
         avanceFinanciero: { name: '', value: 0 },
         avanceFisico: { name: '', value: 0 },
@@ -32,44 +35,58 @@ const UniqueSectorialScreen = () => {
     });
     const { online } = useInternetStore();
 
-    useEffect(() => {
-        const fetchProyectos = async () => {
-            try {
-                setLoading(true);
-                if (online) {
-                    const res = await ProjectsService.getAll({
-                        sectorial_id: sectorial.id,
-                        fechaInicio: fechaInicio,
-                        fechaFin: fechaFin
-                    });
-                    setProyectos(res?.data?.data);
-                    await AsyncStorage.setItem(
-                        `proyectosSectorial`,
-                        JSON.stringify(res?.data?.data)
-                    );
-                } else {
-                    const stored = await AsyncStorage.getItem(`proyectosSectorial`);
-                    if (stored) {
-                        setProyectos(JSON.parse(stored));
-                    } else {
-                        setProyectos([]);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching proyectos:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
+    const fetchProyectos = useCallback(async () => {
+        try {
+            setRefreshing(true);
+            setLoading(true);
+            if (online === null) return;
 
+            if (online) {
+                const res = await ProjectsService.getAll({
+                    sectorial_id: sectorial.id,
+                    fechaInicio,
+                    fechaFin,
+                });
+                const proyectos = res?.data?.data;
+                setProyectos(proyectos);
+                await AsyncStorage.setItem(
+                    `proyectosSectorial`,
+                    JSON.stringify(proyectos)
+                );
+            } else {
+                const stored = await AsyncStorage.getItem(`proyectosSectorial`);
+                if (stored) {
+                    setProyectos(JSON.parse(stored));
+                } else {
+                    setProyectos([]);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching proyectos:', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, [online, sectorial.id, fechaInicio, fechaFin]);
+
+    useEffect(() => {
         fetchProyectos();
-    }, [sectorial.id, fechaInicio, fechaFin])
+    }, [fetchProyectos]);
+
+    const onRefresh = () => {
+        fetchProyectos();
+    };
+
 
     useEffect(() => {
         const fetchInfo = async () => {
             try {
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await InfoService.getInfoByAllData({
+                        development_plan_id: planDesarrolloActivo?.id,
                         sectorial_id: sectorial.id,
                         fechaInicio: fechaInicio,
                         fechaFin: fechaFin
@@ -125,73 +142,85 @@ const UniqueSectorialScreen = () => {
     };
 
     const items = [
-        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} /> },
-        { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value} height={240} /> },
-        { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={240} /> },
+        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value || 0} height={240} /> },
+        { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value || 0} height={240} /> },
+        { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value || 0} height={240} /> },
     ];
 
     return (
-        <View className="animate-fade-in px-12 w-full">
-            <View className="flex-row items-center justify-center gap-4">
-                <Text className="py-6 text-center text-3xl font-bold">{sectorial.name}</Text>
-                <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
-                    <Ionicons
-                        name="archive-outline"
-                        size={28}
-                        color={globalColor}
-                        style={{ marginRight: 12 }}
-                    />
-                </Pressable>
-            </View>
+        <ScrollView
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
+            }
+            className="animate-fade-in px-12 w-full flex-1 bg-white"
+        >
+            {loading ? (
+                <Loading />
+            ) : (
+                <>
+                    <View className="flex-row items-center justify-center gap-4">
+                        <Text className="py-6 text-center text-3xl font-bold">{sectorial.sector_name}</Text>
+                        <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
+                            <Ionicons
+                                name="archive-outline"
+                                size={28}
+                                color={globalColor}
+                                style={{ marginRight: 12 }}
+                            />
+                        </Pressable>
+                    </View>
 
-            <View className='gap-4 mb-4 my-3 mx-auto w-full rounded-xl shadow-lg bg-white'>
-                <View className="justify-center items-center mt-6 rounded-lg h-auto">
-                    <Carousel
-                        loop
-                        width={Dimensions.get('window').width - 90}
-                        height={290}
-                        data={items}
-                        scrollAnimationDuration={1000}
-                        renderItem={({ item }) => (
-                            <View className="w-full gap-5 justify-center items-center mb-5">
-                                <Text className="mt-4 text-lg font-bold">{item.title}</Text>
-                                {item.component}
-                            </View>
-                        )}
-                    />
-                </View>
-            </View>
+                    <View className='gap-4 mb-4 my-3 mx-auto w-full rounded-xl shadow-lg border border-gray-300 bg-white'>
+                        <View className="justify-center items-center mt-6 rounded-lg h-auto">
+                            <Carousel
+                                loop
+                                width={Dimensions.get('window').width - 90}
+                                height={200}
+                                data={items}
+                                scrollAnimationDuration={1000}
+                                renderItem={({ item }) => (
+                                    <View className="w-full justify-center items-center">
+                                        <Text className="mt-4 text-lg font-bold">{item.title}</Text>
+                                        {item.component}
+                                    </View>
+                                )}
+                            />
+                        </View>
+                    </View>
 
 
-            <View className="rounded-2xl justify-center animate-fade-in py-5 h-2/4">
-                {
-                    loading ? (
-                        <ActivityIndicator size={'large'} color={globalColor} />
-                    ) :
-                        proyectos.length > 0 ? (
-                            <View className="mb-8">
-                                <Text className="text-2xl font-bold py-2">
-                                    Proyectos
-                                </Text>
-                                <FlatList
-                                    data={proyectos}
-                                    keyExtractor={(item, index) => `${item.id}-${index}`}
-                                    renderItem={({ item, index }) => (
-                                        <Animated.View entering={index < 10 ? FadeInDown.delay(index * 200) : undefined} exiting={FadeOutDown}>
-                                            <ProyectoCard data={item} />
-                                        </Animated.View>
-                                    )}
-                                    contentContainerStyle={{ paddingBottom: 20 }}
-                                />
-                            </View>
-                        ) : (
-                            <View className='justify-center items-center m-auto'>
-                                <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
-                            </View>
-                        )
-                }
-            </View>
-        </View>
+                    <View className="h-auto rounded-2xl justify-center animate-fade-in py-3">
+                        {
+                            loading ? (
+                                <ActivityIndicator size={'large'} color={globalColor} />
+                            ) :
+                                proyectos.length > 0 ? (
+                                    <View className="mb-8">
+                                        <Text className="text-xl font-bold py-2">
+                                            Proyectos
+                                        </Text>
+                                        <FlatList
+                                            data={proyectos}
+                                            scrollEnabled={false}
+                                            keyExtractor={(item, index) => `${item.id}-${index}`}
+                                            renderItem={({ item, index }) => (
+                                                <Animated.View entering={index < 10 ? FadeInDown.delay(index * 200) : undefined} exiting={FadeOutDown}>
+                                                    <ProyectoCard data={item} />
+                                                </Animated.View>
+                                            )}
+                                            contentContainerStyle={{ paddingBottom: 20 }}
+                                        />
+                                    </View>
+                                ) : (
+                                    <View className='justify-center items-center m-auto'>
+                                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                                    </View>
+                                )
+                        }
+                    </View>
+                </>
+            )}
+        </ScrollView>
     );
 }
 

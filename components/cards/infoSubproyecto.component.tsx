@@ -6,6 +6,7 @@ import { ExportsService } from "services/exports/exports.service";
 import useStylesStore from "store/styles/styles.store";
 import { capitalize } from "utils/capitalize";
 import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
 

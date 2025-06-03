@@ -23,6 +23,9 @@ export const ModalMunicipios = ({ active, closeModal }: Props) => {
     useEffect(() => {
         const fetchMunicipios = async () => {
             try {
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const { data } = await MunicipalitiesService.getMunicipalitiesCesar();
                     setMunicipios(data);

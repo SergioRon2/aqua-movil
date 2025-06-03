@@ -23,6 +23,9 @@ export const ModalSectoriales = ({ active, closeModal }: Props) => {
     useEffect(() => {
         const fetchSectorals = async () => {
             try {
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await SectoralService.getAllSectorals();
                     setSectoriales(res?.data?.data);

@@ -29,6 +29,9 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
             try {
                 setLoading(true)
                 let projectsData: IProyectoDashboard[] = [];
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await StateService.getStatesData({
                         sectorial_id: selectedItem.sector_id,

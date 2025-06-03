@@ -5,18 +5,22 @@ import { useNavigation } from '@react-navigation/native';
 import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 import { Ionicons } from '@expo/vector-icons';
 import useStylesStore from 'store/styles/styles.store';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { StateService } from 'services/states/states.service';
 import { capitalize } from 'utils/capitalize';
 import useActiveStore from 'store/actives/actives.store';
 import useInternetStore from 'store/internet/internet.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Loading } from 'components/loading/loading.component';
+import { CardLoading } from './cardMunicipioSectorialLoading.component';
 
 interface Props {
-    municipioData: IMunicipio;
+    municipioData: any;
+    onLoaded: () => void;
+    index: number
 }
 
-const MunicipioCard = ({ municipioData }: Props) => {
+const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [municipioInfo, setMunicipioInfo] = useState<any>()
     const { globalColor } = useStylesStore()
@@ -24,49 +28,80 @@ const MunicipioCard = ({ municipioData }: Props) => {
     const navigation = useNavigation();
     const { online } = useInternetStore();
 
-    useEffect(() => {
-        const fetchProjectsByDashboard = async () => {
-            try {
-                setLoading(true);
-                let data;
-                if (online) {
-                    const res = await StateService.getStatesData({ municipio_id: municipioData.id, fechaInicio, fechaFin });
-                    data = res?.data;
-                    // Guarda en storage
-                    await AsyncStorage.setItem('municipioInfo', JSON.stringify(data));
-                } else {
-                    // Intenta obtener de storage
-                    const stored = await AsyncStorage.getItem('municipioInfo');
-                    data = stored ? JSON.parse(stored) : null;
+
+    const fetchProjectsByDashboard = useCallback(async () => {
+        const key = `municipioInfo_${municipioData.id}`;
+        let isMounted = true;
+
+        try {
+            setLoading(true);
+            let data;
+
+            if (online === null) return;
+
+            if (online) {
+                const res = await StateService.getStatesData({
+                    municipio_id: municipioData.id,
+                    fechaInicio,
+                    fechaFin,
+                });
+                data = res?.data;
+                if (data) {
+                    await AsyncStorage.setItem(key, JSON.stringify(data));
                 }
-                setMunicipioInfo(data);
-            } catch (error) {
-                console.error({ error });
-            } finally {
+            } else {
+                const stored = await AsyncStorage.getItem(key);
+                data = stored ? JSON.parse(stored) : null;
+            }
+
+            if (isMounted) {
+                setMunicipioInfo(data || {});
+                onLoaded();
+            }
+        } catch (error) {
+            console.error({ error });
+        } finally {
+            if (isMounted) {
                 setLoading(false);
+                onLoaded();
             }
         }
 
-        fetchProjectsByDashboard();
-    }, [municipioData.id, fechaInicio, fechaFin])
+        // Para cancelar en caso de desmontaje
+        return () => {
+            isMounted = false;
+        };
+    }, [municipioData.id, fechaInicio, fechaFin, online]);
 
-    const total = municipioInfo?.value_total_project
+    useEffect(() => {
+        const delay = index * 1000; // espera 1000ms por cada índice
+        const timeout = setTimeout(() => {
+            fetchProjectsByDashboard();
+        }, delay);
+
+        return () => clearTimeout(timeout); // limpieza por si el componente se desmonta
+    }, [fechaInicio, fechaFin]);
+
+    const total = municipioInfo?.value_total_project || 0
     const ejecutado = municipioInfo?.value_total_executed
     const progress = total > 0 ? ejecutado / total : 0;
 
-    const handleNavigate = () => {
+    const handleNavigate = useCallback(() => {
         navigation.navigate('UniqueMunicipio', { municipio: municipioData });
-    };
+    }, [navigation, municipioData]);
+
+
+    if (!municipioInfo) return <CardLoading />;
 
     return (
         <Pressable onPress={handleNavigate} className='flex-row h-40 w-11/12 rounded-2xl justify-center items-center mx-auto mt-5 shadow-lg'>
-            <View style={{ backgroundColor: globalColor }} className='w-1/2 h-full rounded-l-2xl justify-center gap-2 items-center animate-fade-in'>
+            <View style={{ backgroundColor: globalColor }} className='w-1/2 h-full rounded-l-2xl justify-center gap-2 items-center'>
                 {loading ? (
                     <ActivityIndicator size={'small'} color={'white'} className='w-full h-full animate-fade-in' />
                 ) : (
                     <>
-                        <Text className='text-white text-2xl font-bold animate-fade-in'>{capitalize(municipioData.nombre)}</Text>
-                        <View className='flex-col justify-center items-center w-full mt-2 animate-fade-in'>
+                        <Text className='text-white text-2xl font-bold'>{capitalize(municipioData.name)}</Text>
+                        <View className='flex-col justify-center items-center w-full mt-2'>
                             <View className='flex-row ml-16 justify-start w-full items-center mt-2'>
                                 <Ionicons color={'white'} name='briefcase' size={20} />
                                 <Text className='text-white ml-2 text-lg font-bold'>{municipioInfo?.amount_project_initiatives}</Text>
@@ -82,17 +117,17 @@ const MunicipioCard = ({ municipioData }: Props) => {
                 )}
 
             </View>
-            <View style={{ borderColor: globalColor }} className='w-1/2 bg-white border rounded-r-2xl p-5 h-full justify-center gap-4 items-center animate-fade-in'>
+            <View style={{ borderColor: globalColor }} className='w-1/2 bg-white border rounded-r-2xl p-5 h-full justify-center gap-4 items-center'>
                 {loading ? (
-                    <ActivityIndicator size={'small'} color={globalColor} className='w-full h-full animate-fade-in' />
+                    <ActivityIndicator size={'small'} color={globalColor} className='w-full h-full' />
                 ) : (
                     <>
-                        <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
+                        <View className='w-full h-1/2 justify-center items-start'>
                             <Text className='text-black text-md font-bold'>Valor de proyectos</Text>
                             <Text className='text-black text-4xl font-bold'>{formatNumberWithSuffix(+total)}</Text>
                         </View>
-                        <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
-                            <Text className='text-black text-md font-bold'>Valor ejecutado</Text>
+                        <View className='w-full h-1/2 justify-center items-start'>
+                            <Text className='text-black text-md font-bold'>Total ejecutado</Text>
                             <View className='w-full flex-row gap-3 justify-center items-center'>
                                 <ProgressBar
                                     progress={progress}

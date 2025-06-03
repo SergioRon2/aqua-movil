@@ -2,8 +2,8 @@ import { FiltersComponentDashboard } from 'components/buttons/filtersInfoDashboa
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import { Loading } from 'components/loading/loading.component';
 import LottieView from 'lottie-react-native';
-import { useEffect, useState } from 'react';
-import { ScrollView, Text, View, Image, Dimensions, Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ScrollView, Text, View, Image, Dimensions, Alert, RefreshControl, Platform } from 'react-native';
 import { StateService } from 'services/states/states.service';
 import useStylesStore from 'store/styles/styles.store';
 import { capitalize } from 'utils/capitalize';
@@ -19,7 +19,9 @@ import DonutChartComponent from 'components/charts/donutChart.component';
 import useInternetStore from 'store/internet/internet.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
 import { generarReporteDashboardHTML } from 'components/pdfTemplates/dashboardReporte.component';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 
@@ -37,8 +39,9 @@ type SectorialInfo = {
 const DashboardScreen = () => {
     const { online } = useInternetStore();
     const { globalColor } = useStylesStore()
-    const { municipioActivoDashboard, sectorialActivoDashboard, fechaInicio, fechaFin } = useActiveStore()
+    const { municipioActivoDashboard, sectorialActivoDashboard, fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
     const [sectorialInfo, setSectorialInfo] = useState<SectorialInfo[]>([])
+    const [refreshing, setRefreshing] = useState(false);
     const [values, setValues] = useState<Values>({
         value_total_project: '0',
         value_total_executed: '0'
@@ -51,100 +54,121 @@ const DashboardScreen = () => {
     });
     const [loading, setLoading] = useState(true)
 
-    console.log({sectorialInfo})
+    const fetchProjectsByDashboard = useCallback(async () => {
+        try {
+            setLoading(true)
+            setRefreshing(true);
+            if (online === null) {
+                return;
+            }
 
-    useEffect(() => {
-        const fetchProjectsByDashboard = async () => {
-            try {
-                setLoading(true)
-                if (online) {
-                    const res = await StateService.getStatesData({
-                        municipio_id: municipioActivoDashboard?.id,
-                        sectorial_id: sectorialActivoDashboard?.id,
-                        fechaInicio: fechaInicio,
-                        fechaFin: fechaFin
-                    });
-                    setAmount(res?.data?.amount_project)
-                    setSectorialInfo(res?.data?.list_sectorial_response)
-                    setValues({
+            if (online) {
+                const res = await StateService.getStatesData({
+                    municipio_id: municipioActivoDashboard?.id,
+                    sectorial_id: sectorialActivoDashboard?.id,
+                    fechaInicio: fechaInicio,
+                    fechaFin: fechaFin
+                });
+                setAmount(res?.data?.amount_project)
+                setSectorialInfo(res?.data?.list_sectorial_response)
+                setValues({
+                    value_total_project: res?.data?.value_total_project,
+                    value_total_executed: res?.data?.value_total_executed
+                })
+                // Save to AsyncStorage
+                const dataToStore = {
+                    amount: res?.data?.amount_project,
+                    sectorialInfo: res?.data?.list_sectorial_response,
+                    values: {
                         value_total_project: res?.data?.value_total_project,
                         value_total_executed: res?.data?.value_total_executed
-                    })
-                    // Save to AsyncStorage
-                    const dataToStore = {
-                        amount: res?.data?.amount_project,
-                        sectorialInfo: res?.data?.list_sectorial_response,
-                        values: {
-                            value_total_project: res?.data?.value_total_project,
-                            value_total_executed: res?.data?.value_total_executed
-                        }
-                    };
-                    try {
-                        await AsyncStorage.setItem('dashboardData', JSON.stringify(dataToStore));
-                    } catch (e) {
-                        console.error('Error saving dashboard data to storage', e);
                     }
-                } else {
-                    try {
-                        const storedData = await AsyncStorage.getItem('dashboardData');
-                        if (storedData) {
-                            const parsed = JSON.parse(storedData);
-                            setAmount(parsed.amount);
-                            setSectorialInfo(parsed.sectorialInfo);
-                            setValues(parsed.values);
-                        }
-                    } catch (e) {
-                        console.error('Error loading dashboard data from storage', e);
-                    }
+                };
+                try {
+                    await AsyncStorage.setItem('dashboardData', JSON.stringify(dataToStore));
+                } catch (e) {
+                    console.error('Error saving dashboard data to storage', e);
                 }
-            } catch (error) {
-                console.error({ error })
-            } finally {
-                setLoading(false)
+            } else {
+                try {
+                    const storedData = await AsyncStorage.getItem('dashboardData');
+                    if (storedData) {
+                        const parsed = JSON.parse(storedData);
+                        setAmount(parsed.amount);
+                        setSectorialInfo(parsed.sectorialInfo);
+                        setValues(parsed.values);
+                    }
+                } catch (e) {
+                    console.error('Error loading dashboard data from storage', e);
+                }
             }
+        } catch (error) {
+            console.error({ error })
+        } finally {
+            setLoading(false)
+            setRefreshing(false);
         }
+    }, [
+        online,
+        municipioActivoDashboard?.id,
+        sectorialActivoDashboard?.id,
+        fechaInicio,
+        fechaFin
+    ]);
 
-        fetchProjectsByDashboard();
-    }, [municipioActivoDashboard?.id, sectorialActivoDashboard?.id, fechaInicio, fechaFin])
+    const fetchInfo = useCallback(async () => {
+        try {
+            if (online === null) {
+                return;
+            }
+            if (online) {
+                const res = await InfoService.getInfoByAllData({
+                    development_plan_id: planDesarrolloActivo?.id,
+                    sectorial_id: sectorialActivoDashboard?.id,
+                    municipio_id: municipioActivoDashboard?.id,
+                    fechaInicio: fechaInicio,
+                    fechaFin: fechaFin
+                });
+                const avancesData = {
+                    avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
+                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                    indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
+                };
+                setAvances(avancesData);
+                try {
+                    await AsyncStorage.setItem('dashboardAvances', JSON.stringify(avancesData));
+                } catch (e) {
+                    console.error('Error saving avances data to storage', e);
+                }
+            } else {
+                try {
+                    const storedAvances = await AsyncStorage.getItem('dashboardAvances');
+                    if (storedAvances) {
+                        setAvances(JSON.parse(storedAvances));
+                    }
+                } catch (e) {
+                    console.error('Error loading avances data from storage', e);
+                }
+            }
+        } catch (error) {
+            console.error({ error })
+        }
+    }, [
+        online,
+        planDesarrolloActivo?.id,
+        sectorialActivoDashboard?.id,
+        municipioActivoDashboard?.id,
+        fechaInicio,
+        fechaFin
+    ]);
 
     useEffect(() => {
-        const fetchInfo = async () => {
-            try {
-                if (online) {
-                    const res = await InfoService.getInfoByAllData({
-                        sectorial_id: sectorialActivoDashboard?.id,
-                        municipio_id: municipioActivoDashboard?.id,
-                        fechaInicio: fechaInicio,
-                        fechaFin: fechaFin
-                    });
-                    const avancesData = {
-                        avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                        avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
-                        indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
-                    };
-                    setAvances(avancesData);
-                    try {
-                        await AsyncStorage.setItem('dashboardAvances', JSON.stringify(avancesData));
-                    } catch (e) {
-                        console.error('Error saving avances data to storage', e);
-                    }
-                } else {
-                    try {
-                        const storedAvances = await AsyncStorage.getItem('dashboardAvances');
-                        if (storedAvances) {
-                            setAvances(JSON.parse(storedAvances));
-                        }
-                    } catch (e) {
-                        console.error('Error loading avances data from storage', e);
-                    }
-                }
-            } catch (error) {
-                console.error({ error })
-            }
-        }
+        fetchProjectsByDashboard();
+    }, [fetchProjectsByDashboard]);
 
+    useEffect(() => {
         fetchInfo();
-    }, [municipioActivoDashboard?.id, sectorialActivoDashboard?.id, fechaInicio, fechaFin])
+    }, [fetchInfo]);
 
     // donut chart data
     const totalProjects = (sectorialInfo || []).reduce((sum, item) => sum + item.amount_project, 0);
@@ -193,6 +217,11 @@ const DashboardScreen = () => {
         }
     };
 
+    const onRefresh = () => {
+        fetchProjectsByDashboard();
+        fetchInfo();
+    };
+
     const items = [
         { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} /> },
         { title: avances.avanceFisico.name, component: <SemiDonutChart color='#009966' percentage={avances.avanceFisico.value} height={240} /> },
@@ -203,6 +232,9 @@ const DashboardScreen = () => {
         <ScrollView
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
+            }
             className="flex-grow bg-white"
         >
             {/* select development plan */}
@@ -278,7 +310,7 @@ const DashboardScreen = () => {
                             <DonutChartComponent amount={amount} data={donutChartData} />
                         </View>
                     </View>
-                    
+
                     <View className='justify-center items-center my-8'>
                         <CustomButtonPrimary rounded title='Generar reporte' onPress={createPDF} />
                     </View>
@@ -291,7 +323,7 @@ const DashboardScreen = () => {
                             style={{ width: 350, height: 350 }}
                         />
                         <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles</Text>
-                    </View>}            
+                    </View>}
         </ScrollView>
     );
 };

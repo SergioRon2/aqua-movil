@@ -11,7 +11,6 @@ interface ProyectoSector {
   sector_name: string;
 }
 
-
 export const generarReporteDashboardHTML = async (
   infoGeneral: ProyectoGeneral,
   sectores: ProyectoSector[],
@@ -26,98 +25,222 @@ export const generarReporteDashboardHTML = async (
     second: "2-digit",
   });
 
+  // Cards para sectores con color según índice, para darle dinamismo
+  const coloresSector = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#E91E63"];
   const renderSectores = sectores
     .map(
       (sector, idx) => `
-    <tr>
-      <td>${idx + 1}</td>
-      <td>${sector.sector_name}</td>
-      <td>${sector.amount_project}</td>
-    </tr>
+    <div class="card sector-card" style="border-left: 6px solid ${coloresSector[idx % coloresSector.length]}">
+      <h4>${sector.sector_name}</h4>
+      <p><strong>Total Proyectos:</strong> ${sector.amount_project}</p>
+    </div>
   `
     )
     .join("");
 
+  // Cards para indicadores con barras de progreso y color dinámico
   const renderIndicadores = Object.values(indicadores)
-  .map(
-    (item: any) => `
-      <tr>
-        <td>${item.name}</td>
-        <td>${item.value}%</td>
-      </tr>
-    `
-  )
-  .join('');
+    .map(
+      (item: any) => {
+        const valor = +item.value || 0;
+        const colorBar = valor >= 75 ? "#4CAF50" : valor >= 50 ? "#FFC107" : "#F44336";
+        return `
+        <div class="card indicador-card">
+          <h4>${item.name}</h4>
+          <div class="progress-bar-container">
+            <div class="progress-bar" style="width: ${valor}%; background-color: ${colorBar};"></div>
+          </div>
+          <p>${valor}%</p>
+        </div>
+      `;
+      }
+    )
+    .join("");
+
+  // % ejecutado calculado bonito
+  const porcentajeEjecutado =
+    (+infoGeneral.valorEjecutado / +infoGeneral.valorTotal || 0) * 100;
 
   return `
     <html>
       <head>
         <style>
-          body { font-family: Arial; padding: 20px; color: #222; background: #f7f7f7; }
-          table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 40px; }
-          th, td { border: 1px solid #bbb; padding: 8px; text-align: left; font-size: 12px; }
-          th { background: #e0e0e0; color: #333; }
-          .excel-header { background: #aaa; color: #fff; font-weight: bold; padding: 12px; margin-bottom: 0; }
-          h3 { margin-top: 40px; }
+          /* Reset y base */
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+          }
+
+          h2 {
+            text-align: center;
+            margin-bottom: 0;
+          }
+
+          .header {
+            color: black;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+          }
+
+          .fecha-exportacion {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #333;
+            margin-top: 5px;
+          }
+
+          /* Contenedor general con grid */
+          .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+          }
+
+          /* Card base */
+          .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+            padding: 15px;
+            transition: transform 0.2s ease;
+          }
+
+          .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgb(0 0 0 / 0.15);
+          }
+
+          /* Información General */
+          .info-general {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+          }
+
+          .info-card {
+            flex: 1 1 200px;
+            border-left: 6px solid #1976d2;
+          }
+
+          .info-card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+          }
+
+          .info-card p {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1976d2;
+          }
+
+          /* Sectores */
+          .sector-card {
+            border-left-width: 6px;
+          }
+
+          .sector-card h4 {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+          }
+
+          .sector-card p {
+            margin: 0;
+            font-size: 1rem;
+          }
+
+          /* Indicadores */
+          .indicador-card h4 {
+            margin: 0 0 6px 0;
+          }
+
+          .progress-bar-container {
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 18px;
+            margin-bottom: 6px;
+          }
+
+          .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+          }
+
+          /* Footer */
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+          }
+
+          /* Responsive tweaks */
+          @media (max-width: 600px) {
+            .info-general {
+              flex-direction: column;
+              align-items: center;
+            }
+          }
         </style>
       </head>
-      <body>
-        <div class="excel-header">
-          Reporte General de Proyectos<br/>
-          Exportado: ${fechaExportacion}
+      <body style="display: flex; gap: 10px; flex-direction: column;">
+        <div class="header">
+          <div class="fecha-exportacion">Exportado: ${fechaExportacion}</div>
         </div>
 
-        <h3>1. Información General</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha Inicio</th>
-              <th>Fecha Fin</th>
-              <th>Valor Total</th>
-              <th>Valor Ejecutado</th>
-              <th>% Ejecutado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${infoGeneral.fechaInicio}</td>
-              <td>${infoGeneral.fechaFin}</td>
-              <td>$${infoGeneral.valorTotal}</td>
-              <td>$${infoGeneral.valorEjecutado}</td>
-              <td>${(
-                (+infoGeneral.valorEjecutado / +infoGeneral.valorTotal || 0) * 100
-              ).toFixed(0)}%</td>
-            </tr>
-          </tbody>
-        </table>
+        <section>
+          <h2>1. Información General</h2>
+          <div class="info-general">
+            <div class="card info-card">
+              <h3>Fecha Inicio</h3>
+              <p>${infoGeneral.fechaInicio || "-"}</p>
+            </div>
+            <div class="card info-card">
+              <h3>Fecha Fin</h3>
+              <p>${infoGeneral.fechaFin || "-"}</p>
+            </div>
+            <div class="card info-card">
+              <h3>Valor Total</h3>
+              <p>$${infoGeneral.valorTotal}</p>
+            </div>
+            <div class="card info-card">
+              <h3>Valor Ejecutado</h3>
+              <p>$${infoGeneral.valorEjecutado}</p>
+            </div>
+            <div class="card info-card">
+              <h3>% Ejecutado</h3>
+              <p>${porcentajeEjecutado.toFixed(1)}%</p>
+            </div>
+          </div>
+        </section>
 
-        <h3>2. Proyectos por Sector</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Sector</th>
-              <th>Total Proyectos</th>
-            </tr>
-          </thead>
-          <tbody>
+        <section>
+          <h2>2. Proyectos por Sector</h2>
+          <div class="dashboard-container">
             ${renderSectores}
-          </tbody>
-        </table>
+          </div>
+        </section>
 
-        <h3>3. Indicadores de Ejecución</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Indicador</th>
-              <th>Valor (%)</th>
-            </tr>
-          </thead>
-          <tbody>
+        <section>
+          <h2>3. Indicadores de Ejecución</h2>
+          <div class="dashboard-container">
             ${renderIndicadores}
-          </tbody>
-        </table>
+          </div>
+        </section>
       </body>
     </html>
   `;
 };
+

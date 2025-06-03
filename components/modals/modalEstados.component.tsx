@@ -24,6 +24,10 @@ export const ModalEstados = ({ active, closeModal }: Props) => {
         const fetchStates = async () => {
             try {
                 let estadosData;
+
+                if (online === null) {
+                    return;
+                }
                 if (online) {
                     const res = await StateService.getTypeStates();
                     estadosData = res?.data;

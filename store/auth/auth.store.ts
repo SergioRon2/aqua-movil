@@ -7,7 +7,7 @@ interface AuthState {
     user: IUser | null;
     token: string | null;
     setIsAuthenticated: (isAuthenticated: boolean) => void;
-    setUser: (user: IUser) => void;
+    setUser: (user: IUser | null) => void;
     setToken: (token: string | null) => void;
     logout: () => void;
 }
@@ -30,6 +30,7 @@ const useAuthStore = create<AuthState>((set) => ({
             '@token',
             '@user',
             '@isAuthenticated',
+            '@expiresAt'
         ]);
     },
 }));

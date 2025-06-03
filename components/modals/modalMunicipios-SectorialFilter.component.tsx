@@ -14,10 +14,10 @@ interface Props {
     closeModal: () => void;
 }
 
-export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
+export const ModalMunicipiosSectorialFilter = ({ active, closeModal }: Props) => {
     const { globalColor } = useStylesStore()
     const [municipios, setMunicipios] = useState<IMunicipio[]>([])
-    const { setMunicipioActivoDashboard, municipioActivoDashboard } = useActiveStore();
+    const { setMunicipioActivo_SectorialesScreen, municipioActivo_SectorialesScreen } = useActiveStore();
     const { online } = useInternetStore();
 
     useEffect(() => {
@@ -29,15 +29,17 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
                 if (online) {
                     const { data } = await MunicipalitiesService.getMunicipalitiesCesar();
                     setMunicipios(data);
-                    await AsyncStorage.setItem('modalMunicipiosDashboard', JSON.stringify(data));
+                    // Guardar en AsyncStorage
+                    await AsyncStorage.setItem('modalMunicipios', JSON.stringify(data));
                 } else {
-                    const storedData = await AsyncStorage.getItem('modalMunicipiosDashboard');
+                    // Leer de AsyncStorage
+                    const storedData = await AsyncStorage.getItem('modalMunicipios');
                     if (storedData) {
                         setMunicipios(JSON.parse(storedData));
                     }
                 }
             } catch (error) {
-                console.error({error})
+                console.error({ error })
             }
         }
 
@@ -45,10 +47,9 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
     }, [])
 
     const handleSelectMunicipio = (municipio: IMunicipio) => {
-        setMunicipioActivoDashboard(municipio)
+        setMunicipioActivo_SectorialesScreen(municipio)
         closeModal();
     }
-
 
     return (
         <Modal
@@ -67,9 +68,9 @@ export const ModalMunicipiosDashboard = ({ active, closeModal }: Props) => {
                             data={municipios}
                             className="w-full"
                             keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item, index }) => (
+                            renderItem={({ item }) => (
                                 <Pressable className="w-full my-3" onPress={() => handleSelectMunicipio(item)}>
-                                    <Text style={{ color: item.id === municipioActivoDashboard?.id ? globalColor : '#6B7280' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
+                                    <Text style={{ color: item.id === municipioActivo_SectorialesScreen?.id ? globalColor : '#6B7280' }} className={`font-bold text-xl`}>{item?.nombre}</Text>
                                 </Pressable>
                             )}
                         />

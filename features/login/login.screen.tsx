@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { Loading } from 'components/loading/loading.component';
 import useStylesStore from 'store/styles/styles.store';
+import { IUser } from 'interfaces/user.interface';
 
 const LoginScreen = () => {
     const { globalColor } = useStylesStore()
@@ -15,6 +16,18 @@ const LoginScreen = () => {
     const [error, setError] = useState<boolean>(false)
     const [emptyFields, setEmptyFields] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
+    const [sessionsModalVisible, setSessionsModalVisible] = useState(false);
+    const [recentSessions, setRecentSessions] = useState<{ email: string; date: string, token: string, user: IUser, isAuthenticated: boolean }[]>([]);
+
+    const handleShowSessions = async () => {
+        const storedSessions = await AsyncStorage.getItem('@recentSessions');
+        if (storedSessions) {
+            setRecentSessions(JSON.parse(storedSessions));
+        } else {
+            setRecentSessions([]);
+        }
+        setSessionsModalVisible(true);
+    };
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -32,13 +45,32 @@ const LoginScreen = () => {
             setToken(token);
             setUser(user);
             setIsAuthenticated(isAuthenticated);
+            // Guardar el tiempo para la expiración del token
+            const oneHourFromNow = new Date().getTime() + 60 * 60 * 1000;
 
             // almacenar en storage
             await AsyncStorage.multiSet([
                 ['@token', token],
                 ['@user', JSON.stringify(user)],
-                ['@isAuthenticated', JSON.stringify(isAuthenticated)]
+                ['@isAuthenticated', JSON.stringify(isAuthenticated)],
+                ['@expiresAt', oneHourFromNow.toString()]
             ]);
+
+            // Guardar sesión reciente
+            const storedSessions = await AsyncStorage.getItem('@recentSessions');
+            let sessions = storedSessions ? JSON.parse(storedSessions) : [];
+            sessions = sessions.filter((session: any) => session.email !== email);
+            // Agregar la sesión actual al inicio
+            sessions.unshift({
+                email,
+                date: new Date().toISOString(),
+                token,
+                user,
+                isAuthenticated
+            });
+            // Limitar a las últimas 5 sesiones
+            sessions = sessions.slice(0, 5);
+            await AsyncStorage.setItem('@recentSessions', JSON.stringify(sessions));
         } catch {
             setError(true)
             setTimeout(() => {
@@ -48,6 +80,30 @@ const LoginScreen = () => {
             setLoading(false)
         }
     };
+
+    const handleLoginSessionRecent = async (token: string, user: IUser, isAuthenticated: boolean) => {
+        try {
+            setLoading(true)
+            const oneHourFromNow = new Date().getTime() + 60 * 60 * 1000;
+
+            // almacenar en storage
+            await AsyncStorage.multiSet([
+                ['@token', token],
+                ['@user', JSON.stringify(user)],
+                ['@isAuthenticated', JSON.stringify(isAuthenticated)],
+                ['@expiresAt', oneHourFromNow.toString()]
+            ]);
+
+            setToken(token);
+            setUser(user);
+            setIsAuthenticated(isAuthenticated);
+            setSessionsModalVisible(false);
+        } catch (error) {
+            console.error('Error al iniciar sesión con la sesión reciente:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     if (emptyFields) {
         return <Modal
@@ -120,9 +176,50 @@ const LoginScreen = () => {
 
                     <CustomButtonPrimary rounded onPress={handleLogin} title='Login' />
                 </View>
-                <View>
-                    <Text className="text-center text-sm text-gray-700 animate-fade-in">Terminos y condiciones de la app <Text style={{ color: globalColor }} className="font-bold">aquí</Text></Text>
+                <View className='flex-row justify-center items-center'>
+                    <Text className="text-center text-sm text-gray-700 animate-fade-in">Ver ultimas sesiones {''}</Text>
+                    <Pressable onPress={handleShowSessions}>
+                        <Text style={{ color: globalColor }} className="text-sm font-bold">aquí</Text>
+                    </Pressable>
                 </View>
+            </View>
+
+            <View>
+                <Modal
+                    visible={sessionsModalVisible}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setSessionsModalVisible(false)}
+                >
+                    <View className="flex-1 items-center justify-center bg-black/50">
+                        <View className="bg-white rounded-lg gap-2 p-6 w-4/5">
+                            <Text className="text-xl font-bold text-center mb-4">Últimas sesiones</Text>
+                            {recentSessions.length === 0 ? (
+                                <Text className="text-center text-gray-600">No hay sesiones recientes.</Text>
+                            ) : (
+                                recentSessions.map((session, idx) => (
+                                    <Pressable onPress={() => handleLoginSessionRecent(session?.token, session?.user, session?.isAuthenticated)} key={idx} style={{ borderColor: globalColor }} className="mb-2 border-2 rounded-xl p-3 active:opacity-50">
+                                        <Text className="text-base">{session.email}</Text>
+                                        <Text className="text-sm text-gray-600">
+                                            {new Date(session.date).toLocaleString('es-CO', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: false
+                                            })}</Text>
+                                    </Pressable>
+                                ))
+                            )}
+                            <CustomButtonPrimary
+                                rounded
+                                onPress={() => setSessionsModalVisible(false)}
+                                title="Cerrar"
+                            />
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </View>
     );

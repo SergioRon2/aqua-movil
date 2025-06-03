@@ -21,16 +21,43 @@ export const generarReporteMunicipiosHTML = async (
     })
   );
 
-  const renderMunicipioRow = (item: any, index: number) => `
-    <tr>
-      <td>${index + 1}</td>
-      <td>${item.nombre}</td>
-      <td>${item.amount_project_initiatives ?? 0}</td>
-      <td>${item.amount_initiatives ?? 0}</td>
-      <td>${item.value_total_project ?? 0}</td>
-      <td>${(item.value_total_project > 0 ? item.value_total_executed / item.value_total_project : 0).toFixed(0)}%</td>
-    </tr>
-  `;
+  const colores = [
+    '#f44336', // rojo
+    '#e91e63', // rosado
+    '#9c27b0', // púrpura
+    '#3f51b5', // azul
+    '#2196f3', // celeste
+    '#00bcd4', // cyan
+    '#009688', // teal
+    '#4caf50', // verde
+    '#ff9800', // naranja
+    '#795548', // marrón
+  ];
+
+  const getRandomColor = () => colores[Math.floor(Math.random() * colores.length)];
+
+  const renderCard = (item: any, index: number) => {
+    const progreso =
+      item.value_total_project > 0
+        ? (item.value_total_executed / item.value_total_project) * 100
+        : 0;
+
+    const borderColor = getRandomColor();
+
+    return `
+      <div class="card" style="border-color: ${borderColor};">
+        <div class="card-header">
+          <strong style="color: ${borderColor};">${index + 1}. ${item.name}</strong>
+        </div>
+        <div class="card-body">
+          <p>📁 Proyectos: <strong>${item.amount_project_initiatives ?? 0}</strong></p>
+          <p>📌 Iniciativas: <strong>${item.amount_initiatives ?? 0}</strong></p>
+          <p>💰 Valor: <strong>$${item.value_total_project?.toLocaleString('es-CO') ?? 0}</strong></p>
+          <p>📊 Progreso: <strong>${progreso.toFixed(0)}%</strong></p>
+        </div>
+      </div>
+    `;
+  };
 
   const fechaExportacion = new Date().toLocaleString("es-ES", {
     day: "2-digit",
@@ -44,34 +71,76 @@ export const generarReporteMunicipiosHTML = async (
   return `
     <html>
       <head>
+        <meta charset="UTF-8" />
         <style>
-          body { font-family: Arial; padding: 20px; color: #222; background: #f7f7f7; }
-          table { width: 100%; border-collapse: collapse; background: #fff; }
-          th, td { border: 1px solid #bbb; padding: 8px; text-align: left; }
-          th { background: #e0e0e0; color: #333; }
-          .excel-header { background: #aaa; color: #fff; font-weight: bold; padding: 12px; margin-bottom: 0; }
+          body {
+            padding: 30px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+          }
+
+          h2 {
+            text-align: center;
+            color: #1a237e;
+            margin-bottom: 30px;
+          }
+
+          .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+          }
+
+          .card {
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 220px;
+            max-width: 300px;
+            flex: 1 1 220px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+          }
+
+          .card-header {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #222;
+          }
+
+          .card-body p {
+            margin: 6px 0;
+            font-size: 14px;
+          }
+
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+          }
+
+          @media print {
+            .grid {
+              page-break-inside: avoid;
+            }
+            .card {
+              break-inside: avoid;
+              -webkit-print-color-adjust: exact;
+            }
+          }
         </style>
       </head>
       <body>
-        <div class="excel-header">
-          Reporte de Municipios<br/>
+        <h2>📊 Reporte de Municipios</h2>
+        <div class="grid">
+          ${listaConInfo.map(renderCard).join("")}
+        </div>
+        <div class="footer">
           Exportado: ${fechaExportacion}
         </div>
-        <table style="margin-top:0;">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nombre</th>
-              <th>Proyectos</th>
-              <th>Iniciativas</th>
-              <th>Valor</th>
-              <th>Progreso</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${listaConInfo.map(renderMunicipioRow).join("")}
-          </tbody>
-        </table>
       </body>
     </html>
   `;

@@ -4,49 +4,92 @@ import { Loading } from 'components/loading/loading.component';
 import { generarReporteSectorialesHTML } from 'components/pdfTemplates/sectorialesReporte.component';
 import { ISectorial } from 'interfaces/sectorial.interface';
 import LottieView from 'lottie-react-native';
-import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, FlatList, Alert, Modal } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, FlatList, Alert, Modal, RefreshControl } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
-import { SectoralService } from 'services/sectoral/sectoral.service';
 import useInternetStore from 'store/internet/internet.store';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import useActiveStore from 'store/actives/actives.store';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
+import useStylesStore from 'store/styles/styles.store';
+import { SelectedYears } from 'components/buttons/selectedYears.component';
+import { FiltersMunicipios } from 'components/buttons/filterMunicipios.component';
+import { StateService } from 'services/states/states.service';
+import * as FileSystem from 'expo-file-system';
 
 const Sectoriales = () => {
-    const [sectoriales, setSectoriales] = useState<ISectorial[]>([])
+    const [sectoriales, setSectoriales] = useState<any[]>([])
+    const [sectorialesCargados, setSectorialesCargados] = useState(0)
     const [loading, setLoading] = useState(true)
     const { online } = useInternetStore();
-    const { fechaInicio, fechaFin } = useActiveStore();
+    const { fechaInicio, fechaFin, municipioActivo_SectorialesScreen } = useActiveStore();
+    const [refreshing, setRefreshing] = useState(false);
+    const { globalColor } = useStylesStore();
+
+    const onCardLoaded = useCallback(() => {
+        setSectorialesCargados(prev => {
+            const newCount = prev + 1;
+            if (newCount === sectoriales.length) {
+                setLoading(false);
+            }
+            return newCount;
+        });
+    }, [sectoriales.length]);
+
+    const fetchSectoriales = useCallback(async () => {
+        try {
+            setRefreshing(true);
+            setLoading(true);
+            if (online === null) return;
+
+            if (online) {
+                const res = await StateService.getStatesData({ fechaInicio, fechaFin, municipio_id: municipioActivo_SectorialesScreen?.id });
+                const sectorialesData = res?.data?.list_sectorial_response;
+                setSectoriales(sectorialesData);
+                await AsyncStorage.setItem('sectoriales', JSON.stringify(sectorialesData));
+            } else {
+                const stored = await AsyncStorage.getItem('sectoriales');
+                if (stored) {
+                    setSectoriales(JSON.parse(stored));
+                } else {
+                    setSectoriales([]);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching sectoriales:', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, [online, fechaInicio, fechaFin, municipioActivo_SectorialesScreen]);
 
     useEffect(() => {
-        const fetchSectoriales = async () => {
-            try {
-                setLoading(true);
-                if (online) {
-                    const res = await SectoralService.getAllSectorals();
-                    setSectoriales(res?.data?.data);
-                    // Save to AsyncStorage
-                    await AsyncStorage.setItem('sectoriales', JSON.stringify(res?.data?.data));
-                } else {
-                    // Get from AsyncStorage
-                    const stored = await AsyncStorage.getItem('sectoriales');
-                    if (stored) {
-                        setSectoriales(JSON.parse(stored));
-                    } else {
-                        setSectoriales([]);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching sectoriales:', error);
-            } finally {
-                setLoading(false)
-            }
-        }
-
         fetchSectoriales();
-    }, [])
+    }, [fetchSectoriales]);
+
+    const onRefresh = () => {
+        fetchSectoriales();
+    };
+
+    const renderItem = useCallback(
+        ({ item, index }: { item: any; index: number }) => {
+            const safeFechaInicio = fechaInicio ?? 'sin-inicio';
+            const safeFechaFin = fechaFin ?? 'sin-fin';
+            const key = `${item.sector_id}-${safeFechaInicio}-${safeFechaFin}`;
+            return (
+                <Animated.View key={key} entering={index < 10 ? FadeInDown.delay(index * 100) : undefined}>
+                    <SectorialCard
+                        key={key}
+                        sectorialData={item}
+                        onLoaded={onCardLoaded}
+                        index={index}
+                    />
+                </Animated.View>
+            );
+        },
+        [fechaInicio, fechaFin]
+    );
 
     const createPDF = async (sectorialesData: ISectorial[]) => {
         try {
@@ -63,18 +106,19 @@ const Sectoriales = () => {
 
     return (
         <View className='h-full bg-white'>
-            <Text className='text-2xl font-bold text-center py-4'>Sectoriales</Text>
+            <Text className='text-2xl font-bold text-center pt-4'>Sectoriales</Text>
+            <SelectedYears />
+            <FiltersMunicipios border />
             {loading ? (
                 <Loading />
             ) : sectoriales && sectoriales.length > 0 ? (
                 <FlatList
                     data={sectoriales}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item, index }) => (
-                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
-                            <SectorialCard sectorialData={item} />
-                        </Animated.View>
-                    )}
+                    keyExtractor={(item) => item.sector_id.toString()}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
+                    }
+                    renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 40 }}
                     ListFooterComponent={
                         <View className='w-full justify-center items-center mt-4'>

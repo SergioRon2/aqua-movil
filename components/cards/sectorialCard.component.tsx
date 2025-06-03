@@ -7,17 +7,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
 import useStylesStore from 'store/styles/styles.store';
 import { capitalize } from 'utils/capitalize';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { StateService } from 'services/states/states.service';
 import useActiveStore from 'store/actives/actives.store';
 import useInternetStore from 'store/internet/internet.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CardLoading } from './cardMunicipioSectorialLoading.component';
 
 interface Props {
-    sectorialData: ISectorial;
+    sectorialData: any;
+    onLoaded: () => void;
+    index: number;
 }
 
-const SectorialCard = ({ sectorialData }: Props) => {
+const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
     const { globalColor } = useStylesStore()
     const { fechaInicio, fechaFin } = useActiveStore()
     const [loading, setLoading] = useState<boolean>(false)
@@ -25,66 +28,85 @@ const SectorialCard = ({ sectorialData }: Props) => {
     const { online } = useInternetStore();
     const navigation = useNavigation();
 
-    const handleNavigate = () => {
-        navigation.navigate('UniqueSectorial', { sectorial: sectorialData });
-    };
+    const fetchProjectsByDashboard = useCallback(async () => {
+        const key = `sectorialInfo_${sectorialData.id}`;
+        let isMounted = true;
 
-    useEffect(() => {
-        const fetchProjectsByDashboard = async () => {
-            try {
-                setLoading(true)
-                let data;
+        try {
+            setLoading(true);
+            let data;
 
-                if (online) {
-                    const res = await StateService.getStatesData({
-                        sectorial_id: sectorialData.id,
-                        fechaInicio: fechaInicio,
-                        fechaFin: fechaFin
-                    });
-                    data = res?.data;
-                    setSectorialInfo(data);
-                    // Guarda en storage
-                    await AsyncStorage.setItem("sectorialInfo", JSON.stringify(data));
-                } else {
-                    // Obtiene de storage
-                    const storedData = await AsyncStorage.getItem("sectorialInfo");
-                    if (storedData) {
-                        data = JSON.parse(storedData);
-                        setSectorialInfo(data);
-                    } else {
-                        setSectorialInfo(undefined);
-                    }
+            if (online === null) return;
+
+            if (online) {
+                const res = await StateService.getStatesData({
+                    sectorial_id: sectorialData.sector_id,
+                    fechaInicio,
+                    fechaFin,
+                });
+                data = res?.data;
+                if (data) {
+                    await AsyncStorage.setItem(key, JSON.stringify(data));
                 }
-            } catch (error) {
-                console.error({ error })
-            } finally {
-                setLoading(false)
+            } else {
+                const stored = await AsyncStorage.getItem(key);
+                data = stored ? JSON.parse(stored) : null;
+            }
+
+            if (isMounted) {
+                setSectorialInfo(data || {});
+                onLoaded();
+            }
+        } catch (error) {
+            console.error({ error });
+        } finally {
+            if (isMounted) {
+                setLoading(false);
+                onLoaded();
             }
         }
 
-        fetchProjectsByDashboard();
-    }, [sectorialData.id, fechaInicio, fechaFin])
+        // Para cancelar en caso de desmontaje
+        return () => {
+            isMounted = false;
+        };
+    }, [sectorialData.id, fechaInicio, fechaFin, online]);
+
+    useEffect(() => {
+        const delay = index * 1000; // espera 1000ms por cada índice
+        const timeout = setTimeout(() => {
+            fetchProjectsByDashboard();
+        }, delay);
+
+        return () => clearTimeout(timeout); // limpieza por si el componente se desmonta
+    }, [fechaInicio, fechaFin]);
+
+    const handleNavigate = useCallback(() => {
+        navigation.navigate('UniqueSectorial', { sectorial: sectorialData });
+    }, [navigation, sectorialData]);
 
     const total = sectorialInfo?.value_total_project
     const ejecutado = sectorialInfo?.value_total_executed
     const progress = total > 0 ? ejecutado / total : 0;
 
+    if (!sectorialInfo) return <CardLoading />;
+
     return (
         <Pressable onPress={handleNavigate} className='flex-row h-40 w-11/12 rounded-2xl justify-center items-center mx-auto mt-5 shadow-lg'>
-            <View style={{ backgroundColor: globalColor }} className='w-1/2 h-full rounded-l-2xl justify-center items-center animate-fade-in'>
+            <View style={{ backgroundColor: globalColor }} className='w-1/2 h-full rounded-l-2xl justify-center items-center'>
                 {
                     loading ? (
-                        <ActivityIndicator size={'small'} color={'white'} className='w-full h-full animate-fade-in' />
+                        <ActivityIndicator size={'small'} color={'white'} className='w-full h-full' />
                     ) : (
                         <>
                             <Text
-                                className='text-white text-2xl font-bold animate-fade-in text-center'
+                                className='text-white text-2xl font-bold text-center'
                                 numberOfLines={2}
                                 adjustsFontSizeToFit
                             >
-                                {capitalize(sectorialData.name)}
+                                {capitalize(sectorialData?.sector_name)}
                             </Text>
-                            <View className='flex-col justify-center items-center w-full mt-2 animate-fade-in'>
+                            <View className='flex-col justify-center items-center w-full mt-2'>
                                 <View className='flex-row ml-16 justify-start w-full items-center mt-2'>
                                     <Ionicons color={'white'} name='briefcase' size={20} />
                                     <Text className='text-white ml-2 text-lg font-bold'>{sectorialInfo?.amount_project_initiatives}</Text>
@@ -100,16 +122,16 @@ const SectorialCard = ({ sectorialData }: Props) => {
                     )
                 }
             </View>
-            <View style={{ borderColor: globalColor }} className='w-1/2 bg-white border rounded-r-2xl p-5 h-full justify-center gap-4 items-center animate-fade-in'>
+            <View style={{ borderColor: globalColor }} className='w-1/2 bg-white border rounded-r-2xl p-5 h-full justify-center gap-4 items-center'>
                 {
                     !loading ? (
                         <>
-                            <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
+                            <View className='w-full h-1/2 justify-center items-start'>
                                 <Text className='text-black text-md font-bold '>Valor de proyectos</Text>
                                 <Text className='text-black text-4xl font-bold'>{formatNumberWithSuffix(+total)}</Text>
                             </View>
-                            <View className='w-full h-1/2 justify-center items-start animate-fade-in'>
-                                <Text className='text-black text-md font-bold'>Valor ejecutado</Text>
+                            <View className='w-full h-1/2 justify-center items-start'>
+                                <Text className='text-black text-md font-bold'>Total ejecutado</Text>
                                 <View className='w-full flex-row gap-3 justify-center items-center'>
                                     <ProgressBar
                                         progress={progress}

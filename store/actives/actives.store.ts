@@ -11,6 +11,10 @@ interface ActiveState {
     estadoActivo: IEstado | undefined;
     municipioActivoDashboard: IMunicipio | undefined;
     sectorialActivoDashboard: ISectorial | undefined;
+    municipioActivo_SectorialesScreen: IMunicipio | undefined;
+    sectorialActivo_MunicipiosScreen: ISectorial | undefined;
+    setSectorialActivo_MunicipiosScreen: (sectorialActivo_MunicipiosScreen: ISectorial | undefined) => void;
+    setMunicipioActivo_SectorialesScreen: (municipioActivo_SectorialesScreen: IMunicipio | undefined) => void;
     setSearchActive: (searchActive: boolean) => void;
     setMunicipiosActivos: (municipios: IMunicipio[] | undefined) => void; 
     setSectorialActivo: (sectorialActivo: ISectorial | undefined) => void;
@@ -44,6 +48,13 @@ const useActiveStore = create<ActiveState>((set) => ({
 
     sectorialActivoDashboard: undefined,
     setSectorialActivoDashboard: (sectorialActivoDashboard: ISectorial | undefined) => set({ sectorialActivoDashboard }),
+
+
+    municipioActivo_SectorialesScreen: undefined,
+    setMunicipioActivo_SectorialesScreen: (municipioActivo_SectorialesScreen: IMunicipio | undefined) => set({ municipioActivo_SectorialesScreen: municipioActivo_SectorialesScreen }),
+
+    sectorialActivo_MunicipiosScreen: undefined,
+    setSectorialActivo_MunicipiosScreen: (sectorialActivo_MunicipiosScreen: ISectorial | undefined) => set({ sectorialActivo_MunicipiosScreen }),
 
     planDesarrolloActivo: undefined,
     setPlanDesarrolloActivo: (planDesarrollo: IDevelopmentPlan | undefined) => set({ planDesarrolloActivo: planDesarrollo }),

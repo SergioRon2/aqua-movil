@@ -9,7 +9,11 @@ interface Avances {
   indicadorTiempo: Avance;
 }
 
-export const generarResumenSectorialUnicoHTML = (nombreSectorial: string, cantidadItems: number, avances: Avances) => {
+export const generarResumenSectorialUnicoHTML = (
+  titulo: string,
+  cantidadItems: number,
+  avances: Avances
+) => {
   const fechaExportacion = new Date().toLocaleString("es-ES", {
     day: "2-digit",
     month: "2-digit",
@@ -18,90 +22,107 @@ export const generarResumenSectorialUnicoHTML = (nombreSectorial: string, cantid
     minute: "2-digit",
     second: "2-digit",
   });
+
+  const colores = [
+    "#f44336", "#e91e63", "#9c27b0", "#3f51b5", "#2196f3",
+    "#00bcd4", "#009688", "#4caf50", "#ff9800", "#795548",
+  ];
+
+  const getRandomColor = () => colores[Math.floor(Math.random() * colores.length)];
+
+  const indicadores = [
+    { ...avances.avanceFinanciero },
+    { ...avances.avanceFisico },
+    { ...avances.indicadorTiempo },
+    { name: "Total de Proyectos", value: cantidadItems },
+  ];
+
+  const renderCard = (item: Avance, index: number) => {
+    const color = getRandomColor();
+    return `
+      <div class="card" style="--main-color: ${color};">
+        <h2>${item.name}</h2>
+        <p>${item.value}${index < 3 ? "%" : ""}</p>
+      </div>
+    `;
+  };
+
   return `
     <html>
       <head>
         <style>
           body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background-color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 40px;
             color: #333;
           }
 
           h1 {
             text-align: center;
-            color: #222;
+            color: #1a237e;
+            margin-bottom: 10px;
+          }
+
+          .subtitulo {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
             margin-bottom: 40px;
           }
 
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            font-size: 16px;
+          .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
           }
 
-          th, td {
-            padding: 12px 18px;
-            border: 1px solid #ddd;
+          .card {
+            background-color: white;
+            border-left: 6px solid var(--main-color);
+            border-radius: 16px;
+            padding: 24px 32px;
+            width: 260px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: transform 0.2s ease-in-out;
           }
 
-          th {
-            background-color: #f4f4f4;
-            color: #444;
+          .card:hover {
+            transform: scale(1.03);
           }
 
-          tr:nth-child(even) {
-            background-color: #f9f9f9;
+          .card h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--main-color);
+            margin-bottom: 12px;
+          }
+
+          .card p {
+            margin: 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--main-color);
           }
 
           .footer {
-            margin-top: 30px;
-            font-size: 14px;
-            color: #777;
+            margin-top: 60px;
             text-align: center;
+            font-size: 14px;
+            color: #888;
           }
         </style>
       </head>
       <body>
+        <h1>${titulo}</h1>
+        <div class="subtitulo">Exportado: ${fechaExportacion}</div>
 
-        <div class="excel-header">
-          <h1>Resumen general de ${nombreSectorial}</h1> <br/>
-          Exportado: ${fechaExportacion}
+        <div class="cards-container">
+          ${indicadores.map(renderCard).join("")}
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Indicador</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>${avances.avanceFinanciero.name}</td>
-              <td>${avances.avanceFinanciero.value}%</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>${avances.avanceFisico.name}</td>
-              <td>${avances.avanceFisico.value}%</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>${avances.indicadorTiempo.name}</td>
-              <td>${avances.indicadorTiempo.value}%</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td><strong>Total de Proyectos</strong></td>
-              <td><strong>${cantidadItems}</strong></td>
-            </tr>
-          </tbody>
-        </table>
 
         <div class="footer">Datos generados automáticamente</div>
       </body>
