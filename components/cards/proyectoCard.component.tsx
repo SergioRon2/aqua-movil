@@ -1,5 +1,6 @@
-
 import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+import { memo } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import useStylesStore from 'store/styles/styles.store';
 import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
@@ -8,16 +9,16 @@ interface Props {
     data: any;
     setModalFalse?: (value: boolean) => void;
     index?: number;
-    }
+}
 
-    const ProyectoCard = ({ data, index, setModalFalse }: Props) => {
-        const { globalColor } = useStylesStore()
-        const navigation = useNavigation();
+const ProyectoCard = ({ data, index, setModalFalse }: Props) => {
+    const { globalColor } = useStylesStore()
+    const navigation = useNavigation();
 
-        const handleNavigate = () => {
-            if (setModalFalse) setModalFalse(false);
-            navigation.navigate('Proyecto', { proyecto: data });
-        };
+    const handleNavigate = () => {
+        if (setModalFalse) setModalFalse(false);
+        navigation.navigate('Proyecto', { proyecto: data });
+    };
 
     return (
         <Pressable
@@ -29,7 +30,7 @@ interface Props {
                     {data?.name || data?.title != null ? data?.name || data?.title : 'Nulo'}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                    {data?.total_source_value || data?.project_value != null ? formatNumberWithSuffix(data?.total_source_value || data?.project_value) : 'Nulo'}
+                    {data?.value_project || data?.total_source_value != null ? formatNumberWithSuffix(data?.value_project || data?.total_source_value) : data?.value_project || data?.total_source_value == 0 ? 0 : 'Nulo'}
                 </Text>
             </View>
             <View className='w-1/3 justify-center items-center'>
@@ -44,4 +45,4 @@ interface Props {
     );
 };
 
-export default ProyectoCard;
+export default memo(ProyectoCard);

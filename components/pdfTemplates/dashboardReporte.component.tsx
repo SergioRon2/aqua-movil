@@ -1,3 +1,6 @@
+import { srcImg } from 'assets/exportable/logo';
+import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
+
 interface ProyectoGeneral {
   fechaInicio: string | undefined;
   fechaFin: string | undefined;
@@ -68,9 +71,10 @@ export const generarReporteDashboardHTML = async (
           /* Reset y base */
           body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            background: #fff;
             color: #333;
-            margin: 0;
+            display: flex;
+            margin: auto;
             padding: 20px;
           }
 
@@ -85,10 +89,11 @@ export const generarReporteDashboardHTML = async (
             margin-bottom: 10px;
             font-weight: 700;
             font-size: 1.2rem;
+            opacity: 0.6;
           }
 
           .fecha-exportacion {
-            text-align: right;
+            text-align: left;
             font-size: 0.85rem;
             color: #333;
             margin-top: 5px;
@@ -107,7 +112,7 @@ export const generarReporteDashboardHTML = async (
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-            padding: 15px;
+            padding: 10px;
             transition: transform 0.2s ease;
           }
 
@@ -197,6 +202,7 @@ export const generarReporteDashboardHTML = async (
       </head>
       <body style="display: flex; gap: 10px; flex-direction: column;">
         <div class="header">
+          <img src="${srcImg}" alt="Logo" style="height:120px;vertical-align:middle;margin-right:12px;" />
           <div class="fecha-exportacion">Exportado: ${fechaExportacion}</div>
         </div>
 
@@ -213,11 +219,11 @@ export const generarReporteDashboardHTML = async (
             </div>
             <div class="card info-card">
               <h3>Valor Total</h3>
-              <p>$${infoGeneral.valorTotal}</p>
+              <p>$${formatNumberWithSuffix(+infoGeneral.valorTotal)}</p>
             </div>
             <div class="card info-card">
               <h3>Valor Ejecutado</h3>
-              <p>$${infoGeneral.valorEjecutado}</p>
+              <p>$${formatNumberWithSuffix(+infoGeneral.valorEjecutado)}</p>
             </div>
             <div class="card info-card">
               <h3>% Ejecutado</h3>

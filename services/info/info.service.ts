@@ -26,4 +26,28 @@ export class InfoService {
             throw new Error(`Error fetching info: ${error}`);
         }
     };
+
+    static readonly getInfoByProject = async (project_id: number) => {
+        try {
+            const response = await aquaApi.get(`/projects/get-info/${project_id}`);
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error fetching info by project: ${error}`);
+        }
+    }
+
+    static readonly getProgressInfo = async (project_id: number, contract_id: number) => {
+        try {
+            const response = await aquaApi.post(`/projects/getProgress`, {
+                limit: 5,
+                page: 1,
+                search: "",
+                project_id: project_id,
+                contract_id: contract_id
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error fetching progress info: ${error}`);
+        }
+    }
 }

@@ -5,6 +5,7 @@ import { IProyecto } from 'interfaces/proyecto.interface';
 import LottieView from 'lottie-react-native';
 import { useEffect, useState } from 'react';
 import { FlatList, Text, View, TextInput } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { ProjectsService } from 'services/projects/projects.service';
 import useActiveStore from 'store/actives/actives.store';
@@ -17,9 +18,11 @@ const SearchScreen = () => {
     const [searchValue, setSearchValue] = useState<string>('');
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
     const { online } = useInternetStore();
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchProyectos = async () => {
+            setLoading(true);
             try {
                 if (online === null) {
                     return;
@@ -49,6 +52,8 @@ const SearchScreen = () => {
                 }
             } catch (error) {
                 console.error({ error });
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -59,9 +64,16 @@ const SearchScreen = () => {
         setSearchValue(text);
     };
 
-    const filteredProjects = proyectos.filter((proyecto) =>
-        proyecto.name?.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    const filteredProjects = proyectos
+        .filter((proyecto) => {
+            const search = searchValue.toLowerCase();
+            return (
+                proyecto.name?.toLowerCase().includes(search) ||
+                proyecto.BPIM?.toLowerCase().includes(search) ||
+                proyecto.state_name?.toLowerCase().includes(search)
+            );
+        })
+        .sort((a: any, b: any) => (b.value_project ?? 0) - (a.value_project ?? 0));
 
     return (
         <View className='flex-1 bg-white items-center justify-start'>
@@ -91,6 +103,8 @@ const SearchScreen = () => {
                             </Animated.View>
                         )}
                     />
+                ) : loading ? (
+                    <ActivityIndicator size="large" color={globalColor} className="mt-4" />
                 ) : (
                     <View className='justify-center items-center m-auto'>
                         <LottieView

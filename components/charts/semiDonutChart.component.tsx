@@ -9,7 +9,10 @@ type SemiDonutChartProps = {
     radius?: number;
     strokeWidth?: number;
     height?: number;
+    width?: number;
     color?: string;
+    fontSize?: number;
+    marginTop?: number;
 };
 
 const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
@@ -18,7 +21,10 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
     radius = 80,
     strokeWidth = 20,
     height = 150,
-    color
+    // width = 150,
+    fontSize = 24,
+    color,
+    marginTop = 10
 }) => {
     const { globalColor } = useStylesStore();
     const clampedPercentage = Math.min(percentage, max);
@@ -36,7 +42,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
     ];
 
     return (
-        <View style={[styles.container, { height: height}]}>
+        <View style={[styles.container, { height, width: radius * 2 }]}>
             <PieChart
                 donut
                 semiCircle
@@ -45,10 +51,13 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
                 radius={radius}
                 innerRadius={radius - strokeWidth}
                 centerLabelComponent={() => (
-                    <Text style={styles.percentageText}>{`${clampedPercentage}%`}</Text>
-                )}
+                    <Text style={[styles.percentageText, { fontSize: fontSize, marginTop }]}>
+                        {`${clampedPercentage}%`}
+                    </Text>
+                )
+                }
             />
-        </View>
+        </View >
     );
 };
 
@@ -58,10 +67,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     percentageText: {
-        fontSize: 24,
         fontWeight: '600',
         color: '#4a4a4a',
-        marginTop: 10, // ajusta esto si quieres mover el texto más al centro
     },
 });
 

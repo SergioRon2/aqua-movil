@@ -16,9 +16,10 @@ import useInternetStore from "store/internet/internet.store";
 import useStylesStore from "store/styles/styles.store";
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import { Loading } from "components/loading/loading.component";
-import * as FileSystem from 'expo-file-system';
+import { sanitizarNombreArchivo } from "utils/sanitazeName";
 
 const UniqueSectorialScreen = () => {
     const { globalColor } = useStylesStore()
@@ -34,10 +35,11 @@ const UniqueSectorialScreen = () => {
         indicadorTiempo: { name: '', value: 0 },
     });
     const { online } = useInternetStore();
+    const [tipoSeleccionado, setTipoSeleccionado] = useState<'proyecto' | 'iniciativa'>('proyecto');
 
     const fetchProyectos = useCallback(async () => {
         try {
-            setRefreshing(true);
+            if (!refreshing) setLoading(true);
             setLoading(true);
             if (online === null) return;
 
@@ -48,15 +50,26 @@ const UniqueSectorialScreen = () => {
                     fechaFin,
                 });
                 const proyectos = res?.data?.data;
-                setProyectos(proyectos);
+                const proyectosFiltrados = proyectos
+                    .filter((item: any) => item?.type === tipoSeleccionado)
+                    .map((item: any) => ({
+                        ...item,
+                        value_project: item.value_project !== null ? Number(item.value_project) : 0
+                    }))
+                    .sort((a: any, b: any) => b.value_project - a.value_project);
+                setProyectos(proyectosFiltrados);
                 await AsyncStorage.setItem(
                     `proyectosSectorial`,
-                    JSON.stringify(proyectos)
+                    JSON.stringify(proyectosFiltrados)
                 );
             } else {
                 const stored = await AsyncStorage.getItem(`proyectosSectorial`);
                 if (stored) {
-                    setProyectos(JSON.parse(stored));
+                    const proyectos = JSON.parse(stored);
+                    const proyectosFiltrados = proyectos.filter((proyecto: any) =>
+                        proyecto.type === tipoSeleccionado
+                    );
+                    setProyectos(proyectosFiltrados);
                 } else {
                     setProyectos([]);
                 }
@@ -67,16 +80,16 @@ const UniqueSectorialScreen = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, sectorial.id, fechaInicio, fechaFin]);
+    }, [online, sectorial.id, fechaInicio, fechaFin, tipoSeleccionado]);
 
     useEffect(() => {
         fetchProyectos();
     }, [fetchProyectos]);
 
     const onRefresh = () => {
+        setRefreshing(true);
         fetchProyectos();
     };
-
 
     useEffect(() => {
         const fetchInfo = async () => {
@@ -126,15 +139,25 @@ const UniqueSectorialScreen = () => {
 
     const createPDF = async () => {
         try {
-            const html = await generarResumenSectorialUnicoHTML(sectorial?.name, proyectos?.length, avances);
+            const html = await generarResumenSectorialUnicoHTML(
+                sectorial?.sector_name,
+                proyectos,
+                avances
+            );
 
             const { uri } = await Print.printToFileAsync({ html });
 
-            // console.log('PDF generado:', uri, { html });
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreSector = sanitizarNombreArchivo(sectorial?.sector_name || 'sin_sector');
+            const nombreArchivo = `resumen_sectorial_${nombreSector}_${fecha}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            console.log(avances.indicadorTiempo.value)
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
 
-            await Sharing.shareAsync(uri);
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
@@ -142,9 +165,9 @@ const UniqueSectorialScreen = () => {
     };
 
     const items = [
-        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value || 0} height={240} /> },
-        { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value || 0} height={240} /> },
-        { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value || 0} height={240} /> },
+        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value || 0} height={150} /> },
+        { title: avances.avanceFisico.name, component: <SemiDonutChart percentage={avances.avanceFisico.value || 0} height={150} /> },
+        { title: avances.indicadorTiempo.name, component: <SemiDonutChart percentage={avances.indicadorTiempo.value || 0} height={150} /> },
     ];
 
     return (
@@ -175,7 +198,7 @@ const UniqueSectorialScreen = () => {
                             <Carousel
                                 loop
                                 width={Dimensions.get('window').width - 90}
-                                height={200}
+                                height={160}
                                 data={items}
                                 scrollAnimationDuration={1000}
                                 renderItem={({ item }) => (
@@ -190,32 +213,41 @@ const UniqueSectorialScreen = () => {
 
 
                     <View className="h-auto rounded-2xl justify-center animate-fade-in py-3">
+                        <View className="flex-row items-center justify-between px-4">
+                            <Pressable onPress={() => setTipoSeleccionado('proyecto')}>
+                                <Text className="text-xl font-bold py-2" style={{ color: tipoSeleccionado === 'proyecto' ? globalColor : '#000' }}>
+                                    Proyectos
+                                </Text>
+                            </Pressable>
+                            <Pressable onPress={() => setTipoSeleccionado('iniciativa')}>
+                                <Text className="text-xl font-bold py-2" style={{ color: tipoSeleccionado === 'iniciativa' ? globalColor : '#000' }}>
+                                    Iniciativas
+                                </Text>
+                            </Pressable>
+                        </View>
                         {
                             loading ? (
                                 <ActivityIndicator size={'large'} color={globalColor} />
-                            ) :
-                                proyectos.length > 0 ? (
-                                    <View className="mb-8">
-                                        <Text className="text-xl font-bold py-2">
-                                            Proyectos
-                                        </Text>
-                                        <FlatList
-                                            data={proyectos}
-                                            scrollEnabled={false}
-                                            keyExtractor={(item, index) => `${item.id}-${index}`}
-                                            renderItem={({ item, index }) => (
-                                                <Animated.View entering={index < 10 ? FadeInDown.delay(index * 200) : undefined} exiting={FadeOutDown}>
-                                                    <ProyectoCard data={item} />
-                                                </Animated.View>
-                                            )}
-                                            contentContainerStyle={{ paddingBottom: 20 }}
-                                        />
-                                    </View>
-                                ) : (
-                                    <View className='justify-center items-center m-auto'>
-                                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
-                                    </View>
-                                )
+                            ) : proyectos.length > 0 ? (
+                                <View className="mb-8">
+                                    <FlatList
+                                        data={proyectos}
+                                        scrollEnabled={false}
+                                        initialNumToRender={10}
+                                        keyExtractor={(item, index) => `${item.id}-${index}`}
+                                        renderItem={({ item, index }) => (
+                                            <Animated.View entering={index < 10 ? FadeInDown.delay(index * 200) : undefined} exiting={FadeOutDown}>
+                                                <ProyectoCard data={item} />
+                                            </Animated.View>
+                                        )}
+                                        contentContainerStyle={{ paddingBottom: 20 }}
+                                    />
+                                </View>
+                            ) : (
+                                <View className='justify-center items-center m-auto'>
+                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                                </View>
+                            )
                         }
                     </View>
                 </>

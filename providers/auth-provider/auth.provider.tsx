@@ -1,13 +1,32 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useAuthStore from 'store/auth/auth.store';
 import { useNavigation } from '@react-navigation/native';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { AppState, Keyboard, TouchableWithoutFeedback, View } from 'react-native';
 import { Loading } from 'components/loading/loading.component';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { setUser, setToken, setIsAuthenticated, token, isAuthenticated, logout } = useAuthStore();
     const navigation = useNavigation();
     const [loading, setLoading] = useState(true);
+    const appState = useRef(AppState.currentState);
+    const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+
+    const INACTIVITY_LIMIT = 25 * 60 * 1000; // 25 minutos
+
+    const resetInactivityTimer = () => {
+        if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+
+        inactivityTimer.current = setTimeout(() => {
+            console.log('Sesión cerrada por inactividad');
+            logout();
+            AsyncStorage.multiRemove(['@token', '@user', '@isAuthenticated']);
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+            });
+        }, INACTIVITY_LIMIT);
+    };
 
     useEffect(() => {
         const loadAuthData = async () => {
@@ -15,21 +34,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const storedToken = await AsyncStorage.getItem('@token');
                 const storedUser = await AsyncStorage.getItem('@user');
                 const storedAuth = await AsyncStorage.getItem('@isAuthenticated');
-                const expiresAt = await AsyncStorage.getItem('@expiresAt');
-                const now = new Date().getTime();
 
-                if (
-                    storedToken &&
-                    storedUser &&
-                    storedAuth === 'true' &&
-                    expiresAt &&
-                    now < parseInt(expiresAt)
-                ) {
+                if (storedToken && storedUser && storedAuth === 'true') {
                     setToken(storedToken);
                     setUser(JSON.parse(storedUser));
                     setIsAuthenticated(true);
                 } else {
-                    await AsyncStorage.multiRemove(['@token', '@user', '@isAuthenticated', '@expiresAt']);
+                    await AsyncStorage.multiRemove(['@token', '@user', '@isAuthenticated']);
                     setToken(null);
                     setUser(null);
                     setIsAuthenticated(false);
@@ -45,26 +56,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        const autoLogout = async () => {
-            const expiresAt = await AsyncStorage.getItem('@expiresAt');
-            if (expiresAt) {
-                const now = new Date().getTime();
-                const timeLeft = parseInt(expiresAt) - now;
-
-                if (timeLeft > 0) {
-                    setTimeout(async () => {
-                        logout();
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'Login' }],
-                        });
-                    }, timeLeft);
-                }
-            }
-        };
-
         if (token && isAuthenticated) {
-            autoLogout();
+            resetInactivityTimer();
+
+            const appStateSubscription = AppState.addEventListener('change', nextAppState => {
+                if (
+                    appState.current.match(/inactive|background/) &&
+                    nextAppState === 'active'
+                ) {
+                    resetInactivityTimer();
+                }
+                appState.current = nextAppState;
+            });
+
+            const keyboardSub = Keyboard.addListener('keyboardDidShow', resetInactivityTimer);
+
+            return () => {
+                appStateSubscription.remove();
+                keyboardSub.remove();
+                if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+            };
         }
     }, [token, isAuthenticated]);
 
@@ -84,9 +95,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [token, isAuthenticated, loading]);
 
-    if (loading) {
-        return <Loading />;
-    }
+    if (loading) return <Loading />;
 
-    return <>{children}</>;
+    return (
+        <TouchableWithoutFeedback onPress={resetInactivityTimer}>
+            <View style={{ flex: 1 }}>{children}</View>
+        </TouchableWithoutFeedback>
+    );
 };

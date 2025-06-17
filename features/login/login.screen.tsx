@@ -7,6 +7,7 @@ import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { Loading } from 'components/loading/loading.component';
 import useStylesStore from 'store/styles/styles.store';
 import { IUser } from 'interfaces/user.interface';
+import useInternetStore from 'store/internet/internet.store';
 
 const LoginScreen = () => {
     const { globalColor } = useStylesStore()
@@ -18,6 +19,7 @@ const LoginScreen = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [sessionsModalVisible, setSessionsModalVisible] = useState(false);
     const [recentSessions, setRecentSessions] = useState<{ email: string; date: string, token: string, user: IUser, isAuthenticated: boolean }[]>([]);
+    const { online } = useInternetStore();
 
     const handleShowSessions = async () => {
         const storedSessions = await AsyncStorage.getItem('@recentSessions');
@@ -27,6 +29,10 @@ const LoginScreen = () => {
             setRecentSessions([]);
         }
         setSessionsModalVisible(true);
+    };
+
+    const getExpirationTime = () => {
+        return new Date().getTime() + 25 * 60 * 1000;
     };
 
     const handleLogin = async () => {
@@ -46,7 +52,7 @@ const LoginScreen = () => {
             setUser(user);
             setIsAuthenticated(isAuthenticated);
             // Guardar el tiempo para la expiración del token
-            const oneHourFromNow = new Date().getTime() + 60 * 60 * 1000;
+            const oneHourFromNow = getExpirationTime();
 
             // almacenar en storage
             await AsyncStorage.multiSet([
@@ -84,14 +90,12 @@ const LoginScreen = () => {
     const handleLoginSessionRecent = async (token: string, user: IUser, isAuthenticated: boolean) => {
         try {
             setLoading(true)
-            const oneHourFromNow = new Date().getTime() + 60 * 60 * 1000;
 
             // almacenar en storage
             await AsyncStorage.multiSet([
                 ['@token', token],
                 ['@user', JSON.stringify(user)],
                 ['@isAuthenticated', JSON.stringify(isAuthenticated)],
-                ['@expiresAt', oneHourFromNow.toString()]
             ]);
 
             setToken(token);
@@ -176,12 +180,14 @@ const LoginScreen = () => {
 
                     <CustomButtonPrimary rounded onPress={handleLogin} title='Login' />
                 </View>
-                <View className='flex-row justify-center items-center'>
-                    <Text className="text-center text-sm text-gray-700 animate-fade-in">Ver ultimas sesiones {''}</Text>
-                    <Pressable onPress={handleShowSessions}>
-                        <Text style={{ color: globalColor }} className="text-sm font-bold">aquí</Text>
-                    </Pressable>
-                </View>
+                {!online && (
+                    <View className='flex-row justify-center items-center'>
+                        <Text className="text-center text-sm text-gray-700 animate-fade-in">Ver ultimas sesiones {''}</Text>
+                        <Pressable onPress={handleShowSessions}>
+                            <Text style={{ color: globalColor }} className="text-sm font-bold">aquí</Text>
+                        </Pressable>
+                    </View>
+                )}
             </View>
 
             <View>

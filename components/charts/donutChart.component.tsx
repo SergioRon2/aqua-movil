@@ -82,7 +82,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
     );
 };
 
-export default DonutChartComponent;
+export default React.memo(DonutChartComponent);
 
 const styles = StyleSheet.create({
     container: {

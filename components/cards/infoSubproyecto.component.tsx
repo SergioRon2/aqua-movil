@@ -9,6 +9,7 @@ import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
+import { sanitizarNombreArchivo } from "utils/sanitazeName";
 
 type Props = {
     subproyecto: any;
@@ -20,15 +21,28 @@ export const InfoSubProyecto = ({ subproyecto }: Props) => {
     const [modalMunicipiosVisible, setModalMunicipiosVisible] = useState(false);
     const municipios = subproyecto?.municipios_texto?.split(',');
 
+
     const createPDF = async () => {
         try {
             const html = await generarReporteProyectoHTML(subproyecto);
 
             const { uri } = await Print.printToFileAsync({ html });
 
-            // console.log('PDF generado:', uri, { html });
+            // 🗂️ Generar nombre legible y válido
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreBase = subproyecto?.name ?? subproyecto?.title ?? 'reporte';
+            const nombreSanitizado = sanitizarNombreArchivo(nombreBase);
+            const nombreArchivo = `proyecto_${nombreSanitizado}_${fecha}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            await Sharing.shareAsync(uri);
+            // 📦 Mover archivo con nombre personalizado
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
+
+            // 📤 Compartir el PDF con nombre bonito
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');

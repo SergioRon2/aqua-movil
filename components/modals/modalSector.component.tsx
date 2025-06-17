@@ -21,7 +21,7 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
     const [proyectos, setProyectos] = useState<IProyectoDashboard[]>([])
     const [loading, setLoading] = useState(true)
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin } = useActiveStore()
+    const { fechaInicio, fechaFin, planDesarrolloActivo, municipioActivoDashboard, sectorialActivoDashboard } = useActiveStore()
     const { online } = useInternetStore();
 
     useEffect(() => {
@@ -36,7 +36,9 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
                     const res = await StateService.getStatesData({
                         sectorial_id: selectedItem.sector_id,
                         fechaInicio,
-                        fechaFin
+                        fechaFin,
+                        development_plan_id: planDesarrolloActivo?.id,
+                        municipio_id: municipioActivoDashboard?.id
                     });
                     projectsData = res?.data?.projects || [];
                     // Guarda todos los datos recibidos en AsyncStorage (sin identificadores específicos)
@@ -69,26 +71,27 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
                 onRequestClose={() => setShowModal(false)}
             >
                 <View className="flex-1 justify-center items-center bg-black/50">
-                    <View className="p-6 bg-white items-center rounded-2xl w-5/6 shadow-2xl gap-6 border border-gray-200">
+                    <View className="p-6 bg-white items-center justify-between rounded-2xl w-5/6 max-h-5/6 shadow-2xl gap-6 border border-gray-200">
                         <Text className="text-2xl font-extrabold text-center text-gray-800">{selectedItem.label}</Text>
-                        <Text className="text-gray-500 text-lg font-medium text-center">
-                            Actualmente en este sector hay <Text className="text-gray-800 font-bold">{selectedItem.value}</Text> proyectos activos.
-                        </Text>
-
+                        {!loading && <Text className="text-gray-500 text-lg font-medium text-center">
+                            Actualmente en este sector hay <Text className="text-gray-800 font-bold">{proyectos.length}</Text> proyectos.
+                        </Text>}
 
                         <View className='h-2/3'>
                             {loading ? (
                                 <ActivityIndicator size="large" color={globalColor} className="m-auto" />
                             ) : proyectos.length > 0 ? (
-                                <FlatList
-                                    data={proyectos}
-                                    keyExtractor={(item, index) => `${item.id}-${index}`}
-                                    renderItem={({ item, index }) => (
-                                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
-                                            <ProyectoCard setModalFalse={setShowModal} data={item} />
-                                        </Animated.View>
-                                    )}
-                                />
+                                <>
+                                    <FlatList
+                                        data={proyectos}
+                                        keyExtractor={(item, index) => `${item.id}-${index}`}
+                                        renderItem={({ item, index }) => (
+                                            <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
+                                                <ProyectoCard setModalFalse={setShowModal} data={item} />
+                                            </Animated.View>
+                                        )}
+                                    />
+                                </>
                             ) : (
                                 <View className='justify-center items-center m-auto'>
                                     <LottieView

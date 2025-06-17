@@ -1,3 +1,4 @@
+import { srcImg } from "assets/exportable/logo";
 import { IMunicipio } from "interfaces/municipio.interface";
 import { StateService } from "services/states/states.service";
 
@@ -134,7 +135,10 @@ export const generarReporteMunicipiosHTML = async (
         </style>
       </head>
       <body>
-        <h2>📊 Reporte de Municipios</h2>
+        <div class="header">
+          <img src="${srcImg}" alt="Logo" style="height:120px;vertical-align:middle;margin-right:12px;opacity:0.7;" />
+        </div>
+        <h2 style="text-align:left">📊 Reporte de Municipios</h2>
         <div class="grid">
           ${listaConInfo.map(renderCard).join("")}
         </div>

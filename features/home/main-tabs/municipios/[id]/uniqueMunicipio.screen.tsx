@@ -19,6 +19,7 @@ import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { Loading } from "components/loading/loading.component";
 import * as FileSystem from 'expo-file-system';
+import { sanitizarNombreArchivo } from "utils/sanitazeName";
 
 const UniqueMunicipioScreen = () => {
     const route = useRoute();
@@ -34,7 +35,7 @@ const UniqueMunicipioScreen = () => {
         indicadorTiempo: { name: '', value: 0 },
     });
     const { online } = useInternetStore();
-
+    const [tipoSeleccionado, setTipoSeleccionado] = useState<'proyecto' | 'iniciativa'>('proyecto');
 
     const fetchProyectos = useCallback(async () => {
         if (online === null) return;
@@ -51,23 +52,37 @@ const UniqueMunicipioScreen = () => {
                 });
                 proyectosData = res?.data?.data || [];
 
+                const proyectosFiltrados = proyectosData
+                    .filter((item: any) => item?.type === tipoSeleccionado)
+                    .map((item: any) => ({
+                        ...item,
+                        value_project: item.value_project !== null ? Number(item.value_project) : 0
+                    }))
+                    .sort((a: any, b: any) => b.value_project - a.value_project);
+                setProyectos(proyectosFiltrados);
                 await AsyncStorage.setItem(
                     'proyectosMunicipio',
-                    JSON.stringify(proyectosData)
+                    JSON.stringify(proyectosFiltrados)
                 );
             } else {
                 const stored = await AsyncStorage.getItem('proyectosMunicipio');
                 proyectosData = stored ? JSON.parse(stored) : [];
+                const proyectosFiltrados = proyectosData
+                    .filter((item: any) => item?.type === tipoSeleccionado)
+                    .map((item: any) => ({
+                        ...item,
+                        value_project: item.value_project !== null ? Number(item.value_project) : 0
+                    }))
+                    .sort((a: any, b: any) => b.value_project - a.value_project);
+                setProyectos(proyectosFiltrados);
             }
-
-            setProyectos(proyectosData);
         } catch (error) {
             console.error('Error fetching proyectos:', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [municipio.id, fechaInicio, fechaFin, online, refreshing]);
+    }, [municipio.id, fechaInicio, fechaFin, online, refreshing, tipoSeleccionado]);
 
     useEffect(() => {
         fetchProyectos();
@@ -123,18 +138,28 @@ const UniqueMunicipioScreen = () => {
         fetchInfo();
     }, [municipio.id, fechaInicio, fechaFin]);
 
-
     const createPDF = async () => {
         try {
-            const html = await generarResumenMunicipioUnicoHTML(municipio?.nombre, proyectos?.length, avances);
+            const html = await generarResumenMunicipioUnicoHTML(
+                municipio?.name,
+                proyectos,
+                avances
+            );
 
             const { uri } = await Print.printToFileAsync({ html });
 
-            // console.log('PDF generado:', uri, { html });
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreBase = municipio?.name ?? 'municipio';
+            const nombreSanitizado = sanitizarNombreArchivo(nombreBase);
+            const nombreArchivo = `resumen_${nombreSanitizado}_${fecha}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            console.log(avances.indicadorTiempo.value)
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
 
-            await Sharing.shareAsync(uri);
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
@@ -144,15 +169,15 @@ const UniqueMunicipioScreen = () => {
     const items = [
         {
             title: avances.avanceFinanciero.name,
-            component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} />,
+            component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={150} />,
         },
         {
             title: avances.avanceFisico.name,
-            component: <SemiDonutChart percentage={avances.avanceFisico.value} height={240} />,
+            component: <SemiDonutChart percentage={avances.avanceFisico.value} height={150} />,
         },
         {
             title: avances.indicadorTiempo.name,
-            component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={240} />,
+            component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={150} />,
         },
     ];
 
@@ -185,7 +210,7 @@ const UniqueMunicipioScreen = () => {
                                 <Carousel
                                     loop
                                     width={Dimensions.get('window').width - 90}
-                                    height={200}
+                                    height={160}
                                     data={items}
                                     scrollAnimationDuration={1000}
                                     renderItem={({ item }) => (
@@ -199,11 +224,22 @@ const UniqueMunicipioScreen = () => {
                         </View>
 
                         <View className="h-auto animate-fade-in justify-start rounded-2xl py-3">
+                            <View className="flex-row items-center justify-between px-4">
+                                <Pressable onPress={() => setTipoSeleccionado('proyecto')}>
+                                    <Text className="text-xl font-bold py-2" style={{ color: tipoSeleccionado === 'proyecto' ? globalColor : '#000' }}>
+                                        Proyectos
+                                    </Text>
+                                </Pressable>
+                                <Pressable onPress={() => setTipoSeleccionado('iniciativa')}>
+                                    <Text className="text-xl font-bold py-2" style={{ color: tipoSeleccionado === 'iniciativa' ? globalColor : '#000' }}>
+                                        Iniciativas
+                                    </Text>
+                                </Pressable>
+                            </View>
                             {loading ? (
                                 <ActivityIndicator size="large" color={globalColor} />
                             ) : proyectos.length > 0 ? (
                                 <>
-                                    <Text className="py-2 text-xl font-bold">Proyectos</Text>
                                     <FlatList
                                         data={proyectos}
                                         scrollEnabled={false}

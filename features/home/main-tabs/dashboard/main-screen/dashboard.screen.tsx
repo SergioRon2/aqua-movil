@@ -2,8 +2,8 @@ import { FiltersComponentDashboard } from 'components/buttons/filtersInfoDashboa
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import { Loading } from 'components/loading/loading.component';
 import LottieView from 'lottie-react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, Text, View, Image, Dimensions, Alert, RefreshControl, Platform } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, Text, View, Image, Dimensions, Alert, RefreshControl, Platform, TouchableOpacity } from 'react-native';
 import { StateService } from 'services/states/states.service';
 import useStylesStore from 'store/styles/styles.store';
 import { capitalize } from 'utils/capitalize';
@@ -19,9 +19,8 @@ import DonutChartComponent from 'components/charts/donutChart.component';
 import useInternetStore from 'store/internet/internet.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 import { generarReporteDashboardHTML } from 'components/pdfTemplates/dashboardReporte.component';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 
@@ -42,6 +41,8 @@ const DashboardScreen = () => {
     const { municipioActivoDashboard, sectorialActivoDashboard, fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
     const [sectorialInfo, setSectorialInfo] = useState<SectorialInfo[]>([])
     const [refreshing, setRefreshing] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const carouselRef = useRef<any>(null);
     const [values, setValues] = useState<Values>({
         value_total_project: '0',
         value_total_executed: '0'
@@ -154,12 +155,12 @@ const DashboardScreen = () => {
             console.error({ error })
         }
     }, [
+        fechaInicio,
+        fechaFin,
         online,
         planDesarrolloActivo?.id,
         sectorialActivoDashboard?.id,
         municipioActivoDashboard?.id,
-        fechaInicio,
-        fechaFin
     ]);
 
     useEffect(() => {
@@ -173,13 +174,13 @@ const DashboardScreen = () => {
     // donut chart data
     const totalProjects = (sectorialInfo || []).reduce((sum, item) => sum + item.amount_project, 0);
 
-    const donutChartData: { label: string; value: number; }[] = (sectorialInfo || []).map((item, index) => ({
-        label: item.sector_name,
-        value: (item.amount_project / totalProjects) * 100,
-        // color: COLORS[index % COLORS.length],
-    }));
+    const donutChartData = useMemo(() => {
+        return (sectorialInfo || []).map((item, index) => ({
+            label: item.sector_name,
+            value: (item.amount_project / totalProjects) * 100,
+        }));
+    }, [sectorialInfo, totalProjects]);
 
-    console.log(fechaInicio, fechaFin)
 
     const transformSectorialDataForBarChart = () => {
         if (sectorialInfo) {
@@ -205,12 +206,16 @@ const DashboardScreen = () => {
 
         try {
             const html = await generarReporteDashboardHTML(valoresProyectoGeneral, sectorialInfo, avances);
+            const { uri } = await Print.printToFileAsync({ html, height: 1000 });
 
-            const { uri } = await Print.printToFileAsync({ html });
+            const nombreArchivo = `reporte-dashboard-${new Date().toISOString().split('T')[0]}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            // console.log('PDF generado:', uri, { html });
-
-            await Sharing.shareAsync(uri);
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
@@ -223,9 +228,9 @@ const DashboardScreen = () => {
     };
 
     const items = [
-        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={240} /> },
-        { title: avances.avanceFisico.name, component: <SemiDonutChart color='#009966' percentage={avances.avanceFisico.value} height={240} /> },
-        { title: avances.indicadorTiempo.name, component: <SemiDonutChart color='#000099' percentage={avances.indicadorTiempo.value} height={240} /> },
+        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={180} /> },
+        { title: avances.avanceFisico.name, component: <SemiDonutChart color='#009966' percentage={avances.avanceFisico.value} height={180} /> },
+        { title: avances.indicadorTiempo.name, component: <SemiDonutChart color='#000099' percentage={avances.indicadorTiempo.value} height={180} /> },
     ];
 
     return (
@@ -288,25 +293,65 @@ const DashboardScreen = () => {
                         </View>
 
                         {/* carousel */}
-                        <View className="justify-center items-center mt-6 bg-white border rounded-lg px-4 h-auto border-gray-200 shadow-lg">
-                            <Carousel
-                                loop
-                                width={Dimensions.get('window').width - 50}
-                                height={290}
-                                data={items}
-                                scrollAnimationDuration={1000}
-                                renderItem={({ item }) => (
-                                    <View className="w-full gap-5 rounded-xl bg-white justify-center items-center mb-5">
-                                        <Text className="text-lg font-bold mt-4">{item.title}</Text>
-                                        {item.component}
-                                    </View>
-                                )}
-                            />
-                        </View>
+                        {avances && (
+                            <View className="justify-center items-center bg-white border rounded-lg px-4 border-gray-200 shadow-lg">
+                                <Carousel
+                                    ref={carouselRef}
+                                    loop
+                                    width={Dimensions.get('window').width - 50}
+                                    height={250}
+                                    data={items}
+                                    scrollAnimationDuration={1000}
+                                    onSnapToItem={(index) => setCurrentIndex(index)}
+                                    onScrollEnd={(index) => setCurrentIndex(index)}
+                                    renderItem={({ item }) => (
+                                        <View className="w-full rounded-xl bg-white justify-center items-center">
+                                            <Text className="text-lg font-bold mt-4">{item.title}</Text>
+                                            {item.component}
+                                        </View>
+                                    )}
+                                />
+                                <View className="absolute flex-row justify-between items-center w-full px-2 mt-4">
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (carouselRef.current) {
+                                                carouselRef.current.prev();
+                                            }
+                                        }}
+                                        className="p-2 bg-gray-200 rounded-full items-center justify-center"
+                                    >
+                                        <Text className='text-2xl text-center font-bold'>{'<'}</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (carouselRef.current) {
+                                                carouselRef.current.next();
+                                            }
+                                        }}
+                                        className="p-2 bg-gray-200 rounded-full items-center justify-center"
+                                    >
+                                        <Text className='text-2xl text-center font-bold'>{'>'}</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View className="flex-row justify-center mb-4">
+                                    {items.map((_, index) => (
+                                        <View
+                                            key={index}
+                                            className={`w-2 h-2 mx-1 rounded-full ${index === currentIndex ? 'bg-black' : 'bg-gray-400'
+                                                }`}
+                                        />
+                                    ))}
+                                </View>
+                            </View>
+                        )}
 
                         {/* donut chart */}
-                        <View className='items-center gap-4 bg-white py-2 justify-center border border-gray-200 rounded-lg'>
-                            <Text className='text-2xl text-gray-800 font-bold'>Proyectos por estados</Text>
+                        <View className='items-center gap-4 bg-white p-3 justify-center border border-gray-200 rounded-lg'>
+                            <Text className='text-2xl text-gray-800 font-bold text-center'>
+                                Porcentaje de proyectos por sectorial
+                            </Text>
                             <DonutChartComponent amount={amount} data={donutChartData} />
                         </View>
                     </View>

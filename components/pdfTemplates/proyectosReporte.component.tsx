@@ -1,9 +1,17 @@
+import { srcImg } from "assets/exportable/logo";
 import { IProyecto } from "interfaces/proyecto.interface";
 import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
 
 export const generarTablaProyectosHTML = (proyectos: IProyecto[]) => {
   const parseValue = (val: any) => (val === null || val === undefined ? 'nulo' : val);
-
+  const fechaExportacion = new Date().toLocaleString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
   const cards = proyectos.map((proyecto, index) => `
     <div class="card">
       <h3 class="card-title">#${index + 1} - ${parseValue(proyecto.name)}</h3>
@@ -60,7 +68,6 @@ export const generarTablaProyectosHTML = (proyectos: IProyecto[]) => {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.2s ease;
           }
 
           .card:hover {
@@ -117,6 +124,10 @@ export const generarTablaProyectosHTML = (proyectos: IProyecto[]) => {
       </head>
       <body>
         <div class="container">
+          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+            <img src="${srcImg}" alt="Logo" style="height:120px;opacity:0.7;"/>
+            <span style="font-size:13px;color:#666;">Exportado: ${fechaExportacion}</span>
+          </div>
           ${cards}
         </div>
       </body>

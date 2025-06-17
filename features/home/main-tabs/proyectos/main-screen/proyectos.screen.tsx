@@ -1,9 +1,9 @@
 import { FiltersComponentProyectos } from 'components/buttons/filters.component';
 import { ProyectoCardPresentable } from 'components/cards/proyectoCardv2.component';
 import { IProyecto } from 'interfaces/proyecto.interface';
-import { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, Image, Pressable, Alert, RefreshControl } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, PanResponder, Pressable, Alert, RefreshControl, SectionList, SectionListData, TouchableOpacity } from 'react-native';
+import Animated, { FadeInDown, FadeOutDown, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { ProjectsService } from 'services/projects/projects.service';
 import useActiveStore from 'store/actives/actives.store';
 import LottieView from 'lottie-react-native';
@@ -17,6 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { generarTablaProyectosHTML } from 'components/pdfTemplates/proyectosReporte.component';
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import * as FileSystem from 'expo-file-system';
+import { sanitizarNombreArchivo } from 'utils/sanitazeName';
+import { agruparPorLetra } from 'utils/agruparPorLetra';
+
+const abecedario = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 const ProyectosScreen = () => {
     const { globalColor } = useStylesStore()
@@ -24,8 +28,16 @@ const ProyectosScreen = () => {
     const { municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin } = useActiveStore();
     const [loading, setLoading] = useState(true);
     const [todosLosProyectos, setTodosLosProyectos] = useState([]);
+    const [proyectosAgrupados, setProyectosAgrupados] = useState<any[]>([]);
     const { online } = useInternetStore();
     const [refreshing, setRefreshing] = useState(false);
+    const sectionListRef = useRef<SectionList<any>>(null);
+    const [letraVisible, setLetraVisible] = useState<string | null>('A');
+    const scale = useSharedValue(0);
+    const opacity = useSharedValue(0);
+    const posicionesSecciones = useRef<Record<string, number>>({});
+    const hideTimeout = useRef<NodeJS.Timeout | null>(null);
+    const isUserScrolling = useRef(false);
 
     const fetchProyectos = useCallback(async () => {
         try {
@@ -54,21 +66,27 @@ const ProyectosScreen = () => {
                 data = stored ? JSON.parse(stored) : [];
             }
 
-            setTodosLosProyectos(data); // Guardamos todo
-            setProyectos(data.slice(0, 100)); // Mostramos los primeros 100
+            let proyectosFiltrados = data
+                .filter((p: any) => p.value_project > 0)
+                .sort((a: any, b: any) => b.value_project - a.value_project);
+            data = proyectosFiltrados;
 
-            // Progresivo: cada 1s mostramos 100 más
+            setTodosLosProyectos(data);
+
+            let acumulado: IProyecto[] = data.slice(0, 100);
+            setProyectosAgrupados(agruparPorLetra(acumulado));
+
             let index = 100;
             const interval = setInterval(() => {
-                setProyectos((prev) => {
-                    const next = data.slice(index, index + 100);
-                    index += 100;
-                    const updated = [...prev, ...next];
-                    if (updated.length >= data.length) {
-                        clearInterval(interval);
-                    }
-                    return updated;
-                });
+                const next = data.slice(index, index + 100);
+                index += 100;
+
+                acumulado = [...acumulado, ...next];
+                setProyectosAgrupados(agruparPorLetra(acumulado));
+
+                if (acumulado.length >= data.length) {
+                    clearInterval(interval);
+                }
             }, 1000);
         } catch (error) {
             console.error({ error });
@@ -86,32 +104,75 @@ const ProyectosScreen = () => {
         fetchProyectos();
     };
 
+    const burbujaStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: scale.value }],
+            opacity: opacity.value,
+        };
+    });
+
+
     const createPDF = async () => {
         try {
             const html = await generarTablaProyectosHTML(proyectos);
 
-            const { uri } = await Print.printToFileAsync({ html, width: 1600 });
+            const { uri } = await Print.printToFileAsync({ html });
 
-            // console.log('PDF generado:', uri, { html });
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreArchivo = `tabla_proyectos_${sanitizarNombreArchivo(fecha)}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            await Sharing.shareAsync(uri);
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
+
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
         }
     };
+
+    const buscarIndexDeLetra = (letra: string, sections: any[]) => {
+        return sections.findIndex((section) => section.letra === letra);
+    };
+
+    const handleLetraPress = (letra: string) => {
+        if (isUserScrolling.current) return;
+
+        const sectionIndex = proyectosAgrupados.findIndex(
+            (section) => section.letra.toUpperCase() === letra
+        );
+
+        if (sectionIndex !== -1) {
+            sectionListRef.current?.scrollToLocation({
+                sectionIndex,
+                itemIndex: 0,
+                animated: true,
+                viewPosition: 0, // 0 = top, 0.5 = center, 1 = bottom
+            });
+
+            setLetraVisible(letra);
+            setTimeout(() => setLetraVisible(null), 1000);
+        }
+    };
+
+
     return (
         <View className='flex-1 bg-white p-4'>
-            <View className="flex-row items-center justify-center gap-4">
+            <View className="flex-row items-center justify-center gap-1">
                 <Text className='text-2xl text-center font-bold'>Proyectos</Text>
-                <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
-                    <Ionicons
-                        name="archive-outline"
-                        size={28}
-                        color={globalColor}
-                        style={{ marginRight: 12 }}
-                    />
-                </Pressable>
+                {proyectos.length > 1 && (
+                    <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
+                        <Ionicons
+                            name="archive-outline"
+                            size={28}
+                            color={globalColor}
+                            style={{ marginRight: 12 }}
+                        />
+                    </Pressable>
+                )}
             </View>
 
             {/* selected years */}
@@ -122,19 +183,55 @@ const ProyectosScreen = () => {
 
             {loading ? (
                 <Loading />
-            ) : proyectos.length > 0 ? (
-                <FlatList
-                    data={proyectos}
-                    keyExtractor={(item, index) => `${item.id}-${index}`}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
-                    }
-                    renderItem={({ item, index }) => (
-                        <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
-                            <ProyectoCardPresentable proyecto={item} />
+            ) : proyectosAgrupados.length > 0 ? (
+                <View className='flex-row items-start'>
+                    <SectionList
+                        ref={sectionListRef}
+                        sections={proyectosAgrupados}
+                        keyExtractor={(item, index) => `${item.id}-${index}`}
+                        showsVerticalScrollIndicator={false}
+                        getItemLayout={(data, index) => ({
+                            length: 150,
+                            offset: 150 * index,
+                            index,
+                        })}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
+                        }
+                        renderItem={({ item, index }) => (
+                            <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
+                                <ProyectoCardPresentable proyecto={item} />
+                            </Animated.View>
+                        )}
+                        renderSectionHeader={({ section: { letra } }) => (
+                            <View
+                                onLayout={(event) => {
+                                    const y = event.nativeEvent.layout.y;
+                                    posicionesSecciones.current[letra] = y;
+                                }}
+                            >
+                                <Text style={{ color: globalColor }} className='my-auto px-8 py-3 font-bold text-2xl mt-2'>{letra}</Text>
+                            </View>
+                        )}
+                    />
+                    <View className='flex-col items-center justify-center w-16 bg-white gap-2'>
+                        {proyectosAgrupados.map(({ letra }) => (
+                            <TouchableOpacity key={letra} onPress={() => handleLetraPress(letra)}>
+                                <Text className='text-xl font-bold' style={{ color: globalColor }}>{letra}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    {letraVisible && (
+                        <Animated.View
+                            style={burbujaStyle}
+                            className="absolute left-[40%] top-[40%] bg-black/50 p-8 rounded-full justify-center items-center"
+                        >
+                            <Text className="text-white text-5xl font-bold">
+                                {letraVisible}
+                            </Text>
                         </Animated.View>
                     )}
-                />
+                </View>
             ) : (
                 <View className='justify-center items-center m-auto'>
                     <LottieView

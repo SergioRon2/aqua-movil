@@ -17,6 +17,8 @@ const SubProyectoScreen = () => {
         ]
     }
 
+    console.log({subproyecto})
+
     return (
         <ScrollView className="h-full mt-5 px-4">
             {

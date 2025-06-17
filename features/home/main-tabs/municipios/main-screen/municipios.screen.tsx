@@ -17,6 +17,7 @@ import useStylesStore from 'store/styles/styles.store';
 import { SelectedYears } from 'components/buttons/selectedYears.component';
 import { FiltersSectoriales } from 'components/buttons/filterSectoriales.component';
 import { StateService } from 'services/states/states.service';
+import { sanitizarNombreArchivo } from 'utils/sanitazeName';
 
 const Municipios = () => {
     const [municipios, setMunicipios] = useState<IMunicipio[]>([]);
@@ -89,13 +90,26 @@ const Municipios = () => {
 
     const createPDF = async (municipiosData: IMunicipio[]) => {
         try {
-            const html = await generarReporteMunicipiosHTML(municipiosData, fechaInicio!, fechaFin!);
+            const html = await generarReporteMunicipiosHTML(
+                municipiosData,
+                fechaInicio!,
+                fechaFin!
+            );
 
             const { uri } = await Print.printToFileAsync({ html });
 
-            // console.log('PDF generado:', uri, { html });
+            const fechaActual = new Date().toISOString().split('T')[0];
+            const nombreInicio = sanitizarNombreArchivo(fechaInicio!);
+            const nombreFin = sanitizarNombreArchivo(fechaFin!);
+            const nombreArchivo = `reporte_municipios_${nombreInicio}_a_${nombreFin}_${fechaActual}.pdf`;
+            const nuevaRuta = FileSystem.documentDirectory + nombreArchivo;
 
-            await Sharing.shareAsync(uri);
+            await FileSystem.moveAsync({
+                from: uri,
+                to: nuevaRuta,
+            });
+
+            await Sharing.shareAsync(nuevaRuta);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');

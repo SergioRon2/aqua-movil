@@ -1,7 +1,9 @@
+import { srcImg } from "assets/exportable/logo";
 import { IProyecto } from "interfaces/proyecto.interface";
+import { capitalize } from "utils/capitalize";
 import { formatNumberWithSuffix } from "utils/formatNumberWithSuffix";
 
-export const generarReporteProyectoHTML = (proyecto: IProyecto, subProjectsLength?: number) => {
+export const generarReporteProyectoHTML = (proyecto: any, subProjectsLength?: number, infoProyecto?: any, avances?: any) => {
     const parseValue = (val: any) => (val === null || val === undefined || val === "" ? 'Nulo' : val);
 
     const buildCard = (label: string, value: string, colorClass: string, icon?: string) => `
@@ -11,6 +13,17 @@ export const generarReporteProyectoHTML = (proyecto: IProyecto, subProjectsLengt
             <span class="value">${value}</span>
         </div>
     `;
+
+    console.log(infoProyecto?.contract_principal?.contract_number)
+
+    const fechaExportacion = new Date().toLocaleString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
     return `
     <html>
@@ -110,25 +123,29 @@ export const generarReporteProyectoHTML = (proyecto: IProyecto, subProjectsLengt
         </style>
       </head>
       <body>
-        <h2>📋 Reporte del Proyecto</h2>
+        <div className="">
+          <img src="${srcImg}" alt="Logo" style="height:120px;vertical-align:middle;margin-right:12px;opacity:0.7;" />
+          <div class="fecha-exportacion">Exportado: ${fechaExportacion}</div>
+        </div>
+        <h2 style="text-align:left;">📋 Reporte del Proyecto</h2>
         <div class="grid">
-          ${buildCard("Nombre", parseValue(proyecto.name), "blue", "📌")}
-          ${buildCard("Fecha inicio", parseValue(proyecto.fechaProyecto), "orange", "📅")}
-          ${buildCard("Fecha fin", parseValue(proyecto.fechaProyecto), "orange", "📅")}
-          ${buildCard("Contrato", parseValue(proyecto.type), "grey", "📃")}
-          ${buildCard("Estado", parseValue(proyecto.state_name), "red", "⚠️")}
-          ${buildCard("Sectorial", parseValue(proyecto.list_sector_name), "blue", "🏛️")}
+          ${buildCard("Nombre", parseValue(proyecto.name || proyecto.title), "blue", "📌")}
+          ${buildCard("Fecha inicio", parseValue(proyecto.fechaProyecto || proyecto.start_actSigning_date), "orange", "📅")}
+          ${buildCard("Fecha fin", parseValue(proyecto.fechaProyecto || proyecto.date_end_all), "orange", "📅")}
+          ${buildCard("Contrato", parseValue(capitalize(proyecto.type) || proyecto.id), "grey", "📃")}
+          ${buildCard("Estado", parseValue(proyecto.state_name || proyecto.state), "red", "⚠️")}
+          ${buildCard("Sectorial", parseValue(proyecto.list_sector_name || proyecto.sector), "blue", "🏛️")}
           ${buildCard("Municipio", parseValue(proyecto.municipios_texto), "blue", "🌍")}
           ${buildCard("Contratista", parseValue(proyecto.BPIM), "grey", "🏗️")}
-          ${buildCard("Valor del proyecto", proyecto.total_source_value != null
-            ? `$${formatNumberWithSuffix(+proyecto.total_source_value)}`
+          ${buildCard("Valor del proyecto", proyecto.total_source_value || proyecto.project_value != null
+            ? `$${formatNumberWithSuffix(+proyecto.total_source_value || +proyecto.value_init_project)}`
             : 'Nulo', "purple", "💰")}
           ${buildCard("Número de contrato", parseValue(proyecto.contract_number), "grey", "🔢")}
           ${subProjectsLength && subProjectsLength > 0
             ? buildCard("Subproyectos", subProjectsLength.toString(), "blue", "🧩")
             : ''}
-          ${buildCard("Avance físico", parseValue(proyecto.physical_current) + "%", "green", "🏃‍♂️")}
-          ${buildCard("Avance financiero", parseValue(proyecto.financial_current) + "%", "green", "💵")}
+          ${buildCard("Avance físico", parseValue(avances.avanceFisico.value) + "%", "green", "🏃‍♂️")}
+          ${buildCard("Avance financiero", parseValue(avances.avanceFinanciero.value) + "%", "green", "💵")}
         </div>
       </body>
     </html>

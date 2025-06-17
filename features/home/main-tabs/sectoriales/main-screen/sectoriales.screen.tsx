@@ -97,7 +97,17 @@ const Sectoriales = () => {
 
             const { uri } = await Print.printToFileAsync({ html });
 
-            await Sharing.shareAsync(uri);
+            const fechaInicioStr = fechaInicio?.split('T')[0] ?? 'sin_fecha_inicio';
+            const fechaFinStr = fechaFin?.split('T')[0] ?? 'sin_fecha_fin';
+            const nombreArchivo = `reporte_sectoriales_${fechaInicioStr}_a_${fechaFinStr}.pdf`;
+            const rutaDestino = FileSystem.documentDirectory + nombreArchivo;
+
+            await FileSystem.moveAsync({
+                from: uri,
+                to: rutaDestino,
+            });
+
+            await Sharing.shareAsync(rutaDestino);
         } catch (error) {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');

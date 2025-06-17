@@ -1,3 +1,4 @@
+import { srcImg } from "assets/exportable/logo";
 import { ISectorial } from "interfaces/sectorial.interface";
 import { StateService } from "services/states/states.service";
 
@@ -147,7 +148,8 @@ export const generarReporteSectorialesHTML = async (
         </style>
       </head>
       <body>
-        <h2>📊 Reporte de Sectoriales</h2>
+        <img src="${srcImg}" alt="Logo" style="height:120px;vertical-align:middle;margin-right:12px;opacity:0.7;" />
+        <h2 style="text-align:left;">📊 Reporte de Sectoriales</h2>
         <div class="grid">
             ${listaConInfo.map(renderSectorialCard).join("")}
         </div>
