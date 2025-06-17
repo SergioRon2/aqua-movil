@@ -30,7 +30,7 @@ const SubProyectoScreen = () => {
                             <InfoSubProyecto subproyecto={subproyecto} />
                         </View>
 
-                        <View className="justify-center items-center mt-5 mb-12 bg-white border-2 rounded-lg p-4 h-auto border-gray-200 shadow-lg">
+                        <View style={{ backgroundColor: '#fff' }} className="justify-center items-center mt-5 mb-12 bg-white border-2 rounded-lg p-4 h-auto border-gray-200 shadow-lg">
                             <BarChartComponent title="Avance del proyecto" horizontalScroll={false} data={dataBar} />
                         </View>
                     </>

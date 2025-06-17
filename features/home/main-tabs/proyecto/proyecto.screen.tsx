@@ -1,12 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { InfoProyecto } from "components/cards/infoProyecto.component";
-import BarChartComponent from "components/charts/barChart.component";
 import SemiDonutChart from "components/charts/semiDonutChart.component";
 import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { Alert, Dimensions, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { InfoService } from "services/info/info.service";
 import { ProjectsService } from "services/projects/projects.service";
 import useActiveStore from "store/actives/actives.store";

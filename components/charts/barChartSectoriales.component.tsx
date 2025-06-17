@@ -1,6 +1,5 @@
-import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import { ModalSector } from 'components/modals/modalSector.component';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, ScrollView, Dimensions, Text, Modal } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import useStylesStore from 'store/styles/styles.store';
@@ -59,7 +58,7 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll }: Props) 
     const chartWidth = Math.max(screenWidth, data.labels.length * 100 + longestLabel * 5);
 
     return (
-        <View className="animate-fade-in w-full gap-4">
+        <View className="animate-fade-in w-full gap-4" style={{ backgroundColor: '#fff' }} renderToHardwareTextureAndroid={true}>
             {title && (
                 <Text className="text-center font-bold text-xl">{title}</Text>
             )}
