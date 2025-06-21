@@ -23,7 +23,7 @@ const Sectoriales = () => {
     const [sectorialesCargados, setSectorialesCargados] = useState(0)
     const [loading, setLoading] = useState(true)
     const { online } = useInternetStore();
-    const { fechaInicio, fechaFin, municipioActivo_SectorialesScreen } = useActiveStore();
+    const { fechaInicio, fechaFin, municipioActivo_SectorialesScreen, planDesarrolloActivo } = useActiveStore();
     const [refreshing, setRefreshing] = useState(false);
     const { globalColor } = useStylesStore();
 
@@ -44,7 +44,7 @@ const Sectoriales = () => {
             if (online === null) return;
 
             if (online) {
-                const res = await StateService.getStatesData({ fechaInicio, fechaFin, municipio_id: municipioActivo_SectorialesScreen?.id });
+                const res = await StateService.getStatesData({ fechaInicio, fechaFin, municipio_id: municipioActivo_SectorialesScreen?.id, development_plan_id: planDesarrolloActivo?.id });
                 const sectorialesData = res?.data?.list_sectorial_response;
                 setSectoriales(sectorialesData);
                 await AsyncStorage.setItem('sectoriales', JSON.stringify(sectorialesData));

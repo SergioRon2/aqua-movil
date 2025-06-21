@@ -22,7 +22,7 @@ interface Props {
 
 const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin } = useActiveStore()
+    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
     const [loading, setLoading] = useState<boolean>(false)
     const [sectorialInfo, setSectorialInfo] = useState<any>()
     const { online } = useInternetStore();
@@ -43,6 +43,7 @@ const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
                     sectorial_id: sectorialData.sector_id,
                     fechaInicio,
                     fechaFin,
+                    development_plan_id: planDesarrolloActivo?.id
                 });
                 data = res?.data;
                 if (data) {
@@ -70,7 +71,7 @@ const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
         return () => {
             isMounted = false;
         };
-    }, [sectorialData.id, fechaInicio, fechaFin, online]);
+    }, [sectorialData.id, fechaInicio, fechaFin, online, planDesarrolloActivo?.id]);
 
     useEffect(() => {
         const delay = index * 1000; // espera 1000ms por cada índice

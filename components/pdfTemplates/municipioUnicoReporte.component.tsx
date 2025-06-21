@@ -226,6 +226,9 @@ export const generarResumenMunicipioUnicoHTML = (
         </div>
 
         <div class="proyectos-container">
+          <div style="width:100%;text-align:center;font-size:20px;font-weight:600;color:#1a237e;margin:32px 0 18px 0;letter-spacing:1px;">
+            <h2 style="margin-top:40px;color:#1a237e;">Lista de Proyectos e Iniciativas</h2>
+          </div>
           ${proyectos.map(renderProyecto).join("")}
         </div>
 

@@ -270,7 +270,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                                     transparent={true}
                                     onRequestClose={() => setModalMunicipiosVisible(false)}
                                 >
-                                    <View className="flex-1 justify-center items-center bg-black bg-opacity-75">
+                                    <View className="flex-1 justify-center items-center bg-black/75">
                                         <View className="bg-white p-8 rounded-lg w-3/4 gap-4">
                                             <Text className="text-xl font-bold mb-4">Municipios</Text>
                                             <ScrollView>
@@ -298,7 +298,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                     <View className="justify-between items-start w-1/2">
                         <Text className="text-md text-gray-500">Valor inicial del proyecto</Text>
                         <Text className="text-lg font-bold">
-                            {formatNumberWithSuffix(+proyectoInfo?.value_init_project)}
+                            {formatNumberWithSuffix(+proyectoInfo?.value_init_project) ?? 0}
                         </Text>
                     </View>
                 </View>
@@ -312,7 +312,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                     <View className="justify-between items-start w-1/2">
                         <Text className="text-md text-gray-500">Valor total del proyecto</Text>
                         <Text className="text-lg font-bold">
-                            {formatNumberWithSuffix(+proyectoInfo?.value_project)}
+                            {formatNumberWithSuffix(+proyectoInfo?.value_project) ?? 0}
                         </Text>
                     </View>
                 </View>

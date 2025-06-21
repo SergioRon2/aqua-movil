@@ -14,14 +14,18 @@ import { ActivityIndicator } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useActiveStore from "store/actives/actives.store";
 import useInternetStore from 'store/internet/internet.store';
+import { Loading } from "components/loading/loading.component";
+import useStylesStore from "store/styles/styles.store";
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
     const [selectedPlan, setSelectedPlan] = useState<IDevelopmentPlan | null>(null);
-    const { setPlanDesarrolloActivo } = useActiveStore()
+    const { setPlanDesarrolloActivo } = useActiveStore();
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const { online } = useInternetStore();
+    const { globalColor } = useStylesStore();
+    const [modalLoading, setModalLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchDevelopmentPlan = async () => {
@@ -65,17 +69,21 @@ export const SelectedDevelopmentPlan = () => {
     }, []);
 
     const handleSelect = async (plan: IDevelopmentPlan) => {
+        setModalLoading(true)
         setSelectedPlan(plan);
         setPlanDesarrolloActivo(plan);
         await AsyncStorage.setItem('selectedPlan', JSON.stringify(plan));
         setModalVisible(false);
+        setTimeout(() => {
+            setModalLoading(false)
+        }, 2000)
     };
 
 
     return (
         <View className="w-3/5 self-center">
             {isLoading ? (
-                <View className="border border-white rounded-xl py-3 px-4 items-center">
+                <View className="border border-white rounded-full py-3 px-4 items-center">
                     <ActivityIndicator
                         className="self-center"
                         size={'small'}
@@ -85,7 +93,7 @@ export const SelectedDevelopmentPlan = () => {
             ) : (
                 <>
                     <Pressable
-                        className="border border-white rounded-xl py-3 px-4 items-center active:opacity-50"
+                        className="border border-white rounded-full py-3 px-4 items-center active:opacity-50"
                         onPress={() => setModalVisible(true)}
                     >
                         <Text className="text-white font-semibold text-center">
@@ -123,6 +131,23 @@ export const SelectedDevelopmentPlan = () => {
                         </View>
                     </Modal>
                 </>
+            )}
+
+
+            {modalLoading && (
+                <Modal
+                    transparent
+                    animationType="fade"
+                    visible={modalLoading}
+                    onRequestClose={() => { }}
+                >
+                    <View className="bg-white flex-1 justify-center items-center">
+                        <View className="h-1/4 justify-center items-center animate-fade-in">
+                            <Loading />
+                            <Text style={{ color: globalColor }} className="mt-4 text-lg font-bold">Cambiando plan de desarrollo a {selectedPlan?.name}</Text>
+                        </View>
+                    </View>
+                </Modal>
             )}
         </View >
     );

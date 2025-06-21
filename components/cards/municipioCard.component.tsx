@@ -24,7 +24,7 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [municipioInfo, setMunicipioInfo] = useState<any>()
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin } = useActiveStore()
+    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
     const navigation = useNavigation();
     const { online } = useInternetStore();
 
@@ -44,6 +44,7 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
                     municipio_id: municipioData.id,
                     fechaInicio,
                     fechaFin,
+                    development_plan_id: planDesarrolloActivo?.id
                 });
                 data = res?.data;
                 if (data) {
@@ -71,7 +72,7 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
         return () => {
             isMounted = false;
         };
-    }, [municipioData.id, fechaInicio, fechaFin, online]);
+    }, [municipioData.id, fechaInicio, fechaFin, online, planDesarrolloActivo?.id]);
 
     useEffect(() => {
         const delay = index * 1000; // espera 1000ms por cada índice

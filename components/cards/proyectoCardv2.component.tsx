@@ -12,7 +12,7 @@ import useStylesStore from 'store/styles/styles.store';
 
 
 interface Props {
-    proyecto: IProyecto;
+    proyecto: any;
 }
 
 export const ProyectoCardPresentable = ({ proyecto }: Props) => {
@@ -22,7 +22,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
 
     const municipios = proyecto?.municipios_texto?.split(',');
 
-    const valorTotal = proyecto.value_project;
+    const valorTotal = proyecto?.value_project || proyecto?.project_value;
     const progresoFinanciero = proyecto.financial_current ? proyecto.financial_current / 100 : 0;
     const progresoFisico = proyecto.physical_current ? proyecto.physical_current / 100 : 0;
 
@@ -58,7 +58,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                                         <View className="bg-white p-8 rounded-lg w-3/4 gap-4">
                                             <Text className="text-xl font-bold mb-4">Municipios</Text>
                                             <ScrollView>
-                                                {municipios.map((municipio, index) => (
+                                                {municipios.map((municipio: any, index: any) => (
                                                     <Text key={index} className="text-black text-md mb-2"> {municipio.trim()}</Text>
                                                 ))}
                                             </ScrollView>

@@ -45,9 +45,10 @@ const UniqueSectorialScreen = () => {
 
             if (online) {
                 const res = await ProjectsService.getAll({
-                    sectorial_id: sectorial.id,
+                    sectorial_id: sectorial?.sector_id,
                     fechaInicio,
                     fechaFin,
+                    development_plan_id: planDesarrolloActivo?.id
                 });
                 const proyectos = res?.data?.data;
                 const proyectosFiltrados = proyectos
@@ -80,7 +81,7 @@ const UniqueSectorialScreen = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, sectorial.id, fechaInicio, fechaFin, tipoSeleccionado]);
+    }, [online, sectorial.id, fechaInicio, fechaFin, tipoSeleccionado, planDesarrolloActivo?.id]);
 
     useEffect(() => {
         fetchProyectos();
@@ -135,7 +136,7 @@ const UniqueSectorialScreen = () => {
         }
 
         fetchInfo();
-    }, [sectorial.id, fechaInicio, fechaFin])
+    }, [sectorial.id, fechaInicio, fechaFin, planDesarrolloActivo?.id])
 
     const createPDF = async () => {
         try {
@@ -245,7 +246,7 @@ const UniqueSectorialScreen = () => {
                                 </View>
                             ) : (
                                 <View className='justify-center items-center m-auto'>
-                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay {tipoSeleccionado}s disponibles.</Text>
                                 </View>
                             )
                         }

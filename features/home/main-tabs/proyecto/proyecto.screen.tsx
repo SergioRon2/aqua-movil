@@ -13,6 +13,7 @@ import { useCallback } from "react";
 import useStylesStore from "store/styles/styles.store";
 import { Loading } from "components/loading/loading.component";
 import AreaChartComponent from "components/charts/areaChart.component";
+import { useWindowDimensions } from "react-native";
 
 
 const ProyectoScreen = () => {
@@ -129,24 +130,58 @@ const ProyectoScreen = () => {
 
     console.log(avanceFisicoData)
 
+    const { width } = useWindowDimensions();
+    const donutSize = Math.max(60, Math.min(110, width * 0.25));
+    const donutRadius = donutSize * 0.53;
+    const donutStrokeWidth = donutSize * 0.16;
+    const donutFontSize = donutSize * 0.14;
+
     const items = [
         {
             title: avances.avanceFinanciero.name,
-            component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={70} radius={50} strokeWidth={12} fontSize={16} marginTop={6} />
+            component: (
+                <SemiDonutChart
+                    percentage={avances.avanceFinanciero.value}
+                    height={donutSize}
+                    radius={donutRadius}
+                    strokeWidth={donutStrokeWidth}
+                    fontSize={donutFontSize}
+                    marginTop={4}
+                />
+            ),
         },
         {
             title: avances.avanceFisico.name,
-            component: <SemiDonutChart percentage={avances.avanceFisico.value} height={70} radius={50} strokeWidth={12} fontSize={16} marginTop={6} />
+            component: (
+                <SemiDonutChart
+                    percentage={avances.avanceFisico.value}
+                    height={donutSize}
+                    radius={donutRadius}
+                    strokeWidth={donutStrokeWidth}
+                    fontSize={donutFontSize}
+                    marginTop={4}
+                />
+            ),
         },
         {
             title: avances.indicadorTiempo.name,
-            component: <SemiDonutChart percentage={avances.indicadorTiempo.value} height={70} radius={50} strokeWidth={12} fontSize={16} marginTop={6} />
+            component: (
+                <SemiDonutChart
+                    percentage={avances.indicadorTiempo.value}
+                    height={donutSize}
+                    radius={donutRadius}
+                    strokeWidth={donutStrokeWidth}
+                    fontSize={donutFontSize}
+                    marginTop={4}
+                />
+            ),
         },
     ];
 
 
     return (
         <ScrollView
+            showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
             }
@@ -164,23 +199,27 @@ const ProyectoScreen = () => {
                                 <InfoProyecto infoProyecto={infoProject} proyecto={proyecto} />
                             </View>
 
-                            <View className="justify-center items-center mt-6 bg-white border rounded-lg px-6 py-6 h-auto border-gray-200 shadow-lg">
+                            <View
+                                className="justify-center items-center mt-6 bg-white border rounded-lg p-2 h-auto border-gray-200 shadow-lg w-full"
+                                style={{ width: '100%', alignSelf: 'center' }}
+                            >
                                 <Text className="text-xl font-bold">Avances</Text>
-                                <View className="flex-row justify-center items-center m-auto px-6 py-6 h-auto">
-                                    {items.slice(0, 2).map((item, idx) => (
-                                        <View key={idx} className="items-center justify-center mx-2">
+                                <View
+                                    className="flex-row flex-wrap justify-center items-stretch m-auto px-2 py-6 h-auto w-full"
+                                    style={{ gap: 12 }}
+                                >
+                                    {items.map((item, idx) => (
+                                        <View
+                                            key={idx}
+                                            className="items-center justify-center flex-1 min-w-[120px] max-w-[180px] mx-2"
+                                            style={{ minWidth: 120, maxWidth: 180, flexBasis: '40%' }}
+                                        >
                                             <Text className="text-sm font-semibold mb-2 text-center">{item.title}</Text>
                                             <View>
                                                 {item.component}
                                             </View>
                                         </View>
                                     ))}
-                                    <View className="items-center justify-center mx-2">
-                                        <Text className="text-sm font-semibold mb-2 text-center">{items[2].title}</Text>
-                                        <View>
-                                            {items[2].component}
-                                        </View>
-                                    </View>
                                 </View>
                             </View>
 
@@ -201,7 +240,7 @@ const ProyectoScreen = () => {
                     )
                 )
             }
-        </ScrollView >
+        </ScrollView>
     )
 }
 

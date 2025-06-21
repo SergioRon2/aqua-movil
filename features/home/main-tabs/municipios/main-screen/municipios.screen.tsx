@@ -24,7 +24,7 @@ const Municipios = () => {
     const [municipiosCargados, setMunicipiosCargados] = useState(0);
     const [loading, setLoading] = useState(true);
     const { online } = useInternetStore();
-    const { fechaInicio, fechaFin, sectorialActivo_MunicipiosScreen } = useActiveStore();
+    const { fechaInicio, fechaFin, sectorialActivo_MunicipiosScreen, planDesarrolloActivo } = useActiveStore();
     const [refreshing, setRefreshing] = useState(false);
     const { globalColor } = useStylesStore();
 
@@ -45,7 +45,7 @@ const Municipios = () => {
             if (online === null) return;
 
             if (online) {
-                const res = await StateService.getStatesData({ fechaInicio, fechaFin, sectorial_id: sectorialActivo_MunicipiosScreen?.id });
+                const res = await StateService.getStatesData({ fechaInicio, fechaFin, sectorial_id: sectorialActivo_MunicipiosScreen?.id, development_plan_id: planDesarrolloActivo?.id });
                 const municipiosData = res?.data?.graph_municipios_all;
                 setMunicipios(municipiosData);
                 await AsyncStorage.setItem('municipios', JSON.stringify(municipiosData));

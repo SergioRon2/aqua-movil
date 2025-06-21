@@ -12,12 +12,13 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import useStylesStore from 'store/styles/styles.store';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const { setGlobalColor, globalColor } = useStylesStore();
-  
+
   useEffect(() => {
     const loadColor = async () => {
       try {
@@ -29,13 +30,13 @@ export default function App() {
         console.error('Error al cargar el color:', error);
       }
     };
-    
+
     loadColor(); // Llamar la función para cargar el color cuando la app se inicie
   }, []);
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{flex: 1, backgroundColor: globalColor}} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: globalColor }} edges={['top', 'left', 'right']}>
         <NavigationContainer>
           <ApplicationProvider {...eva} theme={{ ...customTheme, 'text-font-family': 'Manrope_400Regular' }}>
             <InternetProvider>

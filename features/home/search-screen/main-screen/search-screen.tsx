@@ -13,7 +13,7 @@ import useInternetStore from 'store/internet/internet.store';
 import useStylesStore from 'store/styles/styles.store';
 
 const SearchScreen = () => {
-    const { fechaInicio, fechaFin } = useActiveStore();
+    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore();
     const { globalColor } = useStylesStore()
     const [searchValue, setSearchValue] = useState<string>('');
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
@@ -28,7 +28,7 @@ const SearchScreen = () => {
                     return;
                 }
                 if (online) {
-                    const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin });
+                    const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin, development_plan_id: planDesarrolloActivo?.id });
                     setProyectos(res?.data?.data || []);
                     // Guarda los datos en AsyncStorage
                     try {
@@ -58,7 +58,7 @@ const SearchScreen = () => {
         };
 
         fetchProyectos();
-    }, [fechaInicio, fechaFin]);
+    }, [fechaInicio, fechaFin, planDesarrolloActivo?.id]);
 
     const handleChange = (text: string) => {
         setSearchValue(text);

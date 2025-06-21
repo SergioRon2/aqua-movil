@@ -48,6 +48,7 @@ const UniqueMunicipioScreen = () => {
                 const res = await ProjectsService.getAll({
                     municipio_ids: [municipio.id],
                     fechaInicio,
+                    development_plan_id: planDesarrolloActivo?.id,
                     fechaFin,
                 });
                 proyectosData = res?.data?.data || [];
@@ -82,7 +83,7 @@ const UniqueMunicipioScreen = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [municipio.id, fechaInicio, fechaFin, online, refreshing, tipoSeleccionado]);
+    }, [municipio.id, fechaInicio, fechaFin, online, refreshing, tipoSeleccionado, planDesarrolloActivo?.id]);
 
     useEffect(() => {
         fetchProyectos();
@@ -259,7 +260,7 @@ const UniqueMunicipioScreen = () => {
                                     <Text
                                         style={{ color: globalColor }}
                                         className="mt-4 animate-fade-in text-center text-lg font-bold">
-                                        No hay proyectos disponibles.
+                                        No hay {tipoSeleccionado}s disponibles.
                                     </Text>
                                 </View>
                             )}

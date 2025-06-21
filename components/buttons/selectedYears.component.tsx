@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Pressable, View, Text, FlatList } from "react-native";
 import useActiveStore from "store/actives/actives.store";
@@ -17,23 +18,28 @@ export const SelectedYears = () => {
         : [];
 
     useEffect(() => {
-        if (years.length > 0) {
-            const currentYear = new Date().getFullYear();
-            let closestYear = years.reduce((prev, curr) =>
-                Math.abs(curr - currentYear) < Math.abs(prev - currentYear) ? curr : prev
-            );
+        const setInitialDates = async () => {
+            if (years.length > 0) {
+                const currentYear = new Date().getFullYear();
+                let closestYear = years.reduce((prev, curr) =>
+                    Math.abs(curr - currentYear) < Math.abs(prev - currentYear) ? curr : prev
+                );
 
-            const index = years.findIndex(y => y === closestYear);
-            setSelected(index + 1); // +1 para mantener tu lógica original
+                const index = years.findIndex(y => y === closestYear);
+                setSelected(index + 1); // +1 para mantener tu lógica original
 
-            const fechaInicio = `${closestYear}-01-01`;
-            const fechaFin = `${closestYear}-12-31`;
+                const fechaInicio = `${closestYear}-01-01`;
+                const fechaFin = `${closestYear}-12-31`;
 
-            setFechaInicio(fechaInicio);
-            setFechaFin(fechaFin);
-        }
+                setFechaInicio(fechaInicio);
+                setFechaFin(fechaFin);
+
+                await AsyncStorage.setItem("fechaInicio", fechaInicio);
+                await AsyncStorage.setItem("fechaFin", fechaFin);
+            }
+        };
+        setInitialDates();
     }, [JSON.stringify(years)]);
-
 
     return (
         <View className="py-4">

@@ -74,7 +74,7 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll }: Props) 
                         </View>
                     )}
 
-                    {hasData ? (<BarChart
+                    {convertedData ? (<BarChart
                         data={convertedData}
                         barWidth={barWidth}
                         spacing={30}

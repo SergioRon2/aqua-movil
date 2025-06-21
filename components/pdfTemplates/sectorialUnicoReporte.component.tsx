@@ -71,9 +71,9 @@ export const generarResumenSectorialUnicoHTML = (
     // Indicadores dinámicos
     const indicadores = [
       proyecto.financial_current !== undefined && proyecto.financial_current !== null
-      ? `<span class="pill pill-financiero">💰 ${parseValue(proyecto.financial_current)}%</span>` : "",
+        ? `<span class="pill pill-financiero">💰 ${parseValue(proyecto.financial_current)}%</span>` : "",
       proyecto.physical_current !== undefined && proyecto.physical_current !== null
-      ? `<span class="pill pill-fisico">🏗️ ${parseValue(proyecto.physical_current)}%</span>` : "",
+        ? `<span class="pill pill-fisico">🏗️ ${parseValue(proyecto.physical_current)}%</span>` : "",
     ].filter(Boolean).join(" ");
 
     return `
@@ -228,8 +228,11 @@ export const generarResumenSectorialUnicoHTML = (
           ${indicadores.map(renderCard).join("")}
         </div>
 
-        <h2 style="margin-top:40px;color:#1a237e;">Lista de Proyectos</h2>
+        
         <div class="proyectos-container">
+          <div style="width:100%;text-align:center;font-size:20px;font-weight:600;color:#1a237e;margin:32px 0 18px 0;letter-spacing:1px;">
+            <h2 style="margin-top:40px;color:#1a237e;">Lista de Proyectos e Iniciativas</h2>
+          </div>
           ${proyectos.map(renderProyecto).join("")}
         </div>
 

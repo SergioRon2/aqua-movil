@@ -8,6 +8,7 @@ import { Loading } from 'components/loading/loading.component';
 import useStylesStore from 'store/styles/styles.store';
 import { IUser } from 'interfaces/user.interface';
 import useInternetStore from 'store/internet/internet.store';
+import { Ionicons } from '@expo/vector-icons';
 
 const LoginScreen = () => {
     const { globalColor } = useStylesStore()
@@ -201,21 +202,34 @@ const LoginScreen = () => {
                         <View className="bg-white rounded-lg gap-2 p-6 w-4/5">
                             <Text className="text-xl font-bold text-center mb-4">Últimas sesiones</Text>
                             {recentSessions.length === 0 ? (
-                                <Text className="text-center text-gray-600">No hay sesiones recientes.</Text>
+                                <Text className="text-center text-gray-600 mb-4">No hay sesiones recientes.</Text>
                             ) : (
                                 recentSessions.map((session, idx) => (
-                                    <Pressable onPress={() => handleLoginSessionRecent(session?.token, session?.user, session?.isAuthenticated)} key={idx} style={{ borderColor: globalColor }} className="mb-2 border-2 rounded-xl p-3 active:opacity-50">
-                                        <Text className="text-base">{session.email}</Text>
-                                        <Text className="text-sm text-gray-600">
-                                            {new Date(session.date).toLocaleString('es-CO', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                hour12: false
-                                            })}</Text>
-                                    </Pressable>
+                                    <View key={session.token} className='flex-row items-center justify-around gap-2 mb-2'>
+                                        <Pressable onPress={() => handleLoginSessionRecent(session?.token, session?.user, session?.isAuthenticated)} key={idx} style={{ borderColor: globalColor }} className="border-2 rounded-xl p-3 active:opacity-50 w-3/4">
+                                            <Text className="text-base">{session.email}</Text>
+                                            <Text className="text-sm text-gray-600">
+                                                {new Date(session.date).toLocaleString('es-CO', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    hour12: false
+                                                })}</Text>
+                                        </Pressable>
+                                        <Pressable
+                                            onPress={async () => {
+                                                const updatedSessions = recentSessions.filter((_, i) => i !== idx);
+                                                await AsyncStorage.setItem('@recentSessions', JSON.stringify(updatedSessions));
+                                                setRecentSessions(updatedSessions);
+                                            }}
+                                            style={{ borderColor: globalColor }}
+                                            className='w-1/4 border-2 rounded-xl justify-center items-center py-2 active:opacity-50'
+                                        >
+                                            <Ionicons name="trash-outline" size={25} color={globalColor} />
+                                        </Pressable>
+                                    </View>
                                 ))
                             )}
                             <CustomButtonPrimary

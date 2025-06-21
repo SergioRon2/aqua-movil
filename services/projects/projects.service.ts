@@ -7,21 +7,23 @@ interface Props {
     estado_id?: number;
     fechaInicio?: string;
     fechaFin?: string;
+    development_plan_id?: number;
 }
 
 export class ProjectsService {
     static PREFIX = 'projects';
 
-    static readonly getAll = async ({ municipio_ids, sectorial_id, type, estado_id, fechaInicio, fechaFin }: Props = {}) => {
+    static readonly getAll = async ({ municipio_ids, sectorial_id, type, estado_id, fechaInicio, fechaFin, development_plan_id }: Props = {}) => {
         try {
             const response = await aquaApi.post(`/${this.PREFIX}/showAll?limit=10000&page=1`, {
                 municipio_ids,
                 sector_id: sectorial_id,
-                departmento_id: 9,
+                departamento_id: 9,
                 type: type,
                 state_id: estado_id,
-                date_begin: fechaInicio,
-                date_end: fechaFin
+                start_date: fechaInicio,
+                end_date: fechaFin,
+                development_plan_id: development_plan_id
             });
             return response.data;
         } catch (error) {

@@ -25,7 +25,7 @@ const abecedario = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const ProyectosScreen = () => {
     const { globalColor } = useStylesStore()
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
-    const { municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin } = useActiveStore();
+    const { municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore();
     const [loading, setLoading] = useState(true);
     const [todosLosProyectos, setTodosLosProyectos] = useState([]);
     const [proyectosAgrupados, setProyectosAgrupados] = useState<any[]>([]);
@@ -56,7 +56,8 @@ const ProyectosScreen = () => {
                     sectorial_id: sectorialId,
                     estado_id: estadoId,
                     fechaInicio,
-                    fechaFin
+                    fechaFin,
+                    development_plan_id: planDesarrolloActivo?.id
                 });
 
                 data = res?.data?.data || [];
@@ -94,7 +95,7 @@ const ProyectosScreen = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin]);
+    }, [online, municipiosActivos, sectorialActivo, estadoActivo, fechaInicio, fechaFin, planDesarrolloActivo?.id]);
 
     useEffect(() => {
         fetchProyectos();
@@ -198,6 +199,7 @@ const ProyectosScreen = () => {
                         refreshControl={
                             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
                         }
+                        contentContainerStyle={{ paddingBottom: 200 }}
                         renderItem={({ item, index }) => (
                             <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
                                 <ProyectoCardPresentable proyecto={item} />
@@ -221,7 +223,7 @@ const ProyectosScreen = () => {
                             </TouchableOpacity>
                         ))}
                     </View>
-                    {letraVisible && (
+                    {/*  {letraVisible && (
                         <Animated.View
                             style={burbujaStyle}
                             className="absolute left-[40%] top-[40%] bg-black/50 p-8 rounded-full justify-center items-center"
@@ -230,7 +232,7 @@ const ProyectosScreen = () => {
                                 {letraVisible}
                             </Text>
                         </Animated.View>
-                    )}
+                    )} */}
                 </View>
             ) : (
                 <View className='justify-center items-center m-auto'>

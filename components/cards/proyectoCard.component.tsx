@@ -30,7 +30,7 @@ const ProyectoCard = ({ data, index, setModalFalse }: Props) => {
                     {data?.name || data?.title != null ? data?.name || data?.title : 'Nulo'}
                 </Text>
                 <Text className="text-sm text-gray-600">
-                    {data?.value_project || data?.total_source_value != null ? formatNumberWithSuffix(data?.value_project || data?.total_source_value) : data?.value_project || data?.total_source_value == 0 ? 0 : 'Nulo'}
+                    {data?.value_project || data?.project_value || data?.total_source_value != null ? formatNumberWithSuffix(data?.value_project || data?.project_value || data?.total_source_value) : data?.value_project || data?.project_value || data?.total_source_value === 0 ? 0 : 'Nulo'}
                 </Text>
             </View>
             <View className='w-1/3 justify-center items-center'>
