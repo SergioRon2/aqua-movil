@@ -12,7 +12,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import useStylesStore from 'store/styles/styles.store';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 
@@ -31,7 +30,7 @@ export default function App() {
       }
     };
 
-    loadColor(); // Llamar la función para cargar el color cuando la app se inicie
+    loadColor();
   }, []);
 
   return (

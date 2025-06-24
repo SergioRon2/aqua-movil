@@ -105,7 +105,7 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
                         <View className='flex-col justify-center items-center w-full mt-2'>
                             <View className='flex-row ml-16 justify-start w-full items-center mt-2'>
                                 <Ionicons color={'white'} name='briefcase' size={20} />
-                                <Text className='text-white ml-2 text-lg font-bold'>{municipioInfo?.amount_project_initiatives}</Text>
+                                <Text className='text-white ml-2 text-lg font-bold'>{municipioInfo?.amount_project}</Text>
                                 <Text className='text-white ml-1 text-lg font-bold'>Proyectos</Text>
                             </View>
                             <View className='flex-row ml-16 justify-start items-center w-full mt-2'>

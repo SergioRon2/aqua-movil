@@ -28,7 +28,7 @@ const SearchScreen = () => {
                     return;
                 }
                 if (online) {
-                    const res = await ProjectsService.getAll({ fechaInicio: fechaInicio, fechaFin: fechaFin, development_plan_id: planDesarrolloActivo?.id });
+                    const res = await ProjectsService.getAll();
                     setProyectos(res?.data?.data || []);
                     // Guarda los datos en AsyncStorage
                     try {
