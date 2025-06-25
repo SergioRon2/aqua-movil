@@ -27,6 +27,10 @@ interface ActiveState {
     setFechaInicio: (fechaInicio: string | undefined) => void;
     fechaFin: string | undefined;
     setFechaFin: (fechaFin: string | undefined) => void;
+    selectedYearIndex: number,
+    setSelectedYearIndex: (index: number) => void;
+    isAllYears: boolean,
+    setIsAllYears: (value: boolean) => void;
 }
 
 
@@ -64,6 +68,12 @@ const useActiveStore = create<ActiveState>((set) => ({
 
     fechaFin: undefined,
     setFechaFin: (fechaFin: string | undefined) => set({ fechaFin }),
+
+    selectedYearIndex: 1,
+    setSelectedYearIndex: (index: number) => set({ selectedYearIndex: index }),
+
+    isAllYears: false,
+    setIsAllYears: (value: boolean) => set({ isAllYears: value }),
 }));
 
 export default useActiveStore;

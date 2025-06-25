@@ -146,28 +146,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (loading) return <Loading />;
 
     return (
-        <TouchableWithoutFeedback onPress={resetInactivityTimer}>
-            <View style={{ flex: 1 }}>
-                {children}
+        <View
+            style={{ flex: 1 }}
+            onStartShouldSetResponder={() => {
+                resetInactivityTimer();
+                return false;
+            }}>
+            {children}
 
-                <View>
-                    {showTimeoutModal && (
-                        <Modal visible={true} transparent animationType="fade">
-                            <View className="flex-1 justify-center items-center bg-black/50">
-                                <View className="bg-white p-6 rounded-xl w-4/5 py-12 justify-center items-center">
-                                    <Text className="text-lg font-semibold text-center mb-4">
-                                        ¡Tu sesión se cerrará en {countdown} segundos por inactividad!
-                                    </Text>
-                                    <View className="flex-col gap-3 justify-center items-center w-full">
-                                        <CustomButtonPrimary rounded backgroundWhite title="Cancelar" onPress={handleCancelLogout} />
-                                        <CustomButtonPrimary rounded title="Cerrar sesión" onPress={handleLogout} />
-                                    </View>
+            <View>
+                {showTimeoutModal && (
+                    <Modal visible={true} transparent animationType="fade">
+                        <View className="flex-1 justify-center items-center bg-black/50">
+                            <View className="bg-white p-6 rounded-xl w-4/5 py-12 justify-center items-center">
+                                <Text className="text-lg font-semibold text-center mb-4">
+                                    ¡Tu sesión se cerrará en {countdown} segundos por inactividad!
+                                </Text>
+                                <View className="flex-col gap-3 justify-center items-center w-full">
+                                    <CustomButtonPrimary rounded backgroundWhite title="Cancelar" onPress={handleCancelLogout} />
+                                    <CustomButtonPrimary rounded title="Cerrar sesión" onPress={handleLogout} />
                                 </View>
                             </View>
-                        </Modal>
-                    )}
-                </View>
+                        </View>
+                    </Modal>
+                )}
             </View>
-        </TouchableWithoutFeedback>
+        </View>
     );
 };

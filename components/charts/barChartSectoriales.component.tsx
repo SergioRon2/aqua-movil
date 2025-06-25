@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Dimensions } from 'react-native';
+import Svg, { Rect, Text as SvgText, G, Line } from 'react-native-svg';
 import { ModalSector } from 'components/modals/modalSector.component';
-import { useState } from 'react';
-import { View, ScrollView, Dimensions, Text, Modal } from 'react-native';
-import { BarChart } from 'react-native-gifted-charts';
 import useStylesStore from 'store/styles/styles.store';
 
 const screenWidth = Dimensions.get('window').width;
@@ -18,101 +18,127 @@ interface Props {
     };
 }
 
-const BarChartSectorialesComponent = ({ data, title, horizontalScroll }: Props) => {
+const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: Props) => {
     const { globalColor } = useStylesStore();
     const [showModal, setShowModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<{ sector_id: number, label: string, value: number } | null>(null);
+    const [selectedItem, setSelectedItem] = useState<{
+        sector_id: number;
+        label: string;
+        value: number;
+    } | null>(null);
 
     const hasData = data.datasets[0].data.some(value => value > 0);
+    const chartHeight = 250;
+    const barSpacing = 30;
+    const barWidth = 60;
 
-    const convertedData = hasData
-        ? data.labels.map((label, index) => {
-            const value = data.datasets[0].data[index];
-            const sector_id = data.ids[index];
-            return {
-                sector_id,
-                value,
-                label,
-                frontColor: globalColor,
-                onPress: () => {
-                    setSelectedItem({ sector_id, label, value });
-                    setShowModal(true);
-                },
-            };
-        })
-        : [
-            {
-                label: 'Sin datos',
-                value: 1,
-                frontColor: '#e0e0e0',
-                sector_id: 0,
-                onPress: () => { }
-            },
-        ];
+    const barData = hasData
+        ? data.labels.map((label, index) => ({
+            label,
+            value: data.datasets[0].data[index],
+            sector_id: data.ids[index],
+        }))
+        : [];
 
-    const averageLabelLength =
-        data.labels.reduce((acc, label) => acc + label.length, 0) / data.labels.length;
-    const barWidth = Math.min(Math.max(averageLabelLength * 5, 30), 80);
-
-    const longestLabel = Math.max(...data.labels.map(label => label.length));
-    const chartWidth = Math.max(screenWidth, data.labels.length * 100 + longestLabel * 5);
+    const maxVal = Math.max(...data.datasets[0].data, 1);
+    const step = Math.ceil(maxVal / 4);
+    const chartWidth = Math.max(screenWidth, barData.length * (barWidth + barSpacing) + 60); // 60 for y-axis space
 
     return (
-        <View className="animate-fade-in w-full gap-4" style={{ backgroundColor: '#fff' }} renderToHardwareTextureAndroid={true}>
-            {title && (
-                <Text className="text-center font-bold text-xl">{title}</Text>
-            )}
-            <ScrollView horizontal={horizontalScroll} showsHorizontalScrollIndicator={false}>
-                <View className="flex-row items-center">
-                    {hasData && (
-                        <View className="w-[45px] items-center justify-center">
-                            <Text
-                                className="text-[16px] text-[#333] font-bold w-[100px] text-center -rotate-90"
-                            >
-                                Proyectos
-                            </Text>
-                        </View>
-                    )}
+        <View className="w-full bg-white px-4 py-6 rounded-xl gap-4">
+            {title && <Text className="text-xl font-bold text-center mb-4">{title}</Text>}
 
-                    {hasData ? (<BarChart
-                        data={convertedData}
-                        barWidth={barWidth}
-                        spacing={30}
-                        barBorderTopLeftRadius={18}
-                        barBorderTopRightRadius={18}
-                        barBorderRadius={2}
-                        yAxisThickness={1}
-                        xAxisThickness={1}
-                        xAxisColor="#ccc"
-                        yAxisColor="#ccc"
-                        yAxisTextStyle={{ color: '#333' }}
-                        xAxisLabelTextStyle={{
-                            color: '#333',
-                            fontSize: 12,
-                            fontWeight: 'bold',
-                            width: barWidth + 30,
-                            textAlign: 'center',
-                            numberOfLines: 2,
-                        }}
-                        stepValue={Math.ceil(Math.max(...data.datasets[0].data) / 4)}
-                        showValuesAsTopLabel
-                        isAnimated
-                        width={chartWidth}
-                        height={250}
-                    />) : (
-                        <View className='flex flex-col w-full items-center justify-center py-12'>
-                            <Text className='text-lg text-center px-4'>No hay datos</Text>
-                        </View>
-                    )}
-                </View>
+            <ScrollView horizontal={horizontalScroll} showsHorizontalScrollIndicator={false}>
+                {hasData ? (
+                    <Svg width={chartWidth} height={chartHeight + 40}>
+                        {/* Líneas horizontales y valores Y */}
+                        {[0, 1, 2, 3, 4].map(i => {
+                            const y = chartHeight - (i * chartHeight) / 4;
+                            return (
+                                <G key={i}>
+                                    <Line
+                                        x1={40}
+                                        y1={y}
+                                        x2={chartWidth}
+                                        y2={y}
+                                        stroke="#ccc"
+                                        strokeWidth={1}
+                                    />
+                                    <SvgText
+                                        x={30}
+                                        y={y + 5}
+                                        fontSize="10"
+                                        fill="#666"
+                                        textAnchor="end"
+                                    >
+                                        {i * step}
+                                    </SvgText>
+                                </G>
+                            );
+                        })}
+
+                        {/* Barras */}
+                        {barData.map((item, index) => {
+                            const height = (item.value / maxVal) * (chartHeight - 20); // Evita que toquen el techo
+                            const x = 50 + index * (barWidth + barSpacing);
+                            const y = chartHeight - height;
+
+                            return (
+                                <G key={index} onPress={() => {
+                                    setSelectedItem(item);
+                                    setShowModal(true);
+                                }}>
+                                    {/* Barra */}
+                                    <Rect
+                                        x={x}
+                                        y={y}
+                                        width={barWidth}
+                                        height={height}
+                                        fill={globalColor}
+                                        rx={8}
+                                        ry={8}
+                                    />
+
+                                    {/* Valor encima */}
+                                    <SvgText
+                                        x={x + barWidth / 2}
+                                        y={y - 6}
+                                        fontSize="10"
+                                        fill="#000"
+                                        textAnchor="middle"
+                                    >
+                                        {item.value}
+                                    </SvgText>
+
+                                    {/* Label */}
+                                    <SvgText
+                                        x={x + barWidth / 2}
+                                        y={chartHeight + 20}
+                                        fontSize="10"
+                                        fill="#333"
+                                        textAnchor="middle"
+                                    >
+                                        {item.label}
+                                    </SvgText>
+                                </G>
+                            );
+                        })}
+                    </Svg>
+                ) : (
+                    <View className="w-full items-center justify-center py-10">
+                        <Text className="text-center text-gray-500 text-lg">No hay datos</Text>
+                    </View>
+                )}
             </ScrollView>
 
-
-            <View>
-                {showModal && selectedItem && (
-                    <ModalSector showModal={showModal} setShowModal={setShowModal} selectedItem={selectedItem} />
-                )}
-            </View>
+            {/* Modal al presionar barra */}
+            {showModal && selectedItem && (
+                <ModalSector
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    selectedItem={selectedItem}
+                />
+            )}
         </View>
     );
 };

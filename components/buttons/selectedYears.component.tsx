@@ -1,14 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Loading } from "components/loading/loading.component";
 import { useEffect, useState } from "react";
-import { Pressable, View, Text, FlatList } from "react-native";
+import { Pressable, View, Text, FlatList, Modal } from "react-native";
 import useActiveStore from "store/actives/actives.store";
 import useStylesStore from "store/styles/styles.store";
 
 export const SelectedYears = () => {
     const { globalColor } = useStylesStore();
-    const { planDesarrolloActivo } = useActiveStore();
-    const [selected, setSelected] = useState<number>(1);
-    const { setFechaInicio, setFechaFin } = useActiveStore();
+    const {
+        planDesarrolloActivo,
+        setFechaInicio,
+        setFechaFin,
+        selectedYearIndex,
+        setSelectedYearIndex,
+        isAllYears,
+        setIsAllYears,
+    } = useActiveStore();
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isManualChange, setIsManualChange] = useState<boolean>(false);
 
     const startYear = planDesarrolloActivo?.yearBegin;
     const endYear = planDesarrolloActivo?.yearEnd;
@@ -17,32 +27,118 @@ export const SelectedYears = () => {
         ? Array.from({ length: endYear - startYear + 1 }, (_, i) => endYear - i)
         : [];
 
+    // Inicialización sincronizada con AsyncStorage
     useEffect(() => {
-        const setInitialDates = async () => {
-            if (years.length > 0) {
-                const currentYear = new Date().getFullYear();
-                let closestYear = years.reduce((prev, curr) =>
-                    Math.abs(curr - currentYear) < Math.abs(prev - currentYear) ? curr : prev
-                );
+        const init = async () => {
+            if (years.length === 0) return;
 
-                const index = years.findIndex(y => y === closestYear);
-                setSelected(index + 1); // +1 para mantener tu lógica original
+            try {
+                const storedIndex = await AsyncStorage.getItem("selectedYearIndex");
+                const storedIsAll = await AsyncStorage.getItem("isAllYears");
 
-                const fechaInicio = `${closestYear}-01-01`;
-                const fechaFin = `${closestYear}-12-31`;
+                if (storedIndex !== null && storedIsAll !== null) {
+                    const index = parseInt(storedIndex, 10);
+                    const all = storedIsAll === "true";
 
-                setFechaInicio(fechaInicio);
-                setFechaFin(fechaFin);
+                    setSelectedYearIndex(index);
+                    setIsAllYears(all);
 
-                await AsyncStorage.setItem("fechaInicio", fechaInicio);
-                await AsyncStorage.setItem("fechaFin", fechaFin);
+                    if (all) {
+                        const fechaInicio = `${startYear}-01-01`;
+                        const fechaFin = `${endYear}-12-31`;
+                        setFechaInicio(fechaInicio);
+                        setFechaFin(fechaFin);
+                    } else {
+                        const year = years[index - 1];
+                        const fechaInicio = `${year}-01-01`;
+                        const fechaFin = `${year}-12-31`;
+                        setFechaInicio(fechaInicio);
+                        setFechaFin(fechaFin);
+                    }
+                } else {
+                    const currentYear = new Date().getFullYear();
+                    const closestYear = years.reduce((prev, curr) =>
+                        Math.abs(curr - currentYear) < Math.abs(prev - currentYear) ? curr : prev
+                    );
+
+                    const index = years.findIndex(y => y === closestYear);
+                    const fechaInicio = `${closestYear}-01-01`;
+                    const fechaFin = `${closestYear}-12-31`;
+
+                    setSelectedYearIndex(index + 1);
+                    setIsAllYears(false);
+                    setFechaInicio(fechaInicio);
+                    setFechaFin(fechaFin);
+
+                    await AsyncStorage.setItem("selectedYearIndex", (index + 1).toString());
+                    await AsyncStorage.setItem("isAllYears", "false");
+                    await AsyncStorage.setItem("fechaInicio", fechaInicio);
+                    await AsyncStorage.setItem("fechaFin", fechaFin);
+                }
+            } catch (err) {
+                console.error("Error cargando fechas:", err);
             }
         };
-        setInitialDates();
+
+        init();
     }, [JSON.stringify(years)]);
+
+    const handleYearSelect = async (index: number, year: number) => {
+        setIsManualChange(true);
+        setLoading(true);
+
+        let fechaInicio = "";
+        let fechaFin = "";
+
+        if (selectedYearIndex === index + 1) {
+            // Mostrar todos los años
+            setSelectedYearIndex(0);
+            setIsAllYears(true);
+
+            fechaInicio = `${startYear}-01-01`;
+            fechaFin = `${endYear}-12-31`;
+        } else {
+            // Año individual
+            setSelectedYearIndex(index + 1);
+            setIsAllYears(false);
+
+            fechaInicio = `${year}-01-01`;
+            fechaFin = `${year}-12-31`;
+        }
+
+        setFechaInicio(fechaInicio);
+        setFechaFin(fechaFin);
+
+        await AsyncStorage.setItem("selectedYearIndex", selectedYearIndex === index + 1 ? "0" : (index + 1).toString());
+        await AsyncStorage.setItem("isAllYears", selectedYearIndex === index + 1 ? "true" : "false");
+        await AsyncStorage.setItem("fechaInicio", fechaInicio);
+        await AsyncStorage.setItem("fechaFin", fechaFin);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        setTimeout(() => {
+            setLoading(false);
+            setIsManualChange(false);
+        }, 4000);
+    };
 
     return (
         <View className="py-4">
+            {isManualChange && (
+                <Modal transparent animationType="fade" visible={loading}>
+                    <View className="bg-white flex-1 justify-center items-center">
+                        <View className="h-1/4 justify-center items-center animate-fade-in">
+                            <Loading />
+                            <Text style={{ color: globalColor }} className="mt-4 text-lg font-semibold">
+                                {isAllYears
+                                    ? "Mostrando todos los años"
+                                    : `Cambiando año a ${years[selectedYearIndex - 1]}`}
+                            </Text>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+
             <FlatList
                 data={years}
                 keyExtractor={(item) => item.toString()}
@@ -56,30 +152,12 @@ export const SelectedYears = () => {
                 }}
                 renderItem={({ item, index }) => (
                     <Pressable
-                        onPress={() => {
-                            if (selected === index + 1) {
-                                // Tocar el mismo año -> seleccionar TODO el rango
-                                setSelected(0); // 0 = modo "rango completo"
-                                const fechaInicio = `${startYear}-01-01`;
-                                const fechaFin = `${endYear}-12-31`;
-                                setFechaInicio(fechaInicio);
-                                setFechaFin(fechaFin);
-                            } else {
-                                // Tocar un año diferente -> seleccionar solo ese año
-                                setSelected(index + 1);
-                                const year = item;
-                                const fechaInicio = `${year}-01-01`;
-                                const fechaFin = `${year}-12-31`;
-                                setFechaInicio(fechaInicio);
-                                setFechaFin(fechaFin);
-                            }
-                        }}
-                        style={selected === index + 1 && { borderColor: globalColor }}
-                        className={`${selected === index + 1 ? 'border-b-2' : 'bg-transparent'} px-6 m-1 rounded-sm`}
+                        onPress={() => handleYearSelect(index, item)}
+                        style={selectedYearIndex === index + 1 && { borderColor: globalColor }}
+                        className={`${selectedYearIndex === index + 1 ? 'border-b-2' : 'bg-transparent'} px-6 m-1 rounded-sm`}
                     >
                         <Text className="text-black text-xl font-bold text-center">{item}</Text>
                     </Pressable>
-
                 )}
             />
         </View>

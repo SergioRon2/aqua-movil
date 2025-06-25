@@ -71,7 +71,7 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                             <Text className="text-gray-600 text-md font-bold mb-1">{proyecto.municipios_texto}</Text>
                         )}
                         <Text className="text-gray-600 text-md font-bold mb-5">
-                            ${formatNumberWithSuffix(+valorTotal!)}
+                            {!isNaN(Number(valorTotal)) ? formatNumberWithSuffix(Number(valorTotal)) : 0}
                         </Text>
                     </View>
                     <Text

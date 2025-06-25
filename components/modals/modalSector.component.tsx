@@ -71,7 +71,7 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
                 onRequestClose={() => setShowModal(false)}
             >
                 <View className="flex-1 justify-center items-center bg-black/50">
-                    <View className="p-6 bg-white items-center justify-between rounded-2xl w-5/6 max-h-5/6 shadow-2xl gap-6 border border-gray-200">
+                    <View className="p-6 bg-white items-center justify-between rounded-2xl w-5/6 h-5/6 shadow-2xl gap-6 border border-gray-200">
                         <Text className="text-2xl font-extrabold text-center text-gray-800">{selectedItem.label}</Text>
                         {!loading && <Text className="text-gray-500 text-lg font-medium text-center">
                             Actualmente en este sector hay <Text className="text-gray-800 font-bold">{proyectos.length}</Text> proyectos.

@@ -120,6 +120,7 @@ const DashboardScreen = () => {
     ]);
 
     const fetchInfo = useCallback(async () => {
+        setLoading(true);
         try {
             if (online === null) {
                 return;
@@ -155,6 +156,8 @@ const DashboardScreen = () => {
             }
         } catch (error) {
             console.error({ error })
+        } finally {
+            setLoading(false);
         }
     }, [
         fechaInicio,
@@ -166,12 +169,15 @@ const DashboardScreen = () => {
     ]);
 
     useEffect(() => {
-        fetchProjectsByDashboard();
-    }, [fetchProjectsByDashboard]);
+        const timeout = setTimeout(() => {
+            if (online !== null) {
+                fetchProjectsByDashboard();
+                fetchInfo();
+            }
+        }, 500);
 
-    useEffect(() => {
-        fetchInfo();
-    }, [fetchInfo]);
+        return () => clearTimeout(timeout);
+    }, [online, fetchProjectsByDashboard, fetchInfo]);
 
     // donut chart data
     const totalProjects = (sectorialInfo || []).reduce((sum, item) => sum + item.amount_project, 0);
@@ -181,11 +187,10 @@ const DashboardScreen = () => {
             label: item.sector_name,
             value: (item.amount_project / totalProjects) * 100,
         }));
-    }, [sectorialInfo, totalProjects]);
-
+    }, [sectorialInfo, totalProjects, planDesarrolloActivo?.id]);
 
     const transformSectorialDataForBarChart = () => {
-        if (sectorialInfo) {
+        if (sectorialInfo && planDesarrolloActivo?.id) {
             return sectorialInfo.map((sector) => ({
                 sector_id: sector.sector_id,
                 label: sector.sector_name,
@@ -230,9 +235,9 @@ const DashboardScreen = () => {
     };
 
     const items = [
-        { title: avances?.avanceFinanciero?.name, component: <SemiDonutChart percentage={avances?.avanceFinanciero?.value} height={180} /> },
-        { title: avances?.avanceFisico?.name, component: <SemiDonutChart color='#009966' percentage={avances?.avanceFisico?.value} height={180} /> },
-        { title: avances?.indicadorTiempo?.name, component: <SemiDonutChart color='#000099' percentage={avances?.indicadorTiempo?.value} height={180} /> },
+        { title: avances.avanceFinanciero.name, component: <SemiDonutChart percentage={avances.avanceFinanciero.value} height={180} /> },
+        { title: avances.avanceFisico.name, component: <SemiDonutChart color='#009966' percentage={avances.avanceFisico.value} height={180} /> },
+        { title: avances.indicadorTiempo.name, component: <SemiDonutChart color='#000099' percentage={avances.indicadorTiempo.value} height={180} /> },
     ];
 
     return (
@@ -245,136 +250,134 @@ const DashboardScreen = () => {
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
             }
-            className="bg-white flex-1"
+            className="bg-white"
         >
-            <View className='flex-1'>
-                {/* select development plan */}
-                <SelectedYears />
+            {/* select development plan */}
+            <SelectedYears />
 
-                {/* filters */}
-                <FiltersComponentDashboard border={false} />
+            {/* filters */}
+            <FiltersComponentDashboard border={false} />
 
-                {/* values */}
-                {loading
-                    ? <View className='justify-start items-center w-full h-full'>
-                        <Loading />
-                    </View>
-                    : values && sectorialInfo && donutChartData && barChartData ? <>
-                        <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4 shadow-lg gap-5'>
-                            <View className='items-center flex-row w-1/2 gap-3'>
-                                <Text><Ionicons name='wallet-outline' color={globalColor} size={40} /></Text>
-                                <View>
-                                    <Text className='text-4xl font-bold'>
-                                        ${formatNumberWithSuffix(+values.value_total_executed)}
-                                    </Text>
-                                    <Text className='font-bold text-gray-500'>Valor ejecutado</Text>
-                                </View>
-                            </View>
-                            <View className='items-center flex-row w-1/2 gap-3'>
-                                <Text><Ionicons name='cash-outline' color={globalColor} size={40} /></Text>
-                                <View>
-                                    <Text className='text-4xl font-bold'>
-                                        ${formatNumberWithSuffix(+values.value_total_project)}
-                                    </Text>
-                                    <Text className='font-bold text-gray-500'>Valor total</Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        {/* charts */}
-                        <View className='gap-4 mb-4 my-3 mx-auto w-11/12 shadow-lg'>
-
-                            {/* bar chart */}
-                            <View className='bg-white w-full py-2 border border-gray-200 rounded-lg'>
-                                <BarChartSectorialesComponent
-                                    horizontalScroll
-                                    title='Sectoriales'
-                                    data={{
-                                        ids: barChartData.map(item => item.sector_id),
-                                        labels: barChartData.map(item => formatLabel(capitalize(item.label))),
-                                        datasets: [{ data: barChartData.map(item => item.value) }]
-                                    }}
-                                />
-                            </View>
-
-                            {/* carousel */}
-                            {avances && (
-                                <View className="justify-center items-center bg-white border rounded-lg px-4 border-gray-200 shadow-lg">
-                                    <Carousel
-                                        ref={carouselRef}
-                                        loop
-                                        width={Dimensions.get('window').width - 50}
-                                        height={250}
-                                        data={items}
-                                        scrollAnimationDuration={1000}
-                                        onSnapToItem={(index) => setCurrentIndex(index)}
-                                        onScrollEnd={(index) => setCurrentIndex(index)}
-                                        renderItem={({ item }) => (
-                                            <View className="w-full rounded-xl bg-white justify-center items-center">
-                                                <Text className="text-lg font-bold mt-4">{item.title}</Text>
-                                                {item.component}
-                                            </View>
-                                        )}
-                                    />
-                                    <View pointerEvents="box-none" className="absolute flex-row justify-between items-center w-full px-2 mt-4">
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (carouselRef.current) {
-                                                    carouselRef.current.prev();
-                                                }
-                                            }}
-                                            className="p-2 bg-gray-200 rounded-full items-center justify-center"
-                                        >
-                                            <Text className='text-2xl text-center font-bold'>{'<'}</Text>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (carouselRef.current) {
-                                                    carouselRef.current.next();
-                                                }
-                                            }}
-                                            className="p-2 bg-gray-200 rounded-full items-center justify-center"
-                                        >
-                                            <Text className='text-2xl text-center font-bold'>{'>'}</Text>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                    <View className="flex-row justify-center mb-4">
-                                        {items.map((_, index) => (
-                                            <View
-                                                key={index}
-                                                className={`w-2 h-2 mx-1 rounded-full ${index === currentIndex ? 'bg-black' : 'bg-gray-400'
-                                                    }`}
-                                            />
-                                        ))}
-                                    </View>
-                                </View>
-                            )}
-
-                            {/* donut chart */}
-                            <View className='items-center gap-4 bg-white p-3 justify-center border border-gray-200 rounded-lg'>
-                                <Text className='text-2xl text-gray-800 font-bold text-center'>
-                                    Porcentaje de proyectos por sectorial
+            {/* values */}
+            {loading
+                ? <View className='justify-start items-center w-full h-full'>
+                    <Loading />
+                </View>
+                : values && sectorialInfo && donutChartData && barChartData ? <>
+                    <View className='flex-row justify-center p-4 mx-auto w-11/12 bg-white border border-gray-200 px-5 py-5 rounded-lg items-start mb-4 shadow-lg gap-5'>
+                        <View className='items-center flex-row w-1/2 gap-3'>
+                            <Text><Ionicons name='wallet-outline' color={globalColor} size={40} /></Text>
+                            <View>
+                                <Text className='text-4xl font-bold'>
+                                    ${formatNumberWithSuffix(+values.value_total_executed)}
                                 </Text>
-                                <DonutChartComponent amount={amount} data={donutChartData} />
+                                <Text className='font-bold text-gray-500'>Valor ejecutado</Text>
                             </View>
                         </View>
-
-                        <View className='justify-center items-center my-8'>
-                            <CustomButtonPrimary rounded title='Generar reporte' onPress={createPDF} />
+                        <View className='items-center flex-row w-1/2 gap-3'>
+                            <Text><Ionicons name='cash-outline' color={globalColor} size={40} /></Text>
+                            <View>
+                                <Text className='text-4xl font-bold'>
+                                    ${formatNumberWithSuffix(+values.value_total_project)}
+                                </Text>
+                                <Text className='font-bold text-gray-500'>Valor total</Text>
+                            </View>
                         </View>
-                    </>
-                        : <View className='justify-center items-center w-full h-full'>
-                            <LottieView
-                                source={require('../../../../../assets/lottie/not_found.json')}
-                                autoPlay
-                                loop
-                                style={{ width: 350, height: 350 }}
+                    </View>
+
+                    {/* charts */}
+                    <View className='gap-4 mb-4 my-3 mx-auto w-11/12 shadow-lg'>
+
+                        {/* bar chart */}
+                        <View className='bg-white w-full py-2 border border-gray-200 rounded-lg shadow-lg'>
+                            <BarChartSectorialesComponent
+                                horizontalScroll
+                                title='Proyectos por sectoriales'
+                                data={{
+                                    ids: barChartData.map(item => item.sector_id),
+                                    labels: barChartData.map(item => formatLabel(capitalize(item.label))),
+                                    datasets: [{ data: barChartData.map(item => item.value) }]
+                                }}
                             />
-                            <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles</Text>
-                        </View>}
-            </View>
+                        </View>
+
+                        {/* carousel */}
+                        {avances && (
+                            <View className="justify-center items-center bg-white border rounded-lg px-4 border-gray-200 shadow-lg">
+                                <Carousel
+                                    ref={carouselRef}
+                                    loop
+                                    width={Dimensions.get('window').width - 50}
+                                    height={250}
+                                    data={items}
+                                    scrollAnimationDuration={1000}
+                                    onSnapToItem={(index) => setCurrentIndex(index)}
+                                    onScrollEnd={(index) => setCurrentIndex(index)}
+                                    renderItem={({ item }) => (
+                                        <View className="w-full rounded-xl bg-white justify-center items-center">
+                                            <Text className="text-lg font-bold mt-4">{item.title}</Text>
+                                            {item.component}
+                                        </View>
+                                    )}
+                                />
+                                <View pointerEvents="box-none" className="absolute flex-row justify-between items-center w-full px-2 mt-4">
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (carouselRef.current) {
+                                                carouselRef.current.prev();
+                                            }
+                                        }}
+                                        className="p-2 bg-gray-200 rounded-full items-center justify-center"
+                                    >
+                                        <Text className='text-2xl text-center font-bold'>{'<'}</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (carouselRef.current) {
+                                                carouselRef.current.next();
+                                            }
+                                        }}
+                                        className="p-2 bg-gray-200 rounded-full items-center justify-center"
+                                    >
+                                        <Text className='text-2xl text-center font-bold'>{'>'}</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View className="flex-row justify-center mb-4">
+                                    {items.map((_, index) => (
+                                        <View
+                                            key={index}
+                                            className={`w-2 h-2 mx-1 rounded-full ${index === currentIndex ? 'bg-black' : 'bg-gray-400'
+                                                }`}
+                                        />
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+
+                        {/* donut chart */}
+                        <View className='items-center gap-4 bg-white p-3 justify-center border border-gray-200 rounded-lg shadow-lg'>
+                            <Text className='text-2xl text-gray-800 font-bold text-center'>
+                                Porcentaje de proyectos por sectorial
+                            </Text>
+                            <DonutChartComponent amount={amount} data={donutChartData} />
+                        </View>
+                    </View>
+
+                    <View className='justify-center items-center my-8'>
+                        <CustomButtonPrimary rounded title='Generar reporte' onPress={createPDF} />
+                    </View>
+                </>
+                    : <View className='justify-center items-center w-full h-full'>
+                        <LottieView
+                            source={require('../../../../../assets/lottie/not_found.json')}
+                            autoPlay
+                            loop
+                            style={{ width: 350, height: 350 }}
+                        />
+                        <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles</Text>
+                    </View>}
         </ScrollView>
     );
 };

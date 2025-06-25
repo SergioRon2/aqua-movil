@@ -20,8 +20,6 @@ import * as FileSystem from 'expo-file-system';
 import { sanitizarNombreArchivo } from 'utils/sanitazeName';
 import { agruparPorLetra } from 'utils/agruparPorLetra';
 
-const abecedario = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
 const ProyectosScreen = () => {
     const { globalColor } = useStylesStore()
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
@@ -68,7 +66,6 @@ const ProyectosScreen = () => {
             }
 
             let proyectosFiltrados = data
-                .filter((p: any) => p.value_project > 0)
                 .sort((a: any, b: any) => b.value_project - a.value_project);
             data = proyectosFiltrados;
 
@@ -105,17 +102,9 @@ const ProyectosScreen = () => {
         fetchProyectos();
     };
 
-    const burbujaStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: scale.value }],
-            opacity: opacity.value,
-        };
-    });
-
-
     const createPDF = async () => {
         try {
-            const html = await generarTablaProyectosHTML(proyectos);
+            const html = await generarTablaProyectosHTML(todosLosProyectos);
 
             const { uri } = await Print.printToFileAsync({ html });
 
@@ -164,7 +153,7 @@ const ProyectosScreen = () => {
         <View className='flex-1 bg-white p-4'>
             <View className="flex-row items-center justify-center gap-1">
                 <Text className='text-2xl text-center font-bold'>Proyectos</Text>
-                {proyectos.length > 1 && (
+                {proyectos && (
                     <Pressable onPress={createPDF} className="flex-row justify-end items-center px-2 active:opacity-50">
                         <Ionicons
                             name="archive-outline"
@@ -199,7 +188,7 @@ const ProyectosScreen = () => {
                         refreshControl={
                             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[globalColor]} />
                         }
-                        contentContainerStyle={{ paddingBottom: 200 }}
+                        contentContainerStyle={{ paddingBottom: 250 }}
                         renderItem={({ item, index }) => (
                             <Animated.View entering={FadeInDown.delay(index * 200)} exiting={FadeOutDown}>
                                 <ProyectoCardPresentable proyecto={item} />
@@ -223,16 +212,6 @@ const ProyectosScreen = () => {
                             </TouchableOpacity>
                         ))}
                     </View>
-                    {/*  {letraVisible && (
-                        <Animated.View
-                            style={burbujaStyle}
-                            className="absolute left-[40%] top-[40%] bg-black/50 p-8 rounded-full justify-center items-center"
-                        >
-                            <Text className="text-white text-5xl font-bold">
-                                {letraVisible}
-                            </Text>
-                        </Animated.View>
-                    )} */}
                 </View>
             ) : (
                 <View className='justify-center items-center m-auto'>

@@ -67,9 +67,14 @@ const SearchScreen = () => {
     const filteredProjects = proyectos
         .filter((proyecto) => {
             const search = searchValue.toLowerCase();
+            if (search === 'proyecto' || search === 'iniciativa') {
+                return proyecto.type?.toLowerCase() === search
+            }
             return (
                 proyecto.name?.toLowerCase().includes(search) ||
                 proyecto.BPIM?.toLowerCase().includes(search) ||
+                proyecto.list_sector_name?.toLowerCase().includes(search) ||
+                proyecto.municipios_texto?.toLowerCase().includes(search) ||
                 proyecto.state_name?.toLowerCase().includes(search)
             );
         })
@@ -83,7 +88,11 @@ const SearchScreen = () => {
                     onChangeText={handleChange}
                     value={searchValue}
                     placeholder='Buscar'
-                    style={{ borderColor: globalColor }}
+                    style={{
+                        borderColor: globalColor,
+                        color: searchValue === 'proyecto' || searchValue === 'iniciativa' ? globalColor : '#000',
+                        fontWeight: (searchValue === 'proyecto' || searchValue === 'iniciativa') ? 'bold' : 'normal'
+                    }}
                     className='border rounded-full px-6 py-4 w-2/3'
                 />
             </View>
