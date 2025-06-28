@@ -28,17 +28,8 @@ const ProyectoScreen = () => {
         avanceFisico: { name: '', value: 0 },
         indicadorTiempo: { name: '', value: 0 },
     });
-    const [avanceFisicoData, setAvanceFisicoData] = useState<{ value: number, label: string }[]>([]);
+    const [avanceFisicoData, setAvanceFisicoData] = useState<{ frontValue: number, backValue: number, label: string }[]>([]);
     const { online } = useInternetStore();
-
-    const dataBar = {
-        labels: ['Avance Fisico', 'Avance Financiero'],
-        datasets: [
-            {
-                data: [proyecto.physical_current, proyecto.financial_current],
-            }
-        ]
-    }
 
     const fetchInfoProject = useCallback(async () => {
         try {
@@ -53,8 +44,17 @@ const ProyectoScreen = () => {
     }, [proyecto.id]);
 
     useEffect(() => {
-        fetchInfoProject();
-    }, [fetchInfoProject]);
+        const allReady =
+            online !== null &&
+            planDesarrolloActivo?.id &&
+            proyecto?.id &&
+            fechaInicio &&
+            fechaFin;
+
+        if (allReady) {
+            fetchInfoProject();
+        }
+    }, [online, planDesarrolloActivo?.id, proyecto?.id, fechaInicio, fechaFin]);
 
     const fetchInfo = useCallback(async () => {
         try {
@@ -96,27 +96,54 @@ const ProyectoScreen = () => {
     }, [online, fechaInicio, fechaFin, planDesarrolloActivo?.id, proyecto.id]);
 
     useEffect(() => {
-        fetchInfo();
-    }, [fetchInfo]);
+        const allReady =
+            online !== null &&
+            planDesarrolloActivo?.id &&
+            proyecto?.id &&
+            fechaInicio &&
+            fechaFin;
+
+        if (allReady) {
+            fetchInfo();
+        }
+    }, [online, planDesarrolloActivo?.id, proyecto?.id, fechaInicio, fechaFin]);
 
     const fetchProgressInfo = useCallback(async () => {
         try {
-            const res = await InfoService.getProgressInfo(proyecto?.id, infoProject?.contract_principal?.id);
-            const rawData = res.data.data;
-            const lineData = rawData
-                .filter((item: any) => item.value_full_financial !== null)
-                .map((item: any, index: any) => ({
-                    value: item.value_full_financial,
-                    label: new Date(item.date).toLocaleDateString('es-CO', {
-                        month: 'short',
-                        day: 'numeric'
-                    }),
-                }));
+            const res = await InfoService.getProgressInfo(infoProject?.contract_principal?.id);
+            const rawData = res?.data;
+
+            if (!Array.isArray(rawData)) {
+                console.warn("Datos no válidos recibidos para el gráfico.");
+                setAvanceFisicoData([]);
+                return;
+            }
+
+            const filteredData = rawData
+                .filter((item: any) =>
+                    item?.progress_type?.trim().toLowerCase() === "fisico" &&
+                    typeof item?.physical_current === "number" &&
+                    typeof item?.physical_projected === "number" &&
+                    !isNaN(item.physical_current) &&
+                    !isNaN(item.physical_projected)
+                );
+
+            const lineData = filteredData.map((item: any) => ({
+                frontValue: item.physical_current,
+                backValue: item.physical_projected,
+                label: item.date,
+            }));
+
+            if (!lineData.length) {
+                console.warn("No hay datos válidos para mostrar en el gráfico.");
+            }
+
             setAvanceFisicoData(lineData);
         } catch (error) {
-            console.error({ error });
+            console.error("Error en fetchProgressInfo:", error);
+            setAvanceFisicoData([]); 
         }
-    }, [proyecto.id]);
+    }, [infoProject?.contract_principal?.id]);
 
     useEffect(() => {
         fetchProgressInfo();
@@ -127,8 +154,6 @@ const ProyectoScreen = () => {
         fetchProgressInfo();
         fetchInfo();
     };
-
-    console.log(avanceFisicoData)
 
     const { width } = useWindowDimensions();
     const donutSize = Math.max(60, Math.min(110, width * 0.25));
@@ -177,7 +202,6 @@ const ProyectoScreen = () => {
             ),
         },
     ];
-
 
     return (
         <ScrollView

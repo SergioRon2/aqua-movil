@@ -36,13 +36,10 @@ export class InfoService {
         }
     }
 
-    static readonly getProgressInfo = async (project_id: number, contract_id: number) => {
+    static readonly getProgressInfo = async (contract_id: number) => {
         try {
-            const response = await aquaApi.post(`/projects/getProgress`, {
-                limit: 5,
-                page: 1,
-                search: "",
-                project_id: project_id,
+            const response = await aquaApi.post(`/projects/getProgressAll`, {
+                project_id: null,
                 contract_id: contract_id
             });
             return response.data;

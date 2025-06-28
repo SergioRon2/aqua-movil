@@ -54,6 +54,7 @@ const DashboardScreen = () => {
         indicadorTiempo: { name: '', value: 0 },
     });
     const [loading, setLoading] = useState(true)
+    console.log({fechaInicio, fechaFin})
 
     const fetchProjectsByDashboard = useCallback(async () => {
         try {
@@ -178,6 +179,14 @@ const DashboardScreen = () => {
 
         return () => clearTimeout(timeout);
     }, [online, fetchProjectsByDashboard, fetchInfo]);
+
+    useEffect(() => {
+        if (!planDesarrolloActivo) {
+            setLoading(true);
+        } else {
+            setLoading(false)
+        }
+    }, [planDesarrolloActivo])
 
     // donut chart data
     const totalProjects = (sectorialInfo || []).reduce((sum, item) => sum + item.amount_project, 0);

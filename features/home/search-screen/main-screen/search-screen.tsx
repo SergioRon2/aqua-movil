@@ -30,14 +30,12 @@ const SearchScreen = () => {
                 if (online) {
                     const res = await ProjectsService.getAll();
                     setProyectos(res?.data?.data || []);
-                    // Guarda los datos en AsyncStorage
                     try {
                         await AsyncStorage.setItem('proyectos', JSON.stringify(res?.data?.data || []));
                     } catch (storageError) {
                         console.error('Error guardando en AsyncStorage', storageError);
                     }
                 } else {
-                    // Si no hay conexión, usa los datos de AsyncStorage
                     try {
                         const storedProyectos = await AsyncStorage.getItem('proyectos');
                         if (storedProyectos) {

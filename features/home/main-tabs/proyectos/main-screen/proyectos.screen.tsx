@@ -31,11 +31,9 @@ const ProyectosScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const sectionListRef = useRef<SectionList<any>>(null);
     const [letraVisible, setLetraVisible] = useState<string | null>('A');
-    const scale = useSharedValue(0);
-    const opacity = useSharedValue(0);
     const posicionesSecciones = useRef<Record<string, number>>({});
-    const hideTimeout = useRef<NodeJS.Timeout | null>(null);
     const isUserScrolling = useRef(false);
+    console.log({fechaInicio, fechaFin})
 
     const fetchProyectos = useCallback(async () => {
         try {
@@ -122,10 +120,6 @@ const ProyectosScreen = () => {
             console.error('Error al generar el PDF:', error);
             Alert.alert('Error', 'No se pudo generar el PDF.');
         }
-    };
-
-    const buscarIndexDeLetra = (letra: string, sections: any[]) => {
-        return sections.findIndex((section) => section.letra === letra);
     };
 
     const handleLetraPress = (letra: string) => {

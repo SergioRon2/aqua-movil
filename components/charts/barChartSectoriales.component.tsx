@@ -12,13 +12,15 @@ interface Props {
     data: {
         ids: number[];
         labels: string[];
-        datasets: {
-            data: number[];
-        }[];
+        datasets: { data: number[] }[];
     };
 }
 
-const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: Props) => {
+const BarChartSectorialesComponent = ({
+    data,
+    title,
+    horizontalScroll = true,
+}: Props) => {
     const { globalColor } = useStylesStore();
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<{
@@ -27,33 +29,44 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: 
         value: number;
     } | null>(null);
 
-    const hasData = data.datasets[0].data.some(value => value > 0);
+    const barData = data.labels.map((label, index) => ({
+        label,
+        value: data.datasets[0].data[index],
+        sector_id: data.ids[index],
+    }));
+
+    const hasData = barData.some(item => item.value > 0);
+
     const chartHeight = 250;
-    const barSpacing = 30;
     const barWidth = 60;
+    const barSpacing = 30;
 
-    const barData = hasData
-        ? data.labels.map((label, index) => ({
-            label,
-            value: data.datasets[0].data[index],
-            sector_id: data.ids[index],
-        }))
-        : [];
+    const rawMax = Math.max(...barData.map(d => d.value), 1);
+    const step = Math.ceil(rawMax / 4);
+    const scaleMax = step * 4;
 
-    const maxVal = Math.max(...data.datasets[0].data, 1);
-    const step = Math.ceil(maxVal / 4);
-    const chartWidth = Math.max(screenWidth, barData.length * (barWidth + barSpacing) + 60); // 60 for y-axis space
+    const pixelsPerUnit = chartHeight / scaleMax;
+
+    const chartWidth = Math.max(
+        screenWidth,
+        barData.length * (barWidth + barSpacing) + 60
+    );
 
     return (
         <View className="w-full bg-white px-4 py-6 rounded-xl gap-4">
-            {title && <Text className="text-xl font-bold text-center mb-4">{title}</Text>}
+            {title && (
+                <Text className="text-xl font-bold text-center mb-4">{title}</Text>
+            )}
 
-            <ScrollView horizontal={horizontalScroll} showsHorizontalScrollIndicator={false}>
+            <ScrollView
+                horizontal={horizontalScroll}
+                showsHorizontalScrollIndicator={false}
+            >
                 {hasData ? (
                     <Svg width={chartWidth} height={chartHeight + 40}>
-                        {/* Líneas horizontales y valores Y */}
+                        {/* Líneas del eje Y y sus valores */}
                         {[0, 1, 2, 3, 4].map(i => {
-                            const y = chartHeight - (i * chartHeight) / 4;
+                            const y = chartHeight - i * step * pixelsPerUnit;
                             return (
                                 <G key={i}>
                                     <Line
@@ -79,16 +92,18 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: 
 
                         {/* Barras */}
                         {barData.map((item, index) => {
-                            const height = (item.value / maxVal) * (chartHeight - 20); // Evita que toquen el techo
+                            const height = item.value * pixelsPerUnit;
                             const x = 50 + index * (barWidth + barSpacing);
                             const y = chartHeight - height;
 
                             return (
-                                <G key={index} onPress={() => {
-                                    setSelectedItem(item);
-                                    setShowModal(true);
-                                }}>
-                                    {/* Barra */}
+                                <G
+                                    key={index}
+                                    onPress={() => {
+                                        setSelectedItem(item);
+                                        setShowModal(true);
+                                    }}
+                                >
                                     <Rect
                                         x={x}
                                         y={y}
@@ -99,7 +114,6 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: 
                                         ry={8}
                                     />
 
-                                    {/* Valor encima */}
                                     <SvgText
                                         x={x + barWidth / 2}
                                         y={y - 6}
@@ -110,7 +124,6 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: 
                                         {item.value}
                                     </SvgText>
 
-                                    {/* Label */}
                                     <SvgText
                                         x={x + barWidth / 2}
                                         y={chartHeight + 20}
@@ -126,7 +139,9 @@ const BarChartSectorialesComponent = ({ data, title, horizontalScroll = true }: 
                     </Svg>
                 ) : (
                     <View className="w-full items-center justify-center py-10">
-                        <Text className="text-center text-gray-500 text-lg">No hay datos</Text>
+                        <Text className="text-center text-gray-500 text-lg">
+                            No hay datos
+                        </Text>
                     </View>
                 )}
             </ScrollView>
