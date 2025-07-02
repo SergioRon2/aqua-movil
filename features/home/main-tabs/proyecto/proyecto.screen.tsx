@@ -110,22 +110,24 @@ const ProyectoScreen = () => {
 
     const fetchProgressInfo = useCallback(async () => {
         try {
+            if (online) {
             const res = await InfoService.getProgressInfo(infoProject?.contract_principal?.id);
             const rawData = res?.data;
 
             if (!Array.isArray(rawData)) {
                 console.warn("Datos no válidos recibidos para el gráfico.");
                 setAvanceFisicoData([]);
+                await AsyncStorage.removeItem('avanceFisicoData');
                 return;
             }
 
             const filteredData = rawData
                 .filter((item: any) =>
-                    item?.progress_type?.trim().toLowerCase() === "fisico" &&
-                    typeof item?.physical_current === "number" &&
-                    typeof item?.physical_projected === "number" &&
-                    !isNaN(item.physical_current) &&
-                    !isNaN(item.physical_projected)
+                item?.progress_type?.trim().toLowerCase() === "fisico" &&
+                typeof item?.physical_current === "number" &&
+                typeof item?.physical_projected === "number" &&
+                !isNaN(item.physical_current) &&
+                !isNaN(item.physical_projected)
                 );
 
             const lineData = filteredData.map((item: any) => ({
@@ -139,9 +141,18 @@ const ProyectoScreen = () => {
             }
 
             setAvanceFisicoData(lineData);
+            await AsyncStorage.setItem('avanceFisicoData', JSON.stringify(lineData));
+            } else {
+            const stored = await AsyncStorage.getItem('avanceFisicoData');
+            if (stored) {
+                setAvanceFisicoData(JSON.parse(stored));
+            } else {
+                setAvanceFisicoData([]);
+            }
+            }
         } catch (error) {
             console.error("Error en fetchProgressInfo:", error);
-            setAvanceFisicoData([]); 
+            setAvanceFisicoData([]);
         }
     }, [infoProject?.contract_principal?.id]);
 
@@ -259,7 +270,7 @@ const ProyectoScreen = () => {
                                 loop
                                 style={{ width: 350, height: 350 }}
                             />
-                            <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
+                            <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexion'}</Text>
                         </View>
                     )
                 )

@@ -366,7 +366,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                                         </Animated.View>
                                     )}
                                     ListEmptyComponent={
-                                        <Text className="text-md text-gray-500">No hay subproyectos disponibles.</Text>
+                                        <Text className="text-md text-gray-500">No hay subproyectos disponibles {!online && 'sin conexion'}.</Text>
                                     }
                                     style={{ maxHeight: 300 }}
                                 />

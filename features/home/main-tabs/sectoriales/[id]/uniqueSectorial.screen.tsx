@@ -246,7 +246,7 @@ const UniqueSectorialScreen = () => {
                                 </View>
                             ) : (
                                 <View className='justify-center items-center m-auto'>
-                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay {tipoSeleccionado}s disponibles.</Text>
+                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay {tipoSeleccionado}s disponibles {!online && 'sin conexion'}.</Text>
                                 </View>
                             )
                         }

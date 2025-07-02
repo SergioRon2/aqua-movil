@@ -72,7 +72,7 @@ export const FiltersMunicipios = ({ border }: Props) => {
                         setModalCleanMunicipios(false)
                         setMunicipioAEliminar(null)
                     }}
-                    title={`Desea eliminar ${municipioAEliminar?.nombre} de la lista de filtros`}
+                    title={`¿Desea eliminar ${municipioAEliminar?.nombre} de la lista de filtros?`}
                 />
             </View>
         </View >

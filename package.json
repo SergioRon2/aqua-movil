@@ -73,5 +73,8 @@
     "extends": "universe/native",
     "root": true
   },
-  "private": true
+  "private": true,
+  "volta": {
+    "node": "22.17.0"
+  }
 }

@@ -54,11 +54,10 @@ const DashboardScreen = () => {
         indicadorTiempo: { name: '', value: 0 },
     });
     const [loading, setLoading] = useState(true)
-    console.log({fechaInicio, fechaFin})
+    console.log({ fechaInicio, fechaFin })
 
     const fetchProjectsByDashboard = useCallback(async () => {
         try {
-            setLoading(true)
             setRefreshing(true);
             if (online === null) {
                 return;
@@ -108,7 +107,6 @@ const DashboardScreen = () => {
         } catch (error) {
             console.error({ error })
         } finally {
-            setLoading(false)
             setRefreshing(false);
         }
     }, [
@@ -121,7 +119,6 @@ const DashboardScreen = () => {
     ]);
 
     const fetchInfo = useCallback(async () => {
-        setLoading(true);
         try {
             if (online === null) {
                 return;
@@ -157,8 +154,6 @@ const DashboardScreen = () => {
             }
         } catch (error) {
             console.error({ error })
-        } finally {
-            setLoading(false);
         }
     }, [
         fechaInicio,
@@ -169,12 +164,29 @@ const DashboardScreen = () => {
         municipioActivoDashboard?.id,
     ]);
 
+    console.log({fechaInicio, fechaFin})
+
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (online !== null) {
-                fetchProjectsByDashboard();
-                fetchInfo();
+        const fetchDataWithDelay = async () => {
+            if (online === null) return;
+
+            setLoading(true);
+
+            try {
+                await fetchProjectsByDashboard();
+
+                await new Promise(resolve => setTimeout(resolve, 4000));
+
+                await fetchInfo();
+            } catch (error) {
+                console.error("Error en llamadas con delay:", error);
+            } finally {
+                setLoading(false);
             }
+        };
+
+        const timeout = setTimeout(() => {
+            fetchDataWithDelay();
         }, 500);
 
         return () => clearTimeout(timeout);
@@ -238,9 +250,17 @@ const DashboardScreen = () => {
         }
     };
 
-    const onRefresh = () => {
-        fetchProjectsByDashboard();
-        fetchInfo();
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await fetchProjectsByDashboard();
+            await new Promise(resolve => setTimeout(resolve, 4000));
+            await fetchInfo();
+        } catch (error) {
+            console.error("Error al refrescar con delay:", error);
+        } finally {
+            setRefreshing(false);
+        }
     };
 
     const items = [
@@ -385,7 +405,7 @@ const DashboardScreen = () => {
                             loop
                             style={{ width: 350, height: 350 }}
                         />
-                        <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles</Text>
+                        <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles {!online && 'sin conexion'}</Text>
                     </View>}
         </ScrollView>
     );

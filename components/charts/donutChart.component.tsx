@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
+import useInternetStore from 'store/internet/internet.store';
 import useStylesStore from 'store/styles/styles.store';
 import { getRandomColor } from 'utils/getRandomColor';
 
@@ -36,6 +37,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
     amount
 }) => {
     const { globalColor } = useStylesStore();
+    const { online } = useInternetStore();
     const chartData = data.map(item => ({
         value: item.value,
         color: getRandomColor(globalColor),
@@ -63,7 +65,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
                 />
             ) : (
                 <View className='flex flex-col items-center justify-center py-12'>
-                    <Text className='text-lg'>No hay datos</Text>
+                    <Text className='text-lg'>No hay datos {!online && 'sin conexion'}</Text>
                 </View>
             )}
             <View className=''>

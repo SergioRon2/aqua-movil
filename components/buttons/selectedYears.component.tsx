@@ -27,7 +27,6 @@ export const SelectedYears = () => {
         ? Array.from({ length: endYear - startYear + 1 }, (_, i) => endYear - i)
         : [];
 
-    // Inicialización sincronizada con AsyncStorage
     useEffect(() => {
         const init = async () => {
             if (years.length === 0) return;

@@ -120,7 +120,7 @@ const SearchScreen = () => {
                             loop
                             style={{ width: 200, height: 200 }}
                         />
-                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles {!online && 'sin conexion'}.</Text>
                     </View>
                 )}
             </View>

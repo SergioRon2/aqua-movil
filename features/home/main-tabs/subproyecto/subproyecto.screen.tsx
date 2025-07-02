@@ -3,9 +3,11 @@ import { InfoSubProyecto } from "components/cards/infoSubproyecto.component";
 import BarChartComponent from "components/charts/barChart.component";
 import LottieView from "lottie-react-native";
 import { ScrollView, Text, View } from "react-native";
+import useInternetStore from "store/internet/internet.store";
 
 const SubProyectoScreen = () => {
     const route = useRoute();
+    const { online } = useInternetStore();
     const { subproyecto } = route.params;
 
     const dataBar = {
@@ -42,7 +44,7 @@ const SubProyectoScreen = () => {
                             loop
                             style={{ width: 350, height: 350 }}
                         />
-                        <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles</Text>
+                        <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexion'}</Text>
                     </View>
                 )
             }
