@@ -48,7 +48,7 @@ export const Navbar = () => {
 
             {searchActive &&
                 <Pressable onPress={handleSearchScreen} className='border border-white rounded-full p-2 w-2/3 px-4 active:opacity-50'>
-                    <Text className='text-white text-lg'>Busqueda de proyectos ✨</Text>
+                    <Text className='text-white text-lg'>Búsqueda de proyectos ✨</Text>
                 </Pressable>
             }
 

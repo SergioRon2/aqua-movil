@@ -20,6 +20,7 @@ export class InfoService {
             date_end: `${fechaFin}`
         }
         try {
+            console.log({payload})
             const response = await aquaApi.post(`/projects/getInfoProgress`, payload);
             return response.data;
         } catch (error) {

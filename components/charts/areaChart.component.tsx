@@ -68,20 +68,20 @@ export default function AreaChartComponent({ title, data }: Props) {
         return monthNames[month - 1] || label;
     };
 
-    const legendLabels = ['Actual', 'Proyectado'];
+    const legendLabels = ['Proyectado', 'Actual'];
 
     const chartData = {
         labels: sortedFront.map(item => formatLabel(item?.label)),
         datasets: [
             {
-                data: sortedFront.map(item => item?.frontValue),
-                color: () => globalColor,
+                data: sortedBack.map(item => item?.backValue),
+                color: () => '#22c55e',
                 strokeWidth: 2,
                 datasetIndex: 0
             },
             {
-                data: sortedBack.map(item => item?.backValue),
-                color: () => '#22c55e',
+                data: sortedFront.map(item => item?.frontValue),
+                color: () => globalColor,
                 withShadow: true,
                 strokeWidth: 4,
                 datasetIndex: 1
@@ -112,7 +112,7 @@ export default function AreaChartComponent({ title, data }: Props) {
             }
             {!hasChartData ? (
                 <View className="justify-center items-center w-full h-40">
-                    <Text className="text-gray-400">No hay datos para mostrar {!online && 'sin conexion'} 🔍</Text>
+                    <Text className="text-gray-400">No hay datos para mostrar {!online && 'sin conexión'} 🔍</Text>
                 </View>
             ) : (
                 <View className="justify-center items-center w-full">

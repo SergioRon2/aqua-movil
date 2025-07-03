@@ -133,7 +133,7 @@ const DashboardScreen = () => {
                 });
                 const avancesData = {
                     avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                    avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
                     indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
                 };
                 setAvances(avancesData);
@@ -386,9 +386,9 @@ const DashboardScreen = () => {
                         )}
 
                         {/* donut chart */}
-                        <View className='items-center gap-4 bg-white p-3 justify-center border border-gray-200 rounded-lg shadow-lg'>
+                        <View className='items-center gap-4 bg-white px-3 py-4 justify-center border border-gray-200 rounded-lg shadow-lg'>
                             <Text className='text-2xl text-gray-800 font-bold text-center'>
-                                Porcentaje de proyectos por sectorial
+                                Distribución porcentual de proyectos por sectorial
                             </Text>
                             <DonutChartComponent amount={amount} data={donutChartData} />
                         </View>
@@ -405,7 +405,7 @@ const DashboardScreen = () => {
                             loop
                             style={{ width: 350, height: 350 }}
                         />
-                        <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles {!online && 'sin conexion'}</Text>
+                        <Text className='text-lg font-bold text-gray-500'>No hay datos disponibles {!online && 'sin conexión'}</Text>
                     </View>}
         </ScrollView>
     );

@@ -144,7 +144,7 @@ const Sectoriales = () => {
                         loop
                         style={{ width: 350, height: 350 }}
                     />
-                    <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexion'}</Text>
+                    <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexión'}</Text>
                 </View>
             )}
         </View>

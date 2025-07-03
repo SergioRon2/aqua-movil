@@ -260,7 +260,7 @@ const UniqueMunicipioScreen = () => {
                                     <Text
                                         style={{ color: globalColor }}
                                         className="mt-4 animate-fade-in text-center text-lg font-bold">
-                                        No hay {tipoSeleccionado}s disponibles {!online && 'sin conexion'}.
+                                        No hay {tipoSeleccionado}s disponibles {!online && 'sin conexión'}.
                                     </Text>
                                 </View>
                             )}

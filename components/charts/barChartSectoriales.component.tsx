@@ -158,7 +158,7 @@ const BarChartSectorialesComponent = ({
                 ) : (
                     <View className="w-full items-center justify-center py-10">
                         <Text className="text-center text-gray-500 text-lg">
-                            No hay datos {!online && 'sin conexion'}
+                            No hay datos {!online && 'sin conexión'}
                         </Text>
                     </View>
                 )}

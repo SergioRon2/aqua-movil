@@ -210,11 +210,11 @@ export const generarReporteDashboardHTML = async (
           <h2>1. Información General</h2>
           <div class="info-general">
             <div class="card info-card">
-              <h3>Fecha Inicio</h3>
+              <h3>Fecha de Inicio</h3>
               <p>${infoGeneral.fechaInicio || "-"}</p>
             </div>
             <div class="card info-card">
-              <h3>Fecha Fin</h3>
+              <h3>Fecha de Finalización</h3>
               <p>${infoGeneral.fechaFin || "-"}</p>
             </div>
             <div class="card info-card">

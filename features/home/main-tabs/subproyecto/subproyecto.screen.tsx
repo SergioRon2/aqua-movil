@@ -11,7 +11,7 @@ const SubProyectoScreen = () => {
     const { subproyecto } = route.params;
 
     const dataBar = {
-        labels: ['Avance Fisico', 'Avance Financiero'],
+        labels: ['Avance Físico', 'Avance Financiero'],
         datasets: [
             {
                 data: [subproyecto.physical_current, subproyecto.financial_current],
@@ -44,7 +44,7 @@ const SubProyectoScreen = () => {
                             loop
                             style={{ width: 350, height: 350 }}
                         />
-                        <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexion'}</Text>
+                        <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexión'}</Text>
                     </View>
                 )
             }

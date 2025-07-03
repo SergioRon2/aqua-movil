@@ -144,7 +144,7 @@ const LoginScreen = () => {
                     <Text className="text-center text-gray-600 mt-2 mb-5">
                         Verifica correo o contraseña
                     </Text>
-                    <CustomButtonPrimary onPress={() => setError(false)} title='Cerrar' />
+                    <CustomButtonPrimary rounded onPress={() => setError(false)} title='Cerrar' />
                 </View>
             </View>
         </Modal>

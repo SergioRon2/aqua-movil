@@ -128,7 +128,7 @@ const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
                     !loading ? (
                         <>
                             <View className='w-full h-1/2 justify-center items-start'>
-                                <Text className='text-black text-md font-bold '>Valor de proyectos</Text>
+                                <Text className='text-black text-md font-bold '>Valor de los proyectos</Text>
                                 <Text className='text-black text-4xl font-bold'>{formatNumberWithSuffix(+total)}</Text>
                             </View>
                             <View className='w-full h-1/2 justify-center items-start'>

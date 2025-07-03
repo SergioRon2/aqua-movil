@@ -64,15 +64,10 @@ const ProyectoScreen = () => {
             }
 
             if (online) {
-                const res = await InfoService.getInfoByAllData({
-                    development_plan_id: planDesarrolloActivo?.id,
-                    project_id: proyecto.id,
-                    fechaInicio: fechaInicio,
-                    fechaFin: fechaFin
-                });
+                const res = await InfoService.getInfoByProject(proyecto.id);
                 const avancesData = {
                     avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                    avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
                     indicadorTiempo: { name: 'Tiempo ejecutado', value: res?.data?.time_exec }
                 };
                 setAvances(avancesData);
@@ -270,7 +265,7 @@ const ProyectoScreen = () => {
                                 loop
                                 style={{ width: 350, height: 350 }}
                             />
-                            <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexion'}</Text>
+                            <Text className="text-lg text-gray-500 mt-4">No hay datos disponibles {!online && 'sin conexión'}</Text>
                         </View>
                     )
                 )

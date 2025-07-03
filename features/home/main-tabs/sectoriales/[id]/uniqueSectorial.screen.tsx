@@ -101,20 +101,20 @@ const UniqueSectorialScreen = () => {
                 if (online) {
                     const res = await InfoService.getInfoByAllData({
                         development_plan_id: planDesarrolloActivo?.id,
-                        sectorial_id: sectorial.id,
+                        sectorial_id: sectorial.sector_id,
                         fechaInicio: fechaInicio,
                         fechaFin: fechaFin
                     });
                     setAvances({
                         avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                        avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                        avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
                         indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
                     });
                     await AsyncStorage.setItem(
                         `avancesSectorial`,
                         JSON.stringify({
                             avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                            avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                            avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
                             indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
                         })
                     );
@@ -136,7 +136,7 @@ const UniqueSectorialScreen = () => {
         }
 
         fetchInfo();
-    }, [sectorial.id, fechaInicio, fechaFin, planDesarrolloActivo?.id])
+    }, [sectorial.sector_id, fechaInicio, fechaFin, planDesarrolloActivo?.id])
 
     const createPDF = async () => {
         try {
@@ -246,7 +246,7 @@ const UniqueSectorialScreen = () => {
                                 </View>
                             ) : (
                                 <View className='justify-center items-center m-auto'>
-                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay {tipoSeleccionado}s disponibles {!online && 'sin conexion'}.</Text>
+                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay {tipoSeleccionado}s disponibles {!online && 'sin conexión'}.</Text>
                                 </View>
                             )
                         }

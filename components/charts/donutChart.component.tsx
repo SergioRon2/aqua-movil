@@ -65,7 +65,7 @@ const DonutChartComponent: React.FC<DonutChartProps> = ({
                 />
             ) : (
                 <View className='flex flex-col items-center justify-center py-12'>
-                    <Text className='text-lg'>No hay datos {!online && 'sin conexion'}</Text>
+                    <Text className='text-lg'>No hay datos {!online && 'sin conexión'}</Text>
                 </View>
             )}
             <View className=''>

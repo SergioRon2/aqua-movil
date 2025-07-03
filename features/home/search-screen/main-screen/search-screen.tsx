@@ -65,8 +65,11 @@ const SearchScreen = () => {
     const filteredProjects = proyectos
         .filter((proyecto) => {
             const search = searchValue.toLowerCase();
-            if (search === 'proyecto' || search === 'iniciativa') {
-                return proyecto.type?.toLowerCase() === search
+            if (search === 'proyectos') {
+                return proyecto.type?.toLowerCase() === 'proyecto';
+            }
+            if (search === 'iniciativas') {
+                return proyecto.type?.toLowerCase() === 'iniciativa';
             }
             return (
                 proyecto.name?.toLowerCase().includes(search) ||
@@ -88,8 +91,8 @@ const SearchScreen = () => {
                     placeholder='Buscar'
                     style={{
                         borderColor: globalColor,
-                        color: searchValue === 'proyecto' || searchValue === 'iniciativa' ? globalColor : '#000',
-                        fontWeight: (searchValue === 'proyecto' || searchValue === 'iniciativa') ? 'bold' : 'normal'
+                        color: searchValue === 'proyectos' || searchValue === 'iniciativas' ? globalColor : '#000',
+                        fontWeight: (searchValue === 'proyectos' || searchValue === 'iniciativas') ? 'bold' : 'normal'
                     }}
                     className='border rounded-full px-6 py-4 w-2/3'
                 />
@@ -120,7 +123,7 @@ const SearchScreen = () => {
                             loop
                             style={{ width: 200, height: 200 }}
                         />
-                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles {!online && 'sin conexion'}.</Text>
+                        <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles {!online && 'sin conexión'}.</Text>
                     </View>
                 )}
             </View>

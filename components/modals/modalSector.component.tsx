@@ -100,7 +100,7 @@ export const ModalSector = ({ showModal, setShowModal, selectedItem }: Props) =>
                                         loop
                                         style={{ width: 350, height: 350 }}
                                     />
-                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles.</Text>
+                                    <Text style={{ color: globalColor }} className="text-center text-lg font-bold mt-4 animate-fade-in">No hay proyectos disponibles {!online && 'sin conexión'}.</Text>
                                 </View>
                             )}
                         </View>

@@ -52,7 +52,7 @@ export const InfoSubProyecto = ({ subproyecto }: Props) => {
     return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
         <View className="flex-row justify-around gap-5 items-start">
             <View className="justify-between items-start w-1/2">
-                <Text className="text-md text-gray-500">Fecha inicio</Text>
+                <Text className="text-md text-gray-500">Fecha de inicio</Text>
                 <Text className="text-lg font-bold">
                     {
                         subproyecto.fechaProyecto != null
@@ -62,7 +62,7 @@ export const InfoSubProyecto = ({ subproyecto }: Props) => {
                 </Text>
             </View>
             <View className="justify-between items-start w-1/2">
-                <Text className="text-md text-gray-500">Fecha fin</Text>
+                <Text className="text-md text-gray-500">Fecha finalización</Text>
                 <Text className="text-lg font-bold">
                     {
                         subproyecto.fechaProyecto != null
@@ -150,7 +150,7 @@ export const InfoSubProyecto = ({ subproyecto }: Props) => {
         </View>
         <View className="flex-row justify-around gap-5 items-start">
             <View className="justify-between items-start w-1/2">
-                <Text className="text-md text-gray-500">Numero de contrato</Text>
+                <Text className="text-md text-gray-500">Número de contrato</Text>
                 <Text className="text-lg font-bold">
                     {subproyecto.contract_number != null ? subproyecto.contract_number : 'Nulo'}
                 </Text>

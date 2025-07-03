@@ -197,18 +197,18 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
     };
 
 
-    return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 items-start justify-center">
+    return <View className="w-full mt-4 bg-white rounded-lg shadow-md p-4 gap-4 min-h-80 items-start justify-center">
         {loading ? (<ActivityIndicator size={'large'} color={globalColor} className="m-auto" />) : (
             <>
                 {infoProyecto?.description && (
                     <View className="justify-between items-start">
-                        <Text className="text-md text-gray-500 text-start">Descripcion</Text>
+                        <Text className="text-md text-gray-500 text-start">Descripción</Text>
                         <Text className="text-md font-bold text-start">{capitalize(infoProyecto?.description)}</Text>
                     </View>
                 )}
                 <View className="flex-row justify-around gap-5 items-start">
                     <View className="justify-between items-start w-1/2">
-                        <Text className="text-md text-gray-500">Fecha inicio</Text>
+                        <Text className="text-md text-gray-500">Fecha de inicio</Text>
                         <Text className="text-lg font-bold">
                             {
                                 proyecto.fechaProyecto || proyecto.start_actSigning_date != null
@@ -218,7 +218,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                         </Text>
                     </View>
                     <View className="justify-between items-start w-1/2">
-                        <Text className="text-md text-gray-500">Fecha fin</Text>
+                        <Text className="text-md text-gray-500">Fecha de finalización</Text>
                         <Text className="text-lg font-bold">
                             {
                                 proyecto.fechaProyecto || proyecto.date_end_all != null
@@ -304,7 +304,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                 </View>
                 <View className="flex-row justify-around gap-5 items-start">
                     <View className="justify-between items-start w-1/2">
-                        <Text className="text-md text-gray-500">Numero de contrato</Text>
+                        <Text className="text-md text-gray-500">Número de contrato</Text>
                         <Text className="text-lg font-bold">
                             {proyectoInfo?.number_contract || 'Nulo'}
                         </Text>
@@ -366,7 +366,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                                         </Animated.View>
                                     )}
                                     ListEmptyComponent={
-                                        <Text className="text-md text-gray-500">No hay subproyectos disponibles {!online && 'sin conexion'}.</Text>
+                                        <Text className="text-md text-gray-500">No hay subproyectos disponibles {!online && 'sin conexión'}.</Text>
                                     }
                                     style={{ maxHeight: 300 }}
                                 />

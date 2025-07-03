@@ -16,6 +16,7 @@ import useActiveStore from "store/actives/actives.store";
 import useInternetStore from 'store/internet/internet.store';
 import { Loading } from "components/loading/loading.component";
 import useStylesStore from "store/styles/styles.store";
+import { useCallback } from "react";
 
 export const SelectedDevelopmentPlan = () => {
     const [developmentPlans, setDevelopmentPlans] = useState<IDevelopmentPlan[]>([]);
@@ -27,46 +28,53 @@ export const SelectedDevelopmentPlan = () => {
     const { globalColor } = useStylesStore();
     const [modalLoading, setModalLoading] = useState<boolean>(false);
 
-    useEffect(() => {
-        const fetchDevelopmentPlan = async () => {
-            try {
-                setIsLoading(true);
-                let plans: IDevelopmentPlan[] = [];
-                if (online) {
-                    const res = await DevelopmentPlanService.getDevelopmentPlans();
-                    plans = res?.data?.data || [];
-                    setDevelopmentPlans(plans);
-                    await AsyncStorage.setItem('developmentPlans', JSON.stringify(plans));
-                } else {
-                    const storedPlans = await AsyncStorage.getItem('developmentPlans');
-                    plans = storedPlans ? JSON.parse(storedPlans) : [];
-                    setDevelopmentPlans(plans);
-                }
-                if (plans.length > 0) {
-                    const storedPlan = await AsyncStorage.getItem('selectedPlan');
-                    if (storedPlan) {
-                        const parsedPlan = JSON.parse(storedPlan);
-                        const foundPlan = plans.find((plan: IDevelopmentPlan) => plan.id === parsedPlan.id);
-                        if (foundPlan) {
-                            setSelectedPlan(foundPlan);
-                            setPlanDesarrolloActivo(foundPlan)
-                        } else {
-                            setSelectedPlan(plans[0]);
-                            setPlanDesarrolloActivo(plans[0])
-                        }
+    const fetchDevelopmentPlan = useCallback(async (showLoading = false) => {
+        try {
+            if (showLoading) setIsLoading(true);
+            let plans: IDevelopmentPlan[] = [];
+            if (online) {
+                const res = await DevelopmentPlanService.getDevelopmentPlans();
+                plans = res?.data?.data || [];
+                setDevelopmentPlans(plans);
+                await AsyncStorage.setItem('developmentPlans', JSON.stringify(plans));
+            } else {
+                const storedPlans = await AsyncStorage.getItem('developmentPlans');
+                plans = storedPlans ? JSON.parse(storedPlans) : [];
+                setDevelopmentPlans(plans);
+            }
+            if (plans.length > 0) {
+                const storedPlan = await AsyncStorage.getItem('selectedPlan');
+                if (storedPlan) {
+                    const parsedPlan = JSON.parse(storedPlan);
+                    const foundPlan = plans.find((plan: IDevelopmentPlan) => plan.id === parsedPlan.id);
+                    if (foundPlan) {
+                        setSelectedPlan(foundPlan);
+                        setPlanDesarrolloActivo(foundPlan)
                     } else {
                         setSelectedPlan(plans[0]);
                         setPlanDesarrolloActivo(plans[0])
                     }
+                } else {
+                    setSelectedPlan(plans[0]);
+                    setPlanDesarrolloActivo(plans[0])
                 }
-            } catch (error) {
-                console.error({ error });
-            } finally {
-                setIsLoading(false);
             }
-        };
-        fetchDevelopmentPlan();
-    }, []);
+        } catch (error) {
+            console.error({ error });
+        } finally {
+            if (showLoading) setIsLoading(false);
+        }
+    }, [online, setPlanDesarrolloActivo]);
+
+    useEffect(() => {
+        fetchDevelopmentPlan(true);
+
+        const interval = setInterval(() => {
+            fetchDevelopmentPlan(false);
+        }, 10000); 
+
+        return () => clearInterval(interval); 
+    }, [online]);
 
     const handleSelect = async (plan: IDevelopmentPlan) => {
         setModalLoading(true)
@@ -144,7 +152,7 @@ export const SelectedDevelopmentPlan = () => {
                     <View className="bg-white flex-1 justify-center items-center">
                         <View className="h-1/4 justify-center items-center animate-fade-in">
                             <Loading />
-                            <Text style={{ color: globalColor }} className="mt-4 text-lg font-bold">Cambiando plan de desarrollo a {selectedPlan?.name}</Text>
+                            <Text style={{ color: globalColor }} className="mt-4 text-lg font-bold">Cambiando el plan de desarrollo a {selectedPlan?.name}</Text>
                         </View>
                     </View>
                 </Modal>
