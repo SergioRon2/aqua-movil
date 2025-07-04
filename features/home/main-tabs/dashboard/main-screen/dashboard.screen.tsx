@@ -124,6 +124,7 @@ const DashboardScreen = () => {
                 return;
             }
             if (online) {
+                console.log(planDesarrolloActivo?.id, sectorialActivoDashboard?.id, municipioActivoDashboard?.id, fechaInicio, fechaFin)
                 const res = await InfoService.getInfoByAllData({
                     development_plan_id: planDesarrolloActivo?.id,
                     sectorial_id: sectorialActivoDashboard?.id,

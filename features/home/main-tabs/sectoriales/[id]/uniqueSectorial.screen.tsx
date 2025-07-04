@@ -23,7 +23,7 @@ import { sanitizarNombreArchivo } from "utils/sanitazeName";
 
 const UniqueSectorialScreen = () => {
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore();
+    const { fechaInicio, fechaFin, planDesarrolloActivo, municipioActivo_SectorialesScreen } = useActiveStore();
     const route = useRoute();
     const { sectorial } = route.params;
     const [proyectos, setProyectos] = useState<IProyecto[]>([]);
@@ -48,6 +48,7 @@ const UniqueSectorialScreen = () => {
                     sectorial_id: sectorial?.sector_id,
                     fechaInicio,
                     fechaFin,
+                    municipio_ids: municipioActivo_SectorialesScreen?.id ? [municipioActivo_SectorialesScreen?.id!] : null,
                     development_plan_id: planDesarrolloActivo?.id
                 });
                 const proyectos = res?.data?.data;

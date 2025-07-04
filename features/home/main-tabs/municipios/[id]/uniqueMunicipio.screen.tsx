@@ -128,7 +128,7 @@ const UniqueMunicipioScreen = () => {
                 }
                 setAvances({
                     avanceFinanciero: { name: 'Avance financiero', value: infoData?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance fisico', value: infoData?.last_progress_physical_current },
+                    avanceFisico: { name: 'Avance físico', value: infoData?.last_progress_physical_current },
                     indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: infoData?.time_exec }
                 });
             } catch (error) {

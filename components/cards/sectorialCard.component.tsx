@@ -22,7 +22,7 @@ interface Props {
 
 const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
     const { globalColor } = useStylesStore()
-    const { fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
+    const { fechaInicio, fechaFin, planDesarrolloActivo, municipioActivo_SectorialesScreen } = useActiveStore()
     const [loading, setLoading] = useState<boolean>(false)
     const [sectorialInfo, setSectorialInfo] = useState<any>()
     const { online } = useInternetStore();
@@ -43,6 +43,7 @@ const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
                     sectorial_id: sectorialData.sector_id,
                     fechaInicio,
                     fechaFin,
+                    municipio_id: municipioActivo_SectorialesScreen?.id,
                     development_plan_id: planDesarrolloActivo?.id
                 });
                 data = res?.data;

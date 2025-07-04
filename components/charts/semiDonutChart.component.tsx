@@ -52,7 +52,7 @@ const SemiDonutChart: React.FC<SemiDonutChartProps> = ({
                 innerRadius={radius - strokeWidth}
                 centerLabelComponent={() => (
                     <Text style={[styles.percentageText, { fontSize: fontSize, marginTop }]}>
-                        {`${clampedPercentage}%`}
+                        {`${clampedPercentage.toFixed()}%`}
                     </Text>
                 )
                 }

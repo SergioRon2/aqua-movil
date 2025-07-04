@@ -61,7 +61,7 @@ export const InfoProyecto = ({ proyecto, infoProyecto }: Props) => {
                 });
                 const avancesData = {
                     avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance fisico', value: res?.data?.last_progress_physical_current },
+                    avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
                     indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
                 };
                 console.log({ avancesData })

@@ -254,7 +254,7 @@ const ProyectoScreen = () => {
                             </View>
 
                             <View className="justify-center items-center mt-5 mb-12 bg-white border-2 rounded-lg p-4 h-auto border-gray-200 shadow-lg">
-                                <AreaChartComponent data={avanceFisicoData} title="Avance fisico" />
+                                <AreaChartComponent data={avanceFisicoData} title="Avance físico" />
                             </View>
                         </>
                     ) : (

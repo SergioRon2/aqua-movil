@@ -1,7 +1,7 @@
 import { aquaApi } from "config/api/aqua-api";
 
 interface Props {
-    municipio_ids?: number[];
+    municipio_ids?: number[] | null;
     sectorial_id?: number;
     type?: string;
     estado_id?: number;
