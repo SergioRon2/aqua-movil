@@ -39,7 +39,7 @@ const DashboardScreen = () => {
     const { online } = useInternetStore();
     const { globalColor } = useStylesStore()
     const { municipioActivoDashboard, sectorialActivoDashboard, fechaInicio, fechaFin, planDesarrolloActivo } = useActiveStore()
-    const [sectorialInfo, setSectorialInfo] = useState<SectorialInfo[]>([])
+    const [sectorialInfo, setSectorialInfo] = useState<SectorialInfo[] | null>([])
     const [refreshing, setRefreshing] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const carouselRef = useRef<any>(null);
@@ -56,28 +56,32 @@ const DashboardScreen = () => {
     const [loading, setLoading] = useState(true)
     console.log({ fechaInicio, fechaFin })
 
+    const makeDashboardKey = () =>
+        `dashboardData_${municipioActivoDashboard?.id}_${sectorialActivoDashboard?.id}_${fechaInicio}_${fechaFin}`;
+
     const fetchProjectsByDashboard = useCallback(async () => {
         try {
             setRefreshing(true);
-            if (online === null) {
-                return;
-            }
+            if (online === null) return;
+
+            const key = makeDashboardKey();
 
             if (online) {
                 const res = await StateService.getStatesData({
                     municipio_id: municipioActivoDashboard?.id,
                     sectorial_id: sectorialActivoDashboard?.id,
-                    fechaInicio: fechaInicio,
-                    fechaFin: fechaFin,
+                    fechaInicio,
+                    fechaFin,
                     development_plan_id: planDesarrolloActivo?.id
                 });
-                setAmount(res?.data?.amount_project)
-                setSectorialInfo(res?.data?.list_sectorial_response)
+
+                setAmount(res?.data?.amount_project);
+                setSectorialInfo(res?.data?.list_sectorial_response);
                 setValues({
                     value_total_project: res?.data?.value_total_project,
                     value_total_executed: res?.data?.value_total_executed
-                })
-                // Save to AsyncStorage
+                });
+
                 const dataToStore = {
                     amount: res?.data?.amount_project,
                     sectorialInfo: res?.data?.list_sectorial_response,
@@ -87,25 +91,34 @@ const DashboardScreen = () => {
                     }
                 };
                 try {
-                    await AsyncStorage.setItem('dashboardData', JSON.stringify(dataToStore));
+                    await AsyncStorage.setItem(key, JSON.stringify(dataToStore));
                 } catch (e) {
-                    console.error('Error saving dashboard data to storage', e);
+                    console.error('Error guardando en storage', e);
                 }
+
             } else {
                 try {
-                    const storedData = await AsyncStorage.getItem('dashboardData');
-                    if (storedData) {
-                        const parsed = JSON.parse(storedData);
+                    const stored = await AsyncStorage.getItem(key);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
                         setAmount(parsed.amount);
                         setSectorialInfo(parsed.sectorialInfo);
                         setValues(parsed.values);
+                    } else {
+                        setAmount(0);
+                        setSectorialInfo(null);
+                        setValues({
+                            value_total_project: '0',
+                            value_total_executed: '0'
+                        });
                     }
                 } catch (e) {
-                    console.error('Error loading dashboard data from storage', e);
+                    console.error('Error cargando cache', e);
                 }
             }
+
         } catch (error) {
-            console.error({ error })
+            console.error({ error });
         } finally {
             setRefreshing(false);
         }
@@ -118,54 +131,79 @@ const DashboardScreen = () => {
         planDesarrolloActivo?.id
     ]);
 
+
+    const makeAvancesKey = () =>
+        `dashboardAvances_${municipioActivoDashboard?.id}_${sectorialActivoDashboard?.id}_${fechaInicio}_${fechaFin}`;
+
     const fetchInfo = useCallback(async () => {
         try {
-            if (online === null) {
-                return;
-            }
+            if (online === null) return;
+
+            const key = makeAvancesKey();
+
             if (online) {
-                console.log(planDesarrolloActivo?.id, sectorialActivoDashboard?.id, municipioActivoDashboard?.id, fechaInicio, fechaFin)
                 const res = await InfoService.getInfoByAllData({
                     development_plan_id: planDesarrolloActivo?.id,
                     sectorial_id: sectorialActivoDashboard?.id,
                     municipio_id: municipioActivoDashboard?.id,
-                    fechaInicio: fechaInicio,
-                    fechaFin: fechaFin
+                    fechaInicio,
+                    fechaFin
                 });
+
                 const avancesData = {
-                    avanceFinanciero: { name: 'Avance financiero', value: res?.data?.last_progress_financial_current },
-                    avanceFisico: { name: 'Avance físico', value: res?.data?.last_progress_physical_current },
-                    indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: res?.data?.time_exec }
+                    avanceFinanciero: {
+                        name: 'Avance financiero',
+                        value: res?.data?.last_progress_financial_current ?? 0
+                    },
+                    avanceFisico: {
+                        name: 'Avance físico',
+                        value: res?.data?.last_progress_physical_current ?? 0
+                    },
+                    indicadorTiempo: {
+                        name: 'Indicador de tiempo ejecutado',
+                        value: res?.data?.time_exec ?? 0
+                    }
                 };
+
                 setAvances(avancesData);
+
                 try {
-                    await AsyncStorage.setItem('dashboardAvances', JSON.stringify(avancesData));
+                    await AsyncStorage.setItem(key, JSON.stringify(avancesData));
                 } catch (e) {
-                    console.error('Error saving avances data to storage', e);
+                    console.error('Error guardando avances en storage', e);
                 }
+
             } else {
                 try {
-                    const storedAvances = await AsyncStorage.getItem('dashboardAvances');
-                    if (storedAvances) {
-                        setAvances(JSON.parse(storedAvances));
+                    const stored = await AsyncStorage.getItem(key);
+                    if (stored) {
+                        setAvances(JSON.parse(stored));
+                    } else {
+                        setAvances({
+                            avanceFinanciero: { name: 'Avance financiero', value: 0 },
+                            avanceFisico: { name: 'Avance físico', value: 0 },
+                            indicadorTiempo: { name: 'Indicador de tiempo ejecutado', value: 0 }
+                        });
                     }
                 } catch (e) {
-                    console.error('Error loading avances data from storage', e);
+                    console.error('Error cargando avances del cache', e);
                 }
             }
+
         } catch (error) {
-            console.error({ error })
+            console.error({ error });
         }
     }, [
         fechaInicio,
         fechaFin,
         online,
-        planDesarrolloActivo?.id,
-        sectorialActivoDashboard?.id,
         municipioActivoDashboard?.id,
+        sectorialActivoDashboard?.id,
+        planDesarrolloActivo?.id
     ]);
 
-    console.log({fechaInicio, fechaFin})
+
+    console.log({ fechaInicio, fechaFin })
 
     useEffect(() => {
         const fetchDataWithDelay = async () => {
@@ -234,7 +272,7 @@ const DashboardScreen = () => {
         }
 
         try {
-            const html = await generarReporteDashboardHTML(valoresProyectoGeneral, sectorialInfo, avances);
+            const html = await generarReporteDashboardHTML(valoresProyectoGeneral, sectorialInfo!, avances);
             const { uri } = await Print.printToFileAsync({ html, height: 1000 });
 
             const nombreArchivo = `reporte-dashboard-${new Date().toISOString().split('T')[0]}.pdf`;

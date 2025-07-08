@@ -8,6 +8,7 @@ import MunicipiosLayout from './municipios/layout';
 import ProyectosLayout from './proyectos/layout';
 import SettingsScreen from './settings/settings.screen';
 import useStylesStore from 'store/styles/styles.store';
+import IAButton from 'components/buttons/IAButton.component';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,7 +18,7 @@ const MainTabNavigator = () => {
     return (
         <View style={{ flex: 1 }}>
             <Navbar />
-            {/* <IAButton /> */}
+            <IAButton />
             <Tab.Navigator
                 initialRouteName="Home"
                 screenOptions={{
