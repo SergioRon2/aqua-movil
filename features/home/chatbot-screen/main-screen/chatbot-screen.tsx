@@ -132,7 +132,7 @@ const ChatbotScreen = () => {
                     exiting={FadeOut}
                     style={{ overflow: 'hidden', borderRadius: 999 }}
                 >
-                    <View className="bg-gray-300 rounded-full px-4 py-2 relative overflow-hidden w-1/3">
+                    <View className="bg-gray-300 rounded-full px-4 py-2 relative overflow-hidden">
                         <Text className="text-gray-600 text-base text">Kira está escribiendo{dots}</Text>
 
                         {/* Shimmer Layer */}
@@ -155,7 +155,7 @@ const ChatbotScreen = () => {
                         className="flex-1 border border-gray-300 rounded-lg px-3 mr-2 text-base"
                         value={input}
                         onChangeText={setInput}
-                        placeholder="Resuelve tus dudas con Kira, tu asistente virtual"
+                        placeholder="Resuelve tus dudas con Kira"
                     />
                     <TouchableOpacity
                         disabled={loading}
