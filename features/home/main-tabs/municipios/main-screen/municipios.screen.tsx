@@ -38,33 +38,65 @@ const Municipios = () => {
         });
     }, [municipios.length]);
 
+    const makeMunicipiosKey = () =>
+        `municipios_${sectorialActivo_MunicipiosScreen?.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
+
     const fetchMunicipios = useCallback(async () => {
         try {
             setRefreshing(true);
             setLoading(true);
             if (online === null) return;
 
+            const key = makeMunicipiosKey();
+
             if (online) {
-                const res = await StateService.getStatesData({ fechaInicio, fechaFin, sectorial_id: sectorialActivo_MunicipiosScreen?.id, development_plan_id: planDesarrolloActivo?.id });
-                const municipiosData = res?.data?.graph_municipios_all;
+                const res = await StateService.getStatesData({
+                    fechaInicio,
+                    fechaFin,
+                    sectorial_id: sectorialActivo_MunicipiosScreen?.id,
+                    development_plan_id: planDesarrolloActivo?.id
+                });
+
+                const municipiosData = res?.data?.graph_municipios_all ?? [];
                 setMunicipios(municipiosData);
-                await AsyncStorage.setItem('municipios', JSON.stringify(municipiosData));
+
+                try {
+                    await AsyncStorage.setItem(key, JSON.stringify(municipiosData));
+                } catch (e) {
+                    console.error('Error guardando municipios en storage:', e);
+                }
+
             } else {
-                const storedData = await AsyncStorage.getItem('municipios');
-                if (storedData) {
-                    setMunicipios(JSON.parse(storedData));
-                } else {
+                try {
+                    const stored = await AsyncStorage.getItem(key);
+                    if (stored) {
+                        setMunicipios(JSON.parse(stored));
+                    } else {
+                        setMunicipios([]); 
+                    }
+                } catch (e) {
+                    console.error('Error cargando municipios del cache:', e);
                     setMunicipios([]);
                 }
             }
+
             setMunicipiosCargados(0);
+
         } catch (error) {
             console.error('Error fetching municipios:', error);
+            setMunicipios([]); 
+
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, fechaInicio, fechaFin, sectorialActivo_MunicipiosScreen]);
+    }, [
+        online,
+        fechaInicio,
+        fechaFin,
+        sectorialActivo_MunicipiosScreen?.id,
+        planDesarrolloActivo?.id
+    ]);
 
     useEffect(() => {
         fetchMunicipios();

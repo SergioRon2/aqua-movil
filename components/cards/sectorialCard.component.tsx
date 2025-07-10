@@ -28,51 +28,69 @@ const SectorialCard = ({ sectorialData, onLoaded, index }: Props) => {
     const { online } = useInternetStore();
     const navigation = useNavigation();
 
+    const makeSectorialKey = () =>
+        `sectorialInfo_${sectorialData.sector_id}_${municipioActivo_SectorialesScreen?.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
+
     const fetchProjectsByDashboard = useCallback(async () => {
-        const key = `sectorialInfo_${sectorialData.id}`;
-        let isMounted = true;
+    const key = makeSectorialKey();
 
-        try {
-            setLoading(true);
-            let data;
+    try {
+        setLoading(true);
 
-            if (online === null) return;
+        if (online === null) return;
 
-            if (online) {
-                const res = await StateService.getStatesData({
-                    sectorial_id: sectorialData.sector_id,
-                    fechaInicio,
-                    fechaFin,
-                    municipio_id: municipioActivo_SectorialesScreen?.id,
-                    development_plan_id: planDesarrolloActivo?.id
-                });
-                data = res?.data;
-                if (data) {
-                    await AsyncStorage.setItem(key, JSON.stringify(data));
-                }
-            } else {
-                const stored = await AsyncStorage.getItem(key);
-                data = stored ? JSON.parse(stored) : null;
-            }
+        let data = null;
 
-            if (isMounted) {
-                setSectorialInfo(data || {});
-                onLoaded();
-            }
-        } catch (error) {
-            console.error({ error });
-        } finally {
-            if (isMounted) {
-                setLoading(false);
-                onLoaded();
+        if (online) {
+        const res = await StateService.getStatesData({
+            sectorial_id: sectorialData.sector_id,
+            fechaInicio,
+            fechaFin,
+            municipio_id: municipioActivo_SectorialesScreen?.id,
+            development_plan_id: planDesarrolloActivo?.id
+        });
+
+        data = res?.data ?? null;
+
+        if (data) {
+            try {
+            await AsyncStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+            console.error('Error guardando sectorialInfo en storage:', e);
             }
         }
 
-        // Para cancelar en caso de desmontaje
-        return () => {
-            isMounted = false;
-        };
-    }, [sectorialData.id, fechaInicio, fechaFin, online, planDesarrolloActivo?.id]);
+        } else {
+        try {
+            const stored = await AsyncStorage.getItem(key);
+            data = stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            console.error('Error cargando sectorialInfo del storage:', e);
+            data = null;
+        }
+        }
+
+        setSectorialInfo(data || {});
+        onLoaded();
+
+    } catch (error) {
+        console.error('Error en fetchProjectsByDashboard:', error);
+        setSectorialInfo({});
+        onLoaded();
+
+    } finally {
+        setLoading(false);
+    }
+
+    }, [
+        sectorialData.sector_id,
+        municipioActivo_SectorialesScreen?.id,
+        fechaInicio,
+        fechaFin,
+        online,
+        planDesarrolloActivo?.id,
+        onLoaded
+    ]);
 
     useEffect(() => {
         const delay = index * 1000; // espera 1000ms por cada índice

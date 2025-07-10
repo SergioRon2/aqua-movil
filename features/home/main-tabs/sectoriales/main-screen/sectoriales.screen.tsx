@@ -37,32 +37,65 @@ const Sectoriales = () => {
         });
     }, [sectoriales.length]);
 
+    const makeSectorialesKey = () =>
+        `sectoriales_${municipioActivo_SectorialesScreen?.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
+
     const fetchSectoriales = useCallback(async () => {
+        if (online === null) return;
+
+        const key = makeSectorialesKey();
+
         try {
             setRefreshing(true);
             setLoading(true);
-            if (online === null) return;
 
             if (online) {
-                const res = await StateService.getStatesData({ fechaInicio, fechaFin, municipio_id: municipioActivo_SectorialesScreen?.id, development_plan_id: planDesarrolloActivo?.id });
-                const sectorialesData = res?.data?.list_sectorial_response;
+                // 🌐 Online: Llama API y guarda en Storage
+                const res = await StateService.getStatesData({
+                    fechaInicio,
+                    fechaFin,
+                    municipio_id: municipioActivo_SectorialesScreen?.id,
+                    development_plan_id: planDesarrolloActivo?.id
+                });
+
+                const sectorialesData = res?.data?.list_sectorial_response ?? [];
                 setSectoriales(sectorialesData);
-                await AsyncStorage.setItem('sectoriales', JSON.stringify(sectorialesData));
+
+                try {
+                    await AsyncStorage.setItem(key, JSON.stringify(sectorialesData));
+                } catch (e) {
+                    console.error('Error guardando sectoriales en storage:', e);
+                }
+
             } else {
-                const stored = await AsyncStorage.getItem('sectoriales');
-                if (stored) {
-                    setSectoriales(JSON.parse(stored));
-                } else {
-                    setSectoriales([]);
+                // 📴 Offline: Recupera con la key correcta
+                try {
+                    const stored = await AsyncStorage.getItem(key);
+                    const storedData = stored ? JSON.parse(stored) : [];
+                    setSectoriales(storedData);
+                } catch (e) {
+                    console.error('Error cargando sectoriales del storage:', e);
+                    setSectoriales([]); // 🧹 Limpieza si algo falla
                 }
             }
+
         } catch (error) {
             console.error('Error fetching sectoriales:', error);
+            setSectoriales([]); // 👻 Sin datos en caso de fallo
+
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, fechaInicio, fechaFin, municipioActivo_SectorialesScreen]);
+
+    }, [
+        online,
+        fechaInicio,
+        fechaFin,
+        municipioActivo_SectorialesScreen?.id,
+        planDesarrolloActivo?.id
+    ]);
+
 
     useEffect(() => {
         fetchSectoriales();

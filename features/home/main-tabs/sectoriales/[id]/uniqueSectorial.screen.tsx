@@ -37,52 +37,87 @@ const UniqueSectorialScreen = () => {
     const { online } = useInternetStore();
     const [tipoSeleccionado, setTipoSeleccionado] = useState<'proyecto' | 'iniciativa'>('proyecto');
 
+    const makeProyectosSectorialKey = () =>
+        `proyectosSectorial_${sectorial?.sector_id}_${municipioActivo_SectorialesScreen?.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
+
     const fetchProyectos = useCallback(async () => {
+        if (online === null) return;
+
+        const key = makeProyectosSectorialKey();
+
         try {
             if (!refreshing) setLoading(true);
-            setLoading(true);
-            if (online === null) return;
+
+            let proyectosData = [];
 
             if (online) {
+                // 🌐 Fetch online
                 const res = await ProjectsService.getAll({
                     sectorial_id: sectorial?.sector_id,
                     fechaInicio,
                     fechaFin,
-                    municipio_ids: municipioActivo_SectorialesScreen?.id ? [municipioActivo_SectorialesScreen?.id!] : null,
+                    municipio_ids: municipioActivo_SectorialesScreen?.id ? [municipioActivo_SectorialesScreen?.id] : null,
                     development_plan_id: planDesarrolloActivo?.id
                 });
-                const proyectos = res?.data?.data;
-                const proyectosFiltrados = proyectos
+
+                proyectosData = res?.data?.data ?? [];
+
+                const proyectosFiltrados = proyectosData
                     .filter((item: any) => item?.type === tipoSeleccionado)
                     .map((item: any) => ({
                         ...item,
                         value_project: item.value_project !== null ? Number(item.value_project) : 0
                     }))
                     .sort((a: any, b: any) => b.value_project - a.value_project);
+
                 setProyectos(proyectosFiltrados);
-                await AsyncStorage.setItem(
-                    `proyectosSectorial`,
-                    JSON.stringify(proyectosFiltrados)
-                );
+
+                try {
+                    await AsyncStorage.setItem(key, JSON.stringify(proyectosFiltrados));
+                } catch (e) {
+                    console.error('Error guardando proyectosSectorial en storage:', e);
+                }
+
             } else {
-                const stored = await AsyncStorage.getItem(`proyectosSectorial`);
-                if (stored) {
-                    const proyectos = JSON.parse(stored);
-                    const proyectosFiltrados = proyectos.filter((proyecto: any) =>
-                        proyecto.type === tipoSeleccionado
-                    );
+                // 📴 Fetch offline
+                try {
+                    const stored = await AsyncStorage.getItem(key);
+                    const storedData = stored ? JSON.parse(stored) : [];
+                    const proyectosFiltrados = storedData
+                        .filter((item: any) => item?.type === tipoSeleccionado)
+                        .map((item: any) => ({
+                            ...item,
+                            value_project: item.value_project !== null ? Number(item.value_project) : 0
+                        }))
+                        .sort((a: any, b: any) => b.value_project - a.value_project);
+
                     setProyectos(proyectosFiltrados);
-                } else {
-                    setProyectos([]);
+                } catch (e) {
+                    console.error('Error cargando proyectosSectorial del storage:', e);
+                    setProyectos([]);  // Limpia si falla
                 }
             }
+
         } catch (error) {
             console.error('Error fetching proyectos:', error);
+            setProyectos([]);  // Siempre limpia en error
+
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [online, sectorial.id, fechaInicio, fechaFin, tipoSeleccionado, planDesarrolloActivo?.id]);
+
+    }, [
+        online,
+        sectorial?.sector_id,
+        municipioActivo_SectorialesScreen?.id,
+        fechaInicio,
+        fechaFin,
+        tipoSeleccionado,
+        planDesarrolloActivo?.id,
+        refreshing
+    ]);
+
 
     useEffect(() => {
         fetchProyectos();

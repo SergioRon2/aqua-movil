@@ -37,21 +37,29 @@ const UniqueMunicipioScreen = () => {
     const { online } = useInternetStore();
     const [tipoSeleccionado, setTipoSeleccionado] = useState<'proyecto' | 'iniciativa'>('proyecto');
 
+    const makeProyectosKey = () =>
+        `proyectosMunicipio_${municipio.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
+
     const fetchProyectos = useCallback(async () => {
         if (online === null) return;
 
+        const key = makeProyectosKey();
+
         try {
             if (!refreshing) setLoading(true);
+
             let proyectosData = [];
 
             if (online) {
+                // 🌐 Fetch online
                 const res = await ProjectsService.getAll({
                     municipio_ids: [municipio.id],
                     fechaInicio,
                     development_plan_id: planDesarrolloActivo?.id,
                     fechaFin,
                 });
-                proyectosData = res?.data?.data || [];
+
+                proyectosData = res?.data?.data ?? [];
 
                 const proyectosFiltrados = proyectosData
                     .filter((item: any) => item?.type === tipoSeleccionado)
@@ -60,30 +68,52 @@ const UniqueMunicipioScreen = () => {
                         value_project: item.value_project !== null ? Number(item.value_project) : 0
                     }))
                     .sort((a: any, b: any) => b.value_project - a.value_project);
+
                 setProyectos(proyectosFiltrados);
-                await AsyncStorage.setItem(
-                    'proyectosMunicipio',
-                    JSON.stringify(proyectosFiltrados)
-                );
+
+                try {
+                    await AsyncStorage.setItem(key, JSON.stringify(proyectosFiltrados));
+                } catch (e) {
+                    console.error('Error guardando proyectos en storage:', e);
+                }
+
             } else {
-                const stored = await AsyncStorage.getItem('proyectosMunicipio');
-                proyectosData = stored ? JSON.parse(stored) : [];
-                const proyectosFiltrados = proyectosData
-                    .filter((item: any) => item?.type === tipoSeleccionado)
-                    .map((item: any) => ({
-                        ...item,
-                        value_project: item.value_project !== null ? Number(item.value_project) : 0
-                    }))
-                    .sort((a: any, b: any) => b.value_project - a.value_project);
-                setProyectos(proyectosFiltrados);
+                try {
+                    const stored = await AsyncStorage.getItem(key);
+                    const storedData = stored ? JSON.parse(stored) : [];
+
+                    const proyectosFiltrados = storedData
+                        .filter((item: any) => item?.type === tipoSeleccionado)
+                        .map((item: any) => ({
+                            ...item,
+                            value_project: item.value_project !== null ? Number(item.value_project) : 0
+                        }))
+                        .sort((a: any, b: any) => b.value_project - a.value_project);
+
+                    setProyectos(proyectosFiltrados);
+                } catch (e) {
+                    console.error('Error cargando proyectos del storage:', e);
+                    setProyectos([]);  // Sin datos válidos
+                }
             }
+
         } catch (error) {
             console.error('Error fetching proyectos:', error);
+            setProyectos([]);  // Limpia en caso de fallo
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [municipio.id, fechaInicio, fechaFin, online, refreshing, tipoSeleccionado, planDesarrolloActivo?.id]);
+
+    }, [
+        municipio.id,
+        fechaInicio,
+        fechaFin,
+        online,
+        refreshing,
+        tipoSeleccionado,
+        planDesarrolloActivo?.id
+    ]);
 
     useEffect(() => {
         fetchProyectos();

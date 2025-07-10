@@ -30,14 +30,14 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
 
 
     const fetchProjectsByDashboard = useCallback(async () => {
-        const key = `municipioInfo_${municipioData.id}`;
-        let isMounted = true;
+        const key = `municipioInfo_${municipioData.id}_${fechaInicio}_${fechaFin}_${planDesarrolloActivo?.id}`;
 
         try {
             setLoading(true);
-            let data;
 
             if (online === null) return;
+
+            let data = null;
 
             if (online) {
                 const res = await StateService.getStatesData({
@@ -46,33 +46,42 @@ const MunicipioCard = ({ municipioData, onLoaded, index }: Props) => {
                     fechaFin,
                     development_plan_id: planDesarrolloActivo?.id
                 });
-                data = res?.data;
+
+                data = res?.data ?? null;
+
                 if (data) {
-                    await AsyncStorage.setItem(key, JSON.stringify(data));
+                    try {
+                        await AsyncStorage.setItem(key, JSON.stringify(data));
+                    } catch (e) {
+                        console.error('Error guardando municipioInfo:', e);
+                    }
                 }
             } else {
                 const stored = await AsyncStorage.getItem(key);
                 data = stored ? JSON.parse(stored) : null;
             }
 
-            if (isMounted) {
-                setMunicipioInfo(data || {});
-                onLoaded();
-            }
+            // Setea siempre el estado, incluso si data es null
+            setMunicipioInfo(data || {});
+            onLoaded();
+
         } catch (error) {
             console.error({ error });
-        } finally {
-            if (isMounted) {
-                setLoading(false);
-                onLoaded();
-            }
-        }
+            setMunicipioInfo({});  // Limpia en caso de error
+            onLoaded();
 
-        // Para cancelar en caso de desmontaje
-        return () => {
-            isMounted = false;
-        };
-    }, [municipioData.id, fechaInicio, fechaFin, online, planDesarrolloActivo?.id]);
+        } finally {
+            setLoading(false);
+        }
+    }, [
+        municipioData.id,
+        fechaInicio,
+        fechaFin,
+        online,
+        planDesarrolloActivo?.id,
+        onLoaded
+    ]);
+
 
     useEffect(() => {
         const delay = index * 1000; // espera 1000ms por cada índice
