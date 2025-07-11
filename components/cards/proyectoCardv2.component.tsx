@@ -1,22 +1,18 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { IProyecto } from 'interfaces/proyecto.interface';
-import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
-import { parseCurrency } from 'utils/parseCurrency';
-import { parseProgress } from 'utils/parseProgress';
-import React, { useState } from 'react';
-import { Modal, Button, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { CustomButtonPrimary } from 'components/buttons/mainButton.component';
 import useStylesStore from 'store/styles/styles.store';
-
+import { formatNumberWithSuffix } from 'utils/formatNumberWithSuffix';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
     proyecto: any;
 }
 
 export const ProyectoCardPresentable = ({ proyecto }: Props) => {
-    const {globalColor} = useStylesStore()
+    const { globalColor } = useStylesStore();
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -30,6 +26,23 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
         navigation.navigate('Proyecto', { proyecto });
     };
 
+    // 📝 Guardar automáticamente el proyecto al renderizar
+    useEffect(() => {
+        const saveProyecto = async () => {
+            if (proyecto?.id || proyecto?.project_id) {
+                const key = `proyecto_${proyecto.id ?? proyecto.project_id}`;
+                try {
+                    await AsyncStorage.setItem(key, JSON.stringify(proyecto));
+                    console.log(`✅ Proyecto guardado: ${key}`);
+                } catch (error) {
+                    console.error(`❌ Error guardando proyecto ${key}:`, error);
+                }
+            }
+        };
+
+        saveProyecto();
+    }, [proyecto]);
+
     return (
         <Pressable
             style={{ borderColor: globalColor }}
@@ -38,15 +51,13 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
         >
             <Text style={{ fontSize: 12 }} className="text-black font-bold">{proyecto.name}</Text>
 
-
             <View className='flex-row mt-5'>
                 <View className="w-1/2 mt-6 flex-col justify-start">
                     <View>
-                        {municipios && 
-                            municipios.length > 1 ? (
+                        {municipios && municipios.length > 1 ? (
                             <>
                                 <Pressable className='py-4' onPress={() => setModalVisible(true)}>
-                                    <Text style={{color: globalColor}} className='font-bold'>Ver municipios</Text>
+                                    <Text style={{ color: globalColor }} className='font-bold'>Ver municipios</Text>
                                 </Pressable>
                                 <Modal
                                     visible={modalVisible}
@@ -58,8 +69,8 @@ export const ProyectoCardPresentable = ({ proyecto }: Props) => {
                                         <View className="bg-white p-8 rounded-lg w-3/4 gap-4">
                                             <Text className="text-xl font-bold mb-4">Municipios</Text>
                                             <ScrollView>
-                                                {municipios.map((municipio: any, index: any) => (
-                                                    <Text key={index} className="text-black text-md mb-2"> {municipio.trim()}</Text>
+                                                {municipios.map((municipio: any, index: number) => (
+                                                    <Text key={index} className="text-black text-md mb-2">{municipio.trim()}</Text>
                                                 ))}
                                             </ScrollView>
                                             <CustomButtonPrimary rounded onPress={() => setModalVisible(false)} title='Cerrar' />
