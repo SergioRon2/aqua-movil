@@ -27,7 +27,8 @@
       "infoPlist": {
         "UIFileSharingEnabled": true,
         "LSSupportsOpeningDocumentsInPlace": true
-      }
+      },
+      "bundleIdentifier": "com.fqtecnologia.aqua"
     },
     "android": {
       "adaptiveIcon": {
