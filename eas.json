@@ -4,6 +4,9 @@
             "android": {
                 "buildType": "apk"
             },
+            "ios": {
+                "simulator": true
+            },
             "env": {
                 "API_URL": "https://gobcesar.aquagov.com:3001",
                 "API_PREFIX": "api"
@@ -13,6 +16,7 @@
             "android": {
                 "buildType": "app-bundle"
             },
+            "ios": {},
             "env": {
                 "API_URL": "https://gobcesar.aquagov.com:3001",
                 "API_PREFIX": "api"
